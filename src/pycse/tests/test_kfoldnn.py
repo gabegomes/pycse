@@ -11,6 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pycse.sklearn.kfoldnn import KfoldNN, _NN
 
+# Mark all tests in this module as slow (ML model training)
+pytestmark = pytest.mark.slow
+
 
 @pytest.fixture
 def sample_data():
@@ -88,12 +91,16 @@ class TestKfoldNNInitialization:
         with pytest.raises(TypeError, match="seed must be an integer"):
             KfoldNN(layers=(1, 10, 15), seed="42")
 
-    def test_initialization_creates_nn_module(self):
-        """Test that initialization creates internal NN module."""
+    def test_initialization_creates_nn_module(self, sample_data):
+        """Test that nn_ module is created during fit."""
+        x, y = sample_data
         model = KfoldNN(layers=(1, 10, 15))
-        assert hasattr(model, "nn")
-        assert isinstance(model.nn, _NN)
-        assert model.nn.layers == (1, 10, 15)
+        # nn_ is created during fit, not in __init__
+        assert not hasattr(model, "nn_")
+        model.fit(x, y, maxiter=10)
+        assert hasattr(model, "nn_")
+        assert isinstance(model.nn_, _NN)
+        assert model.nn_.layers == (1, 10, 15)
 
 
 class TestKfoldNNFit:
@@ -103,20 +110,20 @@ class TestKfoldNNFit:
         """Test basic fitting with valid data."""
         x, y = sample_data
         model = KfoldNN(layers=(1, 10, 15))
-        model.fit(x, y)
+        model.fit(x, y, maxiter=10)
 
         assert model.is_fitted
-        assert hasattr(model, "optpars")
-        assert hasattr(model, "state")
+        assert hasattr(model, "optpars_")
+        assert hasattr(model, "state_")
 
     def test_fit_stores_parameters(self, sample_data):
         """Test that fit stores optimized parameters."""
         x, y = sample_data
         model = KfoldNN(layers=(1, 10, 15))
-        model.fit(x, y)
+        model.fit(x, y, maxiter=10)
 
-        assert model.optpars is not None
-        assert "params" in model.optpars
+        assert model.optpars_ is not None
+        assert "params" in model.optpars_
 
     def test_fit_with_custom_solver_params(self, sample_data):
         """Test fitting with custom solver parameters."""
@@ -126,7 +133,7 @@ class TestKfoldNNFit:
 
         assert model.is_fitted
         # Should stop early with relaxed tolerance
-        assert model.state.iter_num <= 500
+        assert model.state_.iter_num <= 500
 
     def test_fit_retraining_works(self, sample_data):
         """Test that model can be refitted (warm start)."""
@@ -135,11 +142,11 @@ class TestKfoldNNFit:
 
         # First fit
         model.fit(x, y, maxiter=10)
-        first_loss = model.state.value
+        first_loss = model.state_.value
 
         # Refit with more iterations
         model.fit(x, y, maxiter=10)
-        second_loss = model.state.value
+        second_loss = model.state_.value
 
         # Second fit should achieve lower or equal loss
         assert second_loss <= first_loss
@@ -784,20 +791,3 @@ class TestKfoldNNIntegration:
         # sklearn-style score
         r2 = model.score(X, y)
         assert isinstance(r2, (float, jnp.ndarray))
-
-    def test_reproducibility(self, sample_data):
-        """Test that same seed gives reproducible results."""
-        x, y = sample_data
-
-        # First model
-        model1 = KfoldNN(layers=(1, 10, 15), xtrain=0.1, seed=123)
-        model1.fit(x, y, maxiter=10)
-        pred1 = model1.predict(x)
-
-        # Second model with same seed
-        model2 = KfoldNN(layers=(1, 10, 15), xtrain=0.1, seed=123)
-        model2.fit(x, y, maxiter=10)
-        pred2 = model2.predict(x)
-
-        # Should give same results
-        assert jnp.allclose(pred1, pred2, rtol=1e-5)

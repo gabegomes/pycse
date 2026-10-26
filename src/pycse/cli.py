@@ -47,7 +47,7 @@ def version_cmd():
     help="Working directory to mount (defaults to current directory)",
 )
 def launch(working_dir):
-    """Launch Jupyter Lab in a Docker container (default command)."""
+    """Launch Jupyter Lab in a Docker container."""
     if shutil.which("docker") is None:
         click.secho(
             "Error: docker was not found. Please install it from https://www.docker.com/",
@@ -175,7 +175,10 @@ def rm(force):
 
 @pycse.group()
 def mcp():
-    """Manage pycse MCP server for Claude Desktop."""
+    """Manage pycse MCP server for Claude Desktop.
+
+    Use `pycse mcp install` / `pycse mcp uninstall`.
+    """
     pass
 
 
@@ -198,7 +201,7 @@ def get_mcp_config_path():
     return cfgfile
 
 
-@mcp.command()
+@mcp.command(name="install")
 def install_mcp():
     """Install pycse MCP server in Claude Desktop."""
     cfgfile = get_mcp_config_path()
@@ -231,7 +234,7 @@ def install_mcp():
     click.echo("\n" + click.style("Please restart Claude Desktop.", fg="yellow", bold=True))
 
 
-@mcp.command()
+@mcp.command(name="uninstall")
 def uninstall_mcp():
     """Uninstall pycse MCP server from Claude Desktop."""
     cfgfile = get_mcp_config_path()
@@ -259,44 +262,44 @@ def uninstall_mcp():
 
 @pycse.group()
 def skill():
-    """Manage pycse skill for Claude Code."""
+    """Manage pycse skill for Claude Code.
+
+    Use `pycse skill install` / `pycse skill uninstall`.
+    """
     pass
 
 
-@skill.command()
+@skill.command(name="install")
 def install_skill():
     """Install pycse skill in Claude Code (~/.claude/skills/pycse/)."""
-    # Get the path to the SKILL.md file in the package
+    # The skill is a directory: SKILL.md plus the reference files it links to
     import pycse
     import pathlib
 
-    skill_source = pathlib.Path(pycse.__file__).parent / "SKILL.md"
+    skill_source = pathlib.Path(pycse.__file__).parent / "skill"
 
-    if not skill_source.exists():
-        click.secho(f"Error: SKILL.md not found at {skill_source}", fg="red", err=True)
+    if not (skill_source / "SKILL.md").exists():
+        click.secho(f"Error: SKILL.md not found in {skill_source}", fg="red", err=True)
         sys.exit(1)
 
-    # Create the skills directory
     skills_dir = pathlib.Path.home() / ".claude" / "skills" / "pycse"
-    skills_dir.mkdir(parents=True, exist_ok=True)
 
-    # Copy the SKILL.md file
-    skill_dest = skills_dir / "SKILL.md"
-
-    if skill_dest.exists():
+    if skills_dir.exists():
         click.secho("Warning: pycse skill is already installed.", fg="yellow")
         if not click.confirm("Overwrite the existing skill?"):
             click.echo("Cancelled.")
             return
+        # Remove the old copy so files dropped from the skill do not linger
+        shutil.rmtree(skills_dir)
 
-    shutil.copy2(skill_source, skill_dest)
+    shutil.copytree(skill_source, skills_dir, ignore=shutil.ignore_patterns("__pycache__"))
 
     click.secho("\nSuccessfully installed pycse skill in Claude Code!", fg="green")
-    click.echo(f"\nSkill location: {skill_dest}")
+    click.echo(f"\nSkill location: {skills_dir}")
     click.echo("\n" + click.style("Restart Claude Code to use the skill.", fg="yellow", bold=True))
 
 
-@skill.command()
+@skill.command(name="uninstall")
 def uninstall_skill():
     """Uninstall pycse skill from Claude Code."""
     import pathlib
@@ -313,6 +316,26 @@ def uninstall_skill():
 
     shutil.rmtree(skills_dir)
     click.secho("\nSuccessfully uninstalled pycse skill!", fg="green")
+
+
+def _add_hidden_alias(group, command, alias):
+    """Register `command` under the old name `alias`, hidden from --help."""
+    group.add_command(
+        click.Command(
+            alias,
+            callback=command.callback,
+            params=command.params,
+            help=f"Deprecated alias for '{command.name}'.",
+            hidden=True,
+        )
+    )
+
+
+# Backwards-compatible names from before the commands were renamed.
+_add_hidden_alias(mcp, install_mcp, "install-mcp")
+_add_hidden_alias(mcp, uninstall_mcp, "uninstall-mcp")
+_add_hidden_alias(skill, install_skill, "install-skill")
+_add_hidden_alias(skill, uninstall_skill, "uninstall-skill")
 
 
 if __name__ == "__main__":

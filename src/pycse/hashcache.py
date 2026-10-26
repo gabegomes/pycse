@@ -13,10 +13,11 @@ like whitespace, docstrings and comments change the hash.
 
 This library aims to provide a simpler version of what I wish joblib did for me.
 
-Results are cached based on a hash of the function name, argnames, bytecode, arg
-values and kwarg values. I use joblib.hash for this. This means any two
-functions with the same bytecode, even if they have different names, will cache
-to the same result.
+Results are cached based on a hash of the function name, bytecode, constants
+(e.g. numeric literals, recursively including nested functions), referenced
+names, arg values and kwarg values. I use joblib.hash for this. The values of
+global variables used by the function are NOT part of the hash, so changing a
+global will not invalidate the cache.
 
 The cache location is set as a class attribute:
 
@@ -29,6 +30,11 @@ The cache location is set as a class attribute:
     SqlCache - stores orjson serialized data in a sqlite3 database by hash key
 
     JsonCache - stores orjson serialized data in json files, compatible with maggma
+
+SqlCache and JsonCache tag numpy arrays, numpy scalars and tuples when they are
+serialized, so a cache hit returns the same types as the miss that stored it.
+Other objects must be JSON serializable by orjson (or by the `default`
+function you set on the class).
 
 
 This is still alpha, proof of concept code. Test it a lot for your use case. The
@@ -77,16 +83,95 @@ simply provide new functions for this.
 
 [2024-06-18 Tue] Changed from function to class decorator (breaking change).
 
+[2026-09-26 Sat] The hash now includes the code constants and names (breaking
+change, old caches will not be found). Previously a change like x * 2 -> x * 3
+did not change the hash, and stale results were returned.
+
 """
 
 import inspect
 import joblib
+import types
 import os
 from pathlib import Path
 import pprint
 import socket
 import sqlite3
 import time
+
+import numpy as np
+
+# Key used to tag values that JSON cannot represent natively.
+_TYPE_KEY = "__pycse_type__"
+
+
+def _encode(obj):
+    """Recursively tag OBJ so that _decode can rebuild numpy arrays and tuples.
+
+    orjson turns arrays and tuples into lists, which would make a cache hit
+    return different types than the miss that stored the value.
+    """
+    if isinstance(obj, np.ndarray):
+        return {
+            _TYPE_KEY: "ndarray",
+            "dtype": obj.dtype.str,
+            "shape": list(obj.shape),
+            "data": _encode(obj.tolist()),
+        }
+    if isinstance(obj, np.generic):
+        return {_TYPE_KEY: "npscalar", "dtype": obj.dtype.str, "value": obj.item()}
+    if isinstance(obj, tuple):
+        return {_TYPE_KEY: "tuple", "items": [_encode(o) for o in obj]}
+    if isinstance(obj, list):
+        return [_encode(o) for o in obj]
+    if isinstance(obj, dict):
+        return {k: _encode(v) for k, v in obj.items()}
+    return obj
+
+
+def _decode(obj):
+    """Invert _encode."""
+    if isinstance(obj, list):
+        return [_decode(o) for o in obj]
+    if isinstance(obj, dict):
+        tag = obj.get(_TYPE_KEY)
+        if tag == "ndarray":
+            arr = np.array(obj["data"], dtype=np.dtype(obj["dtype"]))
+            return arr.reshape(obj["shape"])
+        if tag == "npscalar":
+            return np.dtype(obj["dtype"]).type(obj["value"])
+        if tag == "tuple":
+            return tuple(_decode(o) for o in obj["items"])
+        return {k: _decode(v) for k, v in obj.items()}
+    return obj
+
+
+def _orjson_dumps(data, default=None):
+    """Serialize DATA with orjson, tagging types JSON would lose."""
+    import orjson
+
+    return orjson.dumps(_encode(data), default=default, option=orjson.OPT_SERIALIZE_NUMPY)
+
+
+def _orjson_loads(value):
+    """Deserialize VALUE written by _orjson_dumps."""
+    import orjson
+
+    return _decode(orjson.loads(value))
+
+
+def _code_signature(code):
+    """Return a deterministic, hashable signature for a code object.
+
+    This includes the name, bytecode, constants and referenced names. Nested
+    code objects in the constants (e.g. lambdas or inner functions) are replaced
+    by their own signatures, since their repr contains memory addresses.
+
+    """
+    consts = tuple(
+        _code_signature(c) if isinstance(c, types.CodeType) else c for c in code.co_consts
+    )
+    return (code.co_name, code.co_code, consts, code.co_names)
 
 
 def hashcache(*args, **kwargs):
@@ -139,21 +224,31 @@ class HashCache:
         store and look up results later. You should think carefully before
         changing this function, it breaks past caches.
 
-        FUNC should be as pure as reasonable. This hash is insensitive to global
-        variables.
+        FUNC should be as pure as reasonable. This hash is insensitive to the
+        values of global variables the function uses; if you change a global,
+        the cached result will still be returned.
 
-        The hash is on the function name, bytecode, and a standardized kwargs
-        including defaults. We use bytecode because it is insensitive to things
+        The hash is on the function name, bytecode, constants (recursively
+        including nested code objects), referenced names, and a standardized
+        kwargs including defaults. The docstring is not included. We use bytecode because it is insensitive to things
         like whitespace, comments, docstrings, and variable name changes that
         don't affect results. It is assumed that two functions with the same
         name and bytecode will evaluate to the same result. However, this makes
         the hash fragile to changes in Python version that affect bytecode.
 
         """
+        name, bytecode, consts, names = _code_signature(self.function.__code__)
+        # Drop the docstring so documentation changes do not change the hash.
+        doc = self.function.__doc__
+        if consts and doc is not None and isinstance(consts[0], str) and consts[0] == doc:
+            consts = consts[1:]
+
         return joblib.hash(
             [
-                self.function.__code__.co_name,  # This is the function name
-                self.function.__code__.co_code,  # this is the function bytecode
+                name,  # This is the function name
+                bytecode,  # this is the function bytecode
+                consts,  # constants, e.g. numbers, so x * 2 != x * 3
+                names,  # global/attribute names used, e.g. np.sin vs np.cos
                 # The args used, including defaults
                 self.get_standardized_args(args, kwargs),
             ],
@@ -254,7 +349,8 @@ class HashCache:
 
         Returns a hash string for future lookup.
 
-        cache is a special kwarg that is not saved
+        cache is a special kwarg that is not saved. It defaults to
+        HashCache.cache, the same directory the decorator uses.
 
         """
         t0 = time.time()
@@ -269,7 +365,7 @@ class HashCache:
             cache = kwargs["cache"]
             del kwargs["cache"]
         else:
-            cache = "cache"
+            cache = HashCache.cache
 
         data = {
             "func": "dump",
@@ -288,10 +384,13 @@ class HashCache:
         return hsh
 
     @staticmethod
-    def load(hsh, cache="cache"):
-        """Load saved variables from HSH."""
+    def load(hsh, cache=None):
+        """Load saved variables from HSH.
+
+        CACHE defaults to HashCache.cache, the same directory the decorator uses.
+        """
         hc = HashCache(lambda x: x)
-        hc.cache = cache
+        hc.cache = HashCache.cache if cache is None else cache
 
         hshpath = hc.get_hashpath(hsh)
         if os.path.exists(hshpath):
@@ -324,9 +423,7 @@ class SqlCache(HashCache):
         DATA must be serializable to json.
 
         """
-        import orjson
-
-        value = orjson.dumps(data, default=self.default, option=orjson.OPT_SERIALIZE_NUMPY)
+        value = _orjson_dumps(data, default=self.default)
         with self.con:
             self.con.execute("INSERT INTO cache(hash, value) VALUES(?, ?)", (hsh, value))
 
@@ -339,15 +436,13 @@ class SqlCache(HashCache):
         does not exist yet, sucess will be False, and data will be None.
 
         """
-        import orjson
-
         with self.con:
             cur = self.con.execute("SELECT value FROM cache WHERE hash = ?", (hsh,))
             value = cur.fetchone()
         if value is None:
             return False, None
         else:
-            return True, orjson.loads(value[0])["output"]
+            return True, _orjson_loads(value[0])["output"]
 
     @staticmethod
     def search(query, *args):
@@ -397,13 +492,11 @@ class SqlCache(HashCache):
     @staticmethod
     def load(hsh):
         """Load data from HSH."""
-        import orjson
-
         hc = SqlCache(lambda x: x)
         with hc.con:
             cur = hc.con.execute("SELECT value FROM cache WHERE hash = ?", (hsh,))
             (value,) = cur.fetchone()  # this returns a tuple that we unpack
-            return orjson.loads(value)["kwargs"]
+            return _orjson_loads(value)["kwargs"]
 
 
 class JsonCache(HashCache):
@@ -427,22 +520,18 @@ class JsonCache(HashCache):
 
     def dump_data(self, hsh, data):
         """Dump DATA into HSH."""
-        import orjson
-
         hshpath = self.get_hashpath(hsh).with_suffix(".json")
         os.makedirs(hshpath.parent, exist_ok=True)
 
         with open(hshpath, "wb") as f:
-            f.write(orjson.dumps(data, default=self.default, option=orjson.OPT_SERIALIZE_NUMPY))
+            f.write(_orjson_dumps(data, default=self.default))
 
     def load_data(self, hsh):
         """Load data from hsh."""
-        import orjson
-
         hshpath = self.get_hashpath(hsh).with_suffix(".json")
         if os.path.exists(hshpath):
             with open(hshpath, "rb") as f:
-                data = orjson.loads(f.read())
+                data = _orjson_loads(f.read())
 
             if self.verbose:
                 pp = pprint.PrettyPrinter(indent=4)
@@ -457,8 +546,6 @@ class JsonCache(HashCache):
 
         Returns a hash string for future lookup.
         """
-        import orjson
-
         t0 = time.time()
         hsh = joblib.hash(kwargs)
 
@@ -483,16 +570,14 @@ class JsonCache(HashCache):
 
         os.makedirs(hshpath.parent, exist_ok=True)
         with open(hshpath, "wb") as f:
-            f.write(orjson.dumps(data, default=hc.default, option=orjson.OPT_SERIALIZE_NUMPY))
+            f.write(_orjson_dumps(data, default=hc.default))
         return hsh
 
     @staticmethod
     def load(hsh):
         """Load data from HSH."""
-        import orjson
-
         hc = JsonCache(lambda x: x)
         hshpath = hc.get_hashpath(hsh).with_suffix(".json")
         if os.path.exists(hshpath):
             with open(hshpath, "rb") as f:
-                return orjson.loads(f.read())["kwargs"]
+                return _orjson_loads(f.read())["kwargs"]

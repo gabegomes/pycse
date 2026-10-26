@@ -128,6 +128,68 @@ class TestHashCache:
         # Different args should produce different hash
         assert hash1 != hash3
 
+    def test_hash_depends_on_constants(self, temp_cache_dir):
+        """Changing a constant in the function must not return stale results."""
+
+        @HashCache
+        def f(x):
+            return x * 2
+
+        assert f(5) == 10
+
+        @HashCache
+        def f(x):  # noqa: F811
+            return x * 3
+
+        assert f(5) == 15
+
+    def test_hash_depends_on_names(self, temp_cache_dir):
+        """Calling a different function with identical bytecode changes the hash."""
+        import math
+
+        @HashCache
+        def f(x):
+            return math.sin(x)
+
+        h1 = f.get_hash((1.0,), {})
+
+        @HashCache
+        def f(x):  # noqa: F811
+            return math.cos(x)
+
+        assert f.get_hash((1.0,), {}) != h1
+        assert f(1.0) == math.cos(1.0)
+
+    def test_hash_nested_code_deterministic(self, temp_cache_dir):
+        """Nested code objects are hashed by content, not by memory address."""
+
+        def make(k):
+            ns = {}
+            exec(f"def q(x):\n    g = lambda y: y * {k}\n    return g(x)\n", ns)
+            return HashCache(ns["q"])
+
+        assert make(2).get_hash((5,), {}) == make(2).get_hash((5,), {})
+        assert make(2).get_hash((5,), {}) != make(3).get_hash((5,), {})
+        assert make(2)(5) == 10
+        assert make(3)(5) == 15
+
+    def test_hash_ignores_docstring(self, temp_cache_dir):
+        """Docstring changes do not change the hash."""
+
+        @HashCache
+        def f(x):
+            """Doc one."""
+            return x
+
+        h1 = f.get_hash((1,), {})
+
+        @HashCache
+        def f(x):  # noqa: F811
+            """Doc two, different."""
+            return x
+
+        assert f.get_hash((1,), {}) == h1
+
     def test_cache_file_created(self, temp_cache_dir):
         """Test that cache files are created in correct location."""
 
@@ -211,6 +273,21 @@ class TestSqlCache:
         SqlCache.cache = original_cache
         if os.path.exists(temp_file.name):
             os.unlink(temp_file.name)
+
+    def test_sqlcache_hash_depends_on_constants(self, temp_db_path):
+        """SqlCache shares the HashCache hash, so constants matter."""
+
+        @SqlCache
+        def f(x):
+            return x * 2
+
+        assert f(5) == 10
+
+        @SqlCache
+        def f(x):  # noqa: F811
+            return x * 3
+
+        assert f(5) == 15
 
     def test_sqlcache_basic_caching(self, temp_db_path):
         """Test SqlCache basic caching functionality."""
@@ -381,3 +458,55 @@ class TestJsonCache:
         capsys.readouterr()
 
         JsonCache.verbose = False  # Reset
+
+
+class TestRoundTripTypes:
+    """SqlCache/JsonCache return the same types on a hit as on a miss (#94)."""
+
+    @staticmethod
+    def _value(x):
+        import numpy as np
+
+        return np.array([x, 2 * x]), (x, x), np.float32(1.5), {"t": (1, [2, (3,)])}
+
+    def _check(self, a, b):
+        import numpy as np
+
+        assert type(a) is type(b) is tuple
+        assert isinstance(b[0], np.ndarray) and b[0].dtype == a[0].dtype
+        np.testing.assert_array_equal(a[0], b[0])
+        assert b[1] == (1, 1) and isinstance(b[1], tuple)
+        assert type(b[2]) is type(a[2])
+        assert b[3] == {"t": (1, [2, (3,)])}
+
+    def test_sqlcache(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(SqlCache, "cache", str(tmp_path / "c.sqlite"))
+
+        @SqlCache
+        def h(x):
+            return TestRoundTripTypes._value(x)
+
+        self._check(h(1), h(1))
+
+    def test_jsoncache(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(JsonCache, "cache", str(tmp_path / "jc"))
+
+        @JsonCache
+        def h(x):
+            return TestRoundTripTypes._value(x)
+
+        self._check(h(1), h(1))
+
+
+def test_hashcache_dump_load_use_configured_cache(tmp_path, monkeypatch):
+    """HashCache.dump/load default to HashCache.cache (#94)."""
+    cache = tmp_path / "configured"
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.setattr(HashCache, "cache", str(cache))
+    monkeypatch.chdir(work)
+
+    hsh = HashCache.dump(a=1)
+    assert not (work / "cache").exists()
+    assert cache.is_dir()
+    assert HashCache.load(hsh) == {"a": 1}

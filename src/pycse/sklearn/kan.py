@@ -46,6 +46,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
 from flax import linen as nn
 
+from pycse.sklearn.mip import Affine, MIPExportMixin, MIPNetwork, PiecewiseLinear, StdSpec
 from pycse.sklearn.optimizers import run_optimizer
 
 os.environ["JAX_ENABLE_X64"] = "True"
@@ -254,7 +255,7 @@ class _KANN(nn.Module):
         return x
 
 
-class KAN(BaseEstimator, RegressorMixin):
+class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
     """KAN: Kolmogorov-Arnold Network regressor.
 
     A neural network that uses learnable activation functions (B-splines)
@@ -328,8 +329,7 @@ class KAN(BaseEstimator, RegressorMixin):
         self.spline_order = spline_order
         self.grid_range = grid_range
         self.seed = seed
-        self.key = jax.random.PRNGKey(seed)
-        self.optimizer = optimizer.lower()
+        self.optimizer = optimizer
         self.loss_type = loss_type
         self.min_sigma = min_sigma
         self.l1_spline = l1_spline
@@ -337,42 +337,22 @@ class KAN(BaseEstimator, RegressorMixin):
         self.entropy_reg = entropy_reg
         self.base_activation = base_activation
         self.n_ensemble = n_ensemble
-        self.calibration_factor = 1.0
-        self.n_outputs = layers[-1]
-
-        # Internal network outputs n_outputs * n_ensemble
-        internal_layers = layers[:-1] + (layers[-1] * n_ensemble,)
-
-        # Create the network
-        self.nn = _KANN(
-            layers=internal_layers,
-            grid_size=grid_size,
-            spline_order=spline_order,
-            grid_range=grid_range,
-            base_activation=base_activation,
-        )
-
-        # Normalization parameters (set during fit)
-        self.X_mean_ = None
-        self.X_std_ = None
-        self.y_mean_ = None
-        self.y_std_ = None
 
     def _normalize_X(self, X):
         """Normalize input features."""
-        if self.X_mean_ is not None and self.X_std_ is not None:
+        if hasattr(self, "X_mean_") and hasattr(self, "X_std_"):
             return (X - self.X_mean_) / (self.X_std_ + 1e-8)
         return X
 
     def _normalize_y(self, y):
         """Normalize target values (handles multi-output)."""
-        if self.y_mean_ is not None and self.y_std_ is not None:
+        if hasattr(self, "y_mean_") and hasattr(self, "y_std_"):
             return (y - self.y_mean_) / (self.y_std_ + 1e-8)
         return y
 
     def _denormalize_y(self, y):
         """Denormalize predictions (handles multi-output and ensemble)."""
-        if self.y_mean_ is not None and self.y_std_ is not None:
+        if hasattr(self, "y_mean_") and hasattr(self, "y_std_"):
             # Handle 3D case: (batch, n_outputs, n_ensemble)
             if y.ndim == 3:
                 # Reshape stats to (1, n_outputs, 1) for broadcasting
@@ -384,7 +364,7 @@ class KAN(BaseEstimator, RegressorMixin):
 
     def _denormalize_std(self, std):
         """Denormalize standard deviations (handles multi-output)."""
-        if self.y_std_ is not None:
+        if hasattr(self, "y_std_"):
             return std * self.y_std_
         return std
 
@@ -411,11 +391,24 @@ class KAN(BaseEstimator, RegressorMixin):
         if y.ndim == 1:
             y = y.reshape(-1, 1)
 
-        if y.shape[1] != self.n_outputs:
+        n_outputs = self.layers[-1]
+        if y.shape[1] != n_outputs:
             raise ValueError(
-                f"Target has {y.shape[1]} outputs but model expects {self.n_outputs}. "
+                f"Target has {y.shape[1]} outputs but model expects {n_outputs}. "
                 f"Set layers[-1]={y.shape[1]} to match."
             )
+
+        # Create derived objects from constructor params
+        key = jax.random.PRNGKey(self.seed)
+        internal_layers = self.layers[:-1] + (n_outputs * self.n_ensemble,)
+        self.nn_ = _KANN(
+            layers=internal_layers,
+            grid_size=self.grid_size,
+            spline_order=self.spline_order,
+            grid_range=self.grid_range,
+            base_activation=self.base_activation,
+        )
+        self.calibration_factor_ = 1.0
 
         # Store normalization parameters (per output)
         self.X_mean_ = jnp.mean(X, axis=0)
@@ -428,20 +421,20 @@ class KAN(BaseEstimator, RegressorMixin):
         y_norm = self._normalize_y(y)
 
         # Initialize parameters
-        params = self.nn.init(self.key, X_norm)
+        params = self.nn_.init(key, X_norm)
 
         # Store regularization params for closure
         l1_spline = self.l1_spline
         l1_activation = self.l1_activation
         entropy_reg = self.entropy_reg
-        n_outputs = self.n_outputs
+        n_outputs = self.layers[-1]
         n_ensemble = self.n_ensemble
         min_sigma = self.min_sigma
 
         @jit
         def objective(pars):
             """Loss function with optional regularization."""
-            pY_raw = self.nn.apply(pars, X_norm)
+            pY_raw = self.nn_.apply(pars, X_norm)
             # Reshape: (batch, n_outputs * n_ensemble) -> (batch, n_outputs, n_ensemble)
             pY = pY_raw.reshape(-1, n_outputs, n_ensemble)
 
@@ -500,10 +493,10 @@ class KAN(BaseEstimator, RegressorMixin):
             return loss + reg_loss
 
         # Run optimization
-        maxiter = kwargs.pop("maxiter", 1500)
+        maxiter = kwargs.pop("maxiter", 300)
         tol = kwargs.pop("tol", 1e-3)
 
-        self.optpars, self.state = run_optimizer(
+        self.optpars_, self.state_ = run_optimizer(
             self.optimizer, objective, params, maxiter=maxiter, tol=tol, **kwargs
         )
 
@@ -530,10 +523,10 @@ class KAN(BaseEstimator, RegressorMixin):
             y = y.reshape(-1, 1)
 
         X_norm = self._normalize_X(X)
-        pY_raw = self.nn.apply(self.optpars, X_norm)
+        pY_raw = self.nn_.apply(self.optpars_, X_norm)
 
         # Reshape: (batch, n_outputs * n_ensemble) -> (batch, n_outputs, n_ensemble)
-        pY = pY_raw.reshape(-1, self.n_outputs, self.n_ensemble)
+        pY = pY_raw.reshape(-1, self.layers[-1], self.n_ensemble)
 
         # Get predictions in normalized space
         py = pY.mean(axis=2)  # (batch, n_outputs)
@@ -546,20 +539,20 @@ class KAN(BaseEstimator, RegressorMixin):
         mean_sigma = jnp.mean(sigma)
         if mean_sigma < 1e-8:
             print("\n⚠ WARNING: Ensemble has collapsed!")
-            self.calibration_factor = 1.0
+            self.calibration_factor_ = 1.0
             return
 
         alpha_sq = jnp.mean(errs**2) / jnp.mean(sigma**2)
-        self.calibration_factor = float(jnp.sqrt(alpha_sq))
+        self.calibration_factor_ = float(jnp.sqrt(alpha_sq))
 
-        if not jnp.isfinite(self.calibration_factor):
-            self.calibration_factor = 1.0
+        if not jnp.isfinite(self.calibration_factor_):
+            self.calibration_factor_ = 1.0
             return
 
-        print(f"\nCalibration factor α = {self.calibration_factor:.4f}")
-        if self.calibration_factor > 1.5:
+        print(f"\nCalibration factor α = {self.calibration_factor_:.4f}")
+        if self.calibration_factor_ > 1.5:
             print("  ⚠ Model is overconfident (α > 1.5)")
-        elif self.calibration_factor < 0.7:
+        elif self.calibration_factor_ < 0.7:
             print("  ⚠ Model is underconfident (α < 0.7)")
         else:
             print("  ✓ Model is well-calibrated")
@@ -579,10 +572,10 @@ class KAN(BaseEstimator, RegressorMixin):
         """
         X = jnp.atleast_2d(X)
         X_norm = self._normalize_X(X)
-        pY_raw = self.nn.apply(self.optpars, X_norm)
+        pY_raw = self.nn_.apply(self.optpars_, X_norm)
 
         # Reshape: (batch, n_outputs * n_ensemble) -> (batch, n_outputs, n_ensemble)
-        pY = pY_raw.reshape(-1, self.n_outputs, self.n_ensemble)
+        pY = pY_raw.reshape(-1, self.layers[-1], self.n_ensemble)
 
         if self.n_ensemble > 1:
             # Ensemble predictions: mean over ensemble
@@ -594,11 +587,11 @@ class KAN(BaseEstimator, RegressorMixin):
             std_pred = self._denormalize_std(std_pred_norm)
 
             # Apply calibration
-            if self.calibration_factor != 1.0:
-                std_pred = std_pred * self.calibration_factor
+            if self.calibration_factor_ != 1.0:
+                std_pred = std_pred * self.calibration_factor_
 
             # Squeeze if single output
-            if self.n_outputs == 1:
+            if self.layers[-1] == 1:
                 mean_pred = mean_pred.squeeze(axis=1)
                 std_pred = std_pred.squeeze(axis=1)
 
@@ -611,7 +604,7 @@ class KAN(BaseEstimator, RegressorMixin):
             pred = self._denormalize_y(pred_norm)
 
             # Squeeze if single output
-            if self.n_outputs == 1:
+            if self.layers[-1] == 1:
                 pred = pred.squeeze(axis=1)
 
             if return_std:
@@ -632,16 +625,16 @@ class KAN(BaseEstimator, RegressorMixin):
         """
         X = jnp.atleast_2d(X)
         X_norm = self._normalize_X(X)
-        pY_raw = self.nn.apply(self.optpars, X_norm)
+        pY_raw = self.nn_.apply(self.optpars_, X_norm)
 
         # Reshape: (batch, n_outputs * n_ensemble) -> (batch, n_outputs, n_ensemble)
-        pY_norm = pY_raw.reshape(-1, self.n_outputs, self.n_ensemble)
+        pY_norm = pY_raw.reshape(-1, self.layers[-1], self.n_ensemble)
 
         # Denormalize each output
         pY = self._denormalize_y(pY_norm)
 
         # Squeeze if single output
-        if self.n_outputs == 1:
+        if self.layers[-1] == 1:
             pY = pY.squeeze(axis=1)  # (batch, n_ensemble)
 
         return pY
@@ -664,14 +657,14 @@ class KAN(BaseEstimator, RegressorMixin):
             if self.entropy_reg > 0:
                 print(f"    Entropy: {self.entropy_reg}")
 
-        if hasattr(self.state, "iter_num"):
-            print(f"  Iterations: {self.state.iter_num}")
-        if hasattr(self.state, "value"):
-            print(f"  Final loss: {self.state.value:.6f}")
-        if hasattr(self.state, "converged"):
-            print(f"  Converged: {self.state.converged}")
-        if hasattr(self, "calibration_factor") and self.n_ensemble > 1:
-            print(f"  Calibration: α = {self.calibration_factor:.4f}")
+        if hasattr(self.state_, "iter_num"):
+            print(f"  Iterations: {self.state_.iter_num}")
+        if hasattr(self.state_, "value"):
+            print(f"  Final loss: {self.state_.value:.6f}")
+        if hasattr(self.state_, "converged"):
+            print(f"  Converged: {self.state_.converged}")
+        if hasattr(self, "calibration_factor_") and self.n_ensemble > 1:
+            print(f"  Calibration: α = {self.calibration_factor_:.4f}")
 
     def plot(self, X, y, ax=None, distribution=False):
         """Visualize predictions with uncertainty bands.
@@ -844,7 +837,7 @@ class KAN(BaseEstimator, RegressorMixin):
         Returns:
             Predictions (and uncertainties if requested).
         """
-        if not hasattr(self, "optpars"):
+        if not hasattr(self, "optpars_"):
             raise Exception("You need to fit the model first.")
 
         if distribution:
@@ -866,11 +859,11 @@ class KAN(BaseEstimator, RegressorMixin):
         Returns:
             matplotlib figure object.
         """
-        if not hasattr(self, "optpars"):
+        if not hasattr(self, "optpars_"):
             raise Exception("You need to fit the model first.")
 
         # Get parameters for the specified layer
-        params = self.optpars["params"]
+        params = self.optpars_["params"]
         layer_keys = [k for k in params.keys() if k.startswith("KANLayer_")]
 
         if layer_idx >= len(layer_keys):
@@ -970,10 +963,10 @@ class KAN(BaseEstimator, RegressorMixin):
         Returns:
             matplotlib figure object.
         """
-        if not hasattr(self, "optpars"):
+        if not hasattr(self, "optpars_"):
             raise Exception("You need to fit the model first.")
 
-        params = self.optpars["params"]
+        params = self.optpars_["params"]
         layer_keys = sorted([k for k in params.keys() if k.startswith("KANLayer_")])
         n_layers = len(layer_keys) + 1  # +1 for input layer
 
@@ -1163,270 +1156,97 @@ class KAN(BaseEstimator, RegressorMixin):
         plt.tight_layout()
         return fig
 
-    def to_pyomo(self, input_bounds=None):
-        """Export trained KAN to a Pyomo optimization model.
+    def mip_network(self):
+        """Return the trained KAN as a ``MIPNetwork`` for MIP export.
 
-        This method creates a Pyomo model representing the trained KAN,
-        enabling global optimization over the neural network using MIP solvers.
-
-        Requirements for MIP export:
-        - spline_order=1 (linear splines for piecewise linear activations)
-        - base_activation='linear' (SiLU is not piecewise linear)
-        - n_ensemble=1 (ensemble models cannot be exported to MIP)
-
-        Supports multi-output models - each output becomes model.y[i].
-
-        Args:
-            input_bounds: List of (lower, upper) tuples for each input dimension.
-                         If None, uses the grid_range for all inputs.
-
-        Returns:
-            pyomo.ConcreteModel: A Pyomo model with:
-                - model.x[i]: Input variables
-                - model.y[j]: Output variables (one per target)
-                - model.obj: Objective (minimizes y[0] by default, user can modify)
-
-        Raises:
-            ValueError: If model is not MIP-compatible (wrong spline_order,
-                       base_activation, or n_ensemble)
-            ImportError: If pyomo is not installed
-
-        Example:
-            >>> # Train MIP-compatible KAN
-            >>> kan = KAN(layers=(2, 4, 1), spline_order=1, grid_size=5,
-            ...           base_activation='linear', n_ensemble=1)
-            >>> kan.fit(X_train, y_train)
-            >>>
-            >>> # Export to Pyomo
-            >>> model = kan.to_pyomo(input_bounds=[(0, 1), (0, 1)])
-            >>>
-            >>> # Solve for minimum
-            >>> from pyomo.environ import SolverFactory
-            >>> solver = SolverFactory('glpk')
-            >>> result = solver.solve(model)
-            >>> print(f"Optimal x: {[model.x[i].value for i in model.x]}")
-            >>> print(f"Optimal y: {model.y[0].value}")
-            >>>
-            >>> # For multi-output, optimize a different output or combination:
-            >>> model.obj.deactivate()
-            >>> model.obj2 = pyo.Objective(expr=model.y[1], sense=pyo.maximize)
+        Requires ``spline_order=1`` and ``base_activation="linear"``, which make every
+        edge function piecewise linear. Each layer becomes a ``PiecewiseLinear`` layer
+        that shares one set of segment binaries per input across its edges. With
+        ``n_ensemble > 1`` the prediction is the ensemble mean and the std is
+        ``calibration_factor * y_std * sqrt(var(members) + min_sigma**2)``.
+        See ``pycse.sklearn.mip`` and ``to_pyomo()``.
         """
-        if self.spline_order != 1:
-            raise ValueError(
-                f"to_pyomo() requires spline_order=1 (linear splines) for MIP representation. "
-                f"Current spline_order={self.spline_order}. "
-                f"Cubic splines (order 3) are not piecewise linear and cannot be exactly "
-                f"represented as mixed-integer constraints."
+        if not hasattr(self, "optpars_"):
+            raise ValueError("Fit the model before exporting it.")
+        layers = kan_mip_layers(
+            self.optpars_, self.grid_size, self.spline_order, self.grid_range, self.base_activation
+        )
+
+        n_out, m = self.layers[-1], self.n_ensemble
+        if m > 1:
+            # Members of output o are columns o * m ... o * m + m - 1; average them.
+            avg = np.zeros((n_out * m, n_out))
+            for o in range(n_out):
+                avg[o * m : (o + 1) * m, o] = 1.0 / m
+            layers.append(Affine(avg, np.zeros(n_out)))
+
+        net = MIPNetwork(layers)
+        net = net.scale_inputs(np.asarray(self.X_mean_), np.asarray(self.X_std_) + 1e-8)
+        y_std = np.asarray(self.y_std_, dtype=float).reshape(-1)
+        net = net.scale_outputs(np.asarray(self.y_mean_), y_std)
+
+        if m > 1:
+            cf = float(getattr(self, "calibration_factor_", 1.0))
+            center = (np.eye(m) - np.full((m, m), 1.0 / m)) / np.sqrt(m)
+            net.std = []
+            for o in range(n_out):
+                A = np.zeros((m, n_out * m))
+                A[:, o * m : (o + 1) * m] = cf * y_std[o] * center
+                d = (cf * y_std[o] * self.min_sigma) ** 2
+                net.std.append(StdSpec(tap=len(layers) - 2, A=A, d=d))
+        return net
+
+    def _mip_default_input_bounds(self):
+        """The input range covered by the first layer's spline grid."""
+        return kan_default_input_bounds(self.X_mean_, self.X_std_, self.grid_range)
+
+
+def kan_default_input_bounds(X_mean, X_std, grid_range):
+    """Raw input bounds that map onto ``grid_range`` after standardization."""
+    mean = np.asarray(X_mean, dtype=float)
+    scale = np.asarray(X_std, dtype=float) + 1e-8
+    return np.column_stack([grid_range[0] * scale + mean, grid_range[1] * scale + mean])
+
+
+def kan_mip_layers(params, grid_size, spline_order, grid_range, base_activation):
+    """``PiecewiseLinear`` layers for a KAN with linear splines and a linear base.
+
+    Each edge is ``spline_scale * spline(clip(x, grid_range)) + base_weight * x``; with
+    ``spline_order=1`` the spline is linear between the grid points and constant
+    outside ``grid_range`` (the clip), so it is exactly a ``PiecewiseLinear`` edge.
+    """
+    if spline_order != 1:
+        raise ValueError(
+            "MIP export requires spline_order=1 (linear splines); "
+            f"got spline_order={spline_order}. Higher-order splines are not piecewise linear."
+        )
+    if base_activation != "linear":
+        raise ValueError(
+            "MIP export requires base_activation='linear'; "
+            f"got base_activation={base_activation!r}. SiLU is not piecewise linear."
+        )
+
+    k = spline_order
+    h = (grid_range[1] - grid_range[0]) / grid_size
+    knots = jnp.linspace(
+        grid_range[0] - k * h, grid_range[1] + k * h, grid_size + 1 + 2 * k
+    )  # the same knots as KANLayer.setup
+    bp = np.linspace(grid_range[0], grid_range[1], grid_size + 1)
+    basis = np.asarray(b_spline_basis(jnp.asarray(bp), knots, k=k), dtype=float)
+
+    params = params["params"]
+    layers = []
+    for i in range(len(params)):
+        p = params[f"KANLayer_{i}"]
+        spline_weight = np.asarray(p["spline_weight"], dtype=float)  # (in, out, n_basis)
+        spline_scale = np.asarray(p["spline_scale"], dtype=float)  # (in, out)
+        values = np.einsum("kb,iob->iko", basis, spline_weight) * spline_scale[:, None, :]
+        n_in = spline_weight.shape[0]
+        layers.append(
+            PiecewiseLinear(
+                breakpoints=np.tile(bp, (n_in, 1)),
+                values=values,
+                W=np.asarray(p["base_weight"], dtype=float),
             )
-
-        if self.base_activation != "linear":
-            raise ValueError(
-                f"to_pyomo() requires base_activation='linear' for exact MIP representation. "
-                f"Current base_activation='{self.base_activation}'. "
-                f"The SiLU activation is not piecewise linear. Use KAN(..., base_activation='linear') "
-                f"for MIP-compatible models."
-            )
-
-        if self.n_ensemble != 1:
-            raise ValueError(
-                f"to_pyomo() requires n_ensemble=1 for MIP export. "
-                f"Current n_ensemble={self.n_ensemble}. "
-                f"Ensemble models cannot be directly exported to MIP. "
-                f"Train with n_ensemble=1 for MIP-compatible models."
-            )
-
-        if not hasattr(self, "optpars"):
-            raise ValueError("Model must be fitted before exporting to Pyomo.")
-
-        try:
-            import pyomo.environ as pyo
-        except ImportError:
-            raise ImportError("Pyomo is required for MIP export. Install with: pip install pyomo")
-
-        # Get network dimensions
-        n_inputs = self.layers[0]
-        n_outputs = self.n_outputs
-
-        # Set default input bounds
-        if input_bounds is None:
-            input_bounds = [self.grid_range] * n_inputs
-
-        # Create Pyomo model
-        model = pyo.ConcreteModel(name="KAN_MIP")
-
-        # Input variables (in original space)
-        model.x = pyo.Var(range(n_inputs), bounds=lambda m, i: input_bounds[i])
-
-        # Normalized input variables
-        model.x_norm = pyo.Var(range(n_inputs), within=pyo.Reals)
-
-        # Normalization constraints
-        model.norm_constraints = pyo.ConstraintList()
-        for i in range(n_inputs):
-            x_mean = float(self.X_mean_[i]) if self.X_mean_ is not None else 0.0
-            x_std = float(self.X_std_[i]) if self.X_std_ is not None else 1.0
-            # x_norm = (x - x_mean) / x_std
-            model.norm_constraints.add(model.x_norm[i] == (model.x[i] - x_mean) / x_std)
-
-        # Get breakpoints for piecewise linear formulation (in normalized space)
-        n_segments = self.grid_size
-        breakpoints = np.linspace(self.grid_range[0], self.grid_range[1], n_segments + 1)
-
-        # Extract parameters
-        params = self.optpars["params"]
-        layer_keys = sorted([k for k in params.keys() if k.startswith("KANLayer_")])
-
-        # Track intermediate variables for each layer
-        # First layer uses normalized inputs
-        layer_outputs = {-1: {i: model.x_norm[i] for i in range(n_inputs)}}
-
-        # Big-M for constraints
-        big_M = 100.0
-
-        # Counter for unique constraint names
-        constraint_counter = [0]
-
-        def add_piecewise_constraint(model, output_var, input_var, breakpoints, values):
-            """Add piecewise linear constraint using big-M formulation.
-
-            For each segment k, we have:
-                output = slope_k * input + intercept_k  when  breakpoint[k] <= input <= breakpoint[k+1]
-
-            We use binary variables delta_k to select the active segment.
-            """
-            n_segs = len(breakpoints) - 1
-            idx = constraint_counter[0]
-            constraint_counter[0] += 1
-
-            # Binary variables for segment selection
-            delta_name = f"delta_{idx}"
-            setattr(model, delta_name, pyo.Var(range(n_segs), within=pyo.Binary))
-            delta = getattr(model, delta_name)
-
-            # Lambda variables for convex combination (SOS2-like formulation)
-            lam_name = f"lam_{idx}"
-            setattr(
-                model,
-                lam_name,
-                pyo.Var(range(n_segs + 1), within=pyo.NonNegativeReals, bounds=(0, 1)),
-            )
-            lam = getattr(model, lam_name)
-
-            # Constraints
-            constraints_name = f"pw_constraints_{idx}"
-            setattr(model, constraints_name, pyo.ConstraintList())
-            cons = getattr(model, constraints_name)
-
-            # Sum of lambdas = 1
-            cons.add(sum(lam[k] for k in range(n_segs + 1)) == 1)
-
-            # Sum of deltas = 1 (exactly one segment active)
-            cons.add(sum(delta[k] for k in range(n_segs)) == 1)
-
-            # Lambda adjacency: lam[k] > 0 implies delta[k-1] or delta[k] is active
-            # lam[0] <= delta[0]
-            cons.add(lam[0] <= delta[0])
-            # lam[n_segs] <= delta[n_segs-1]
-            cons.add(lam[n_segs] <= delta[n_segs - 1])
-            # lam[k] <= delta[k-1] + delta[k] for k in 1..n_segs-1
-            for k in range(1, n_segs):
-                cons.add(lam[k] <= delta[k - 1] + delta[k])
-
-            # Input = sum of lambda * breakpoints
-            cons.add(input_var == sum(lam[k] * breakpoints[k] for k in range(n_segs + 1)))
-
-            # Output = sum of lambda * values
-            cons.add(output_var == sum(lam[k] * values[k] for k in range(n_segs + 1)))
-
-        for layer_idx, layer_key in enumerate(layer_keys):
-            layer_params = params[layer_key]
-            spline_weight = np.asarray(layer_params["spline_weight"])
-            base_weight = np.asarray(layer_params["base_weight"])
-            spline_scale = np.asarray(layer_params["spline_scale"])
-
-            in_features, out_features, n_basis = spline_weight.shape
-
-            # Create output variables for this layer
-            layer_outputs[layer_idx] = {}
-
-            for j in range(out_features):
-                # Create variable for this neuron's output
-                var_name = f"z_{layer_idx}_{j}"
-                setattr(model, var_name, pyo.Var(within=pyo.Reals, bounds=(-big_M, big_M)))
-                neuron_var = getattr(model, var_name)
-                layer_outputs[layer_idx][j] = neuron_var
-
-                # Sum contributions from all input edges
-                edge_contributions = []
-
-                for i in range(in_features):
-                    input_var = layer_outputs[layer_idx - 1][i]
-
-                    # Compute the piecewise linear function values at breakpoints
-                    pw_values = []
-                    for bp in breakpoints:
-                        # Compute basis functions at this breakpoint
-                        n_knots = self.grid_size + 1 + 2 * self.spline_order
-                        grid = np.linspace(
-                            self.grid_range[0]
-                            - self.spline_order
-                            * (self.grid_range[1] - self.grid_range[0])
-                            / self.grid_size,
-                            self.grid_range[1]
-                            + self.spline_order
-                            * (self.grid_range[1] - self.grid_range[0])
-                            / self.grid_size,
-                            n_knots,
-                        )
-                        basis = np.asarray(
-                            b_spline_basis(jnp.array([bp]), jnp.array(grid), k=self.spline_order)
-                        )
-
-                        # Spline contribution
-                        spline_val = float(np.dot(basis[0], spline_weight[i, j, :]))
-
-                        # Base contribution (for linear splines, use linear base)
-                        base_val = float(bp * base_weight[i, j])
-
-                        # Combined value
-                        combined = float(spline_scale[i, j]) * spline_val + base_val
-                        pw_values.append(combined)
-
-                    # Create edge output variable
-                    edge_var_name = f"edge_{layer_idx}_{i}_{j}"
-                    edge_lb = min(pw_values) - 1.0
-                    edge_ub = max(pw_values) + 1.0
-                    setattr(
-                        model, edge_var_name, pyo.Var(within=pyo.Reals, bounds=(edge_lb, edge_ub))
-                    )
-                    edge_var = getattr(model, edge_var_name)
-                    edge_contributions.append(edge_var)
-
-                    # Add piecewise linear constraint
-                    add_piecewise_constraint(model, edge_var, input_var, breakpoints, pw_values)
-
-                # Sum all edge contributions for this neuron
-                sum_constraint_name = f"sum_{layer_idx}_{j}"
-                setattr(
-                    model,
-                    sum_constraint_name,
-                    pyo.Constraint(expr=neuron_var == sum(edge_contributions)),
-                )
-
-        # Output variables (denormalized) - one per output
-        model.y = pyo.Var(range(n_outputs), within=pyo.Reals)
-
-        # Denormalization constraints for each output
-        model.denorm_constraints = pyo.ConstraintList()
-        for j in range(n_outputs):
-            final_output = layer_outputs[len(layer_keys) - 1][j]
-
-            # Denormalization: y = y_norm * y_std + y_mean
-            y_mean = float(self.y_mean_[j]) if self.y_mean_ is not None else 0.0
-            y_std = float(self.y_std_[j]) if self.y_std_ is not None else 1.0
-            model.denorm_constraints.add(model.y[j] == final_output * y_std + y_mean)
-
-        # Default objective: minimize first output (user can modify)
-        model.obj = pyo.Objective(expr=model.y[0], sense=pyo.minimize)
-
-        return model
+        )
+    return layers

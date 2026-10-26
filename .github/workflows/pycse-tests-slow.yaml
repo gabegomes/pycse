@@ -1,0 +1,57 @@
+name: Slow Tests Batch 2
+
+on:
+  # Slow tests (~40-60 min) run only when cutting a release, not on every
+  # master push. Tag a release (e.g. `git tag v2.12.0 && git push --tags`)
+  # to exercise them, or trigger manually from the Actions tab.
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  slow-tests-batch2:
+    name: Slow Tests Batch 2 - Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install package with dependencies
+        run: |
+          uv pip install --system -e ".[test]"
+
+      - name: Run slow tests batch 2 (second half)
+        run: |
+          # Run second half of slow tests using pytest-split
+          # --splits=2 --group=2 runs second half of tests
+          pytest src/pycse/tests -v -m "slow" --cov=src/pycse --cov-report=term-missing --cov-report=xml -n auto --durations=30 --splits=2 --group=2
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: slow-tests-batch2

@@ -42,3 +42,9 @@ ode-units-ca.png
 /cache.sqlite
 /.eggs/
 .claude/settings.local.json
+.claude/worktrees/
+
+# Emacs backup/lock files
+\#*\#
+*~
+*.orig
