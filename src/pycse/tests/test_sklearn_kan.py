@@ -292,6 +292,23 @@ class TestKANReportAndVisualization:
         model.plot(X, y, ax=ax, distribution=True)
         plt.close(fig)
 
+    def test_plot_multi_column_parity(self):
+        """Multi-column X draws a parity plot instead of raising IndexError."""
+        rng = np.random.default_rng(0)
+        X = rng.normal(size=(40, 3))
+        y = X[:, 0] + X[:, 1] ** 2
+
+        model = KAN(layers=(3, 3, 1), grid_size=3, n_ensemble=2)
+        model.fit(X, y, maxiter=10)
+
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots()
+        out = model.plot(X, y, ax=ax)
+        assert out is not None
+        assert "parity" in ax.get_title(loc="left")
+        plt.close(fig)
+
     def test_plot_network(self, simple_linear_data):
         """Test network graph visualization."""
         X, y = simple_linear_data

@@ -712,8 +712,14 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
 
         # Get predictions
         mp, se = self.predict(X, return_std=True)
-        mp = np.asarray(mp)
-        se = np.asarray(se)
+        mp = np.asarray(mp).ravel()
+        se = np.asarray(se).ravel()
+        y = y.ravel()
+
+        # Several input columns: no single x axis to draw the curve against, so
+        # show a parity plot (predicted vs observed) with the uncertainty as bars.
+        if X.ndim == 2 and X.shape[1] > 1:
+            return self._plot_parity(ax, y, mp, se)
 
         # For 1D input, sort for line plot
         X_plot = X.ravel()
@@ -776,6 +782,46 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
             color=_INK,
         )
 
+        return plt.gcf()
+
+    def _plot_parity(self, ax, y, mp, se):
+        """Predicted vs observed for multi-column inputs, same styling as ``plot``."""
+        _style_axes(ax)
+        lo, hi = float(min(y.min(), mp.min())), float(max(y.max(), mp.max()))
+        ax.plot([lo, hi], [lo, hi], color=_MUTED, linewidth=_PX, zorder=1, label="y = x")
+        if self.n_ensemble > 1:
+            ax.errorbar(
+                y,
+                mp,
+                yerr=2 * se,
+                fmt="none",
+                ecolor=_INK_2,
+                elinewidth=_PX,
+                capsize=2,
+                alpha=0.6,
+                zorder=2,
+                label="±2σ (95% CI)",
+            )
+        ax.scatter(
+            y,
+            mp,
+            s=(8 * _PX) ** 2,
+            color=_SERIES[0],
+            edgecolors=_SURFACE,
+            linewidths=_PX,
+            alpha=0.8,
+            label="KAN prediction",
+            zorder=3,
+        )
+        ax.set_xlabel("observed y", color=_INK_2)
+        ax.set_ylabel("predicted y", color=_INK_2)
+        ax.legend(frameon=False, labelcolor=_INK_2)
+        ax.set_title(
+            f"KAN parity plot (grid={self.grid_size}, layers={self.layers})",
+            loc="left",
+            fontweight="bold",
+            color=_INK,
+        )
         return plt.gcf()
 
     def uncertainty_metrics(self, X, y):
