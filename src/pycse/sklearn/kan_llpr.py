@@ -41,7 +41,7 @@ from sklearn.model_selection import train_test_split
 from flax import linen as nn
 
 from pycse.sklearn.optimizers import run_optimizer
-from pycse.sklearn.kan import KANLayer, kan_default_input_bounds, kan_mip_layers
+from pycse.sklearn.kan import KANLayer, feature_std, kan_default_input_bounds, kan_mip_layers
 from pycse.sklearn.mip import MIPExportMixin, MIPNetwork, llpr_std
 
 os.environ["JAX_ENABLE_X64"] = "True"
@@ -286,7 +286,7 @@ class KANLLPR(MIPExportMixin, BaseEstimator, RegressorMixin):
 
         # Store normalization parameters
         self.X_mean_ = jnp.mean(X_train, axis=0)
-        self.X_std_ = jnp.std(X_train, axis=0)
+        self.X_std_ = feature_std(X_train)
         self.y_mean_ = jnp.mean(y_train, axis=0)
         self.y_std_ = jnp.std(y_train, axis=0)
 

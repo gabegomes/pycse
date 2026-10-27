@@ -96,6 +96,20 @@ class TestKANLLPRBasicFunctionality:
         assert y_pred.shape == (len(X_test),)
         assert np.all(np.isfinite(y_pred))
 
+    def test_constant_feature_is_stable(self):
+        """A feature constant in training must not blow up predictions when it moves."""
+        rng = np.random.default_rng(0)
+        X = np.column_stack([rng.normal(size=(60, 2)), np.full(60, 3.0)])
+        y = X[:, 0] - 0.5 * X[:, 1] + 0.05 * rng.normal(size=60)
+
+        model = KANLLPR(layers=(3, 3, 1), grid_size=3, val_size=0.2)
+        model.fit(X, y, maxiter=20)
+
+        assert float(model.X_std_[2]) == 1.0
+        X_shifted = X.copy()
+        X_shifted[:, 2] += 0.01
+        assert np.max(np.abs(model.predict(X_shifted) - model.predict(X))) < 0.1
+
     def test_predict_with_uncertainty(self, simple_linear_data):
         """Test prediction with LLPR uncertainty estimates."""
         X, y = simple_linear_data

@@ -53,6 +53,23 @@ os.environ["JAX_ENABLE_X64"] = "True"
 jax.config.update("jax_enable_x64", True)
 
 
+def feature_std(X):
+    """Per-feature standard deviation for input scaling, with constant features mapped to 1.
+
+    A feature that is constant in the training data has zero std; dividing by it
+    (even with a small epsilon) makes any deviation from the training value explode
+    in normalized space. Like sklearn's StandardScaler, such features get scale 1.
+
+    Args:
+        X: Training inputs, shape (n_samples, n_features).
+
+    Returns:
+        Standard deviations, shape (n_features,).
+    """
+    std = jnp.std(X, axis=0)
+    return jnp.where(std < 10 * jnp.finfo(std.dtype).eps, 1.0, std)
+
+
 def b_spline_basis(x, grid, k=3):
     """Compute B-spline basis functions using Cox-de Boor recursion.
 
@@ -396,7 +413,7 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
 
         # Store normalization parameters (per output)
         self.X_mean_ = jnp.mean(X, axis=0)
-        self.X_std_ = jnp.std(X, axis=0)
+        self.X_std_ = feature_std(X)
         self.y_mean_ = jnp.mean(y, axis=0)  # Shape: (n_outputs,)
         self.y_std_ = jnp.std(y, axis=0)  # Shape: (n_outputs,)
 
