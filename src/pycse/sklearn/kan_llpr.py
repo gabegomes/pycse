@@ -43,6 +43,7 @@ from flax import linen as nn
 from pycse.sklearn.optimizers import run_optimizer
 from pycse.sklearn.kan import KANLayer, feature_std, kan_default_input_bounds, kan_mip_layers
 from pycse.sklearn.mip import MIPExportMixin, MIPNetwork, llpr_std
+from pycse.sklearn._plotstyle import plot_prediction
 
 os.environ["JAX_ENABLE_X64"] = "True"
 jax.config.update("jax_enable_x64", True)
@@ -692,7 +693,8 @@ class KANLLPR(MIPExportMixin, BaseEstimator, RegressorMixin):
         Parameters
         ----------
         X : array-like
-            Input features (works best with 1D input).
+            Input features. One column draws the prediction curve with ±1σ and
+            ±2σ bands; several columns draw a parity plot.
         y : array-like
             True target values.
         ax : matplotlib axis, optional
@@ -704,55 +706,12 @@ class KANLLPR(MIPExportMixin, BaseEstimator, RegressorMixin):
         """
         if ax is None:
             ax = plt.gca()
-
         X = np.asarray(X)
-        y = np.asarray(y)
-
-        # Get predictions with uncertainty
         mp, se = self.predict_with_uncertainty(X, return_std=True)
-        mp = np.asarray(mp)
-        se = np.asarray(se)
-
-        # For 1D input, sort for line plot
-        X_plot = X.ravel()
-        sort_idx = np.argsort(X_plot)
-        X_sorted = X_plot[sort_idx]
-        mp_sorted = mp[sort_idx]
-        se_sorted = se[sort_idx]
-
-        # Plot uncertainty band
-        ax.fill_between(
-            X_sorted,
-            mp_sorted - 2 * se_sorted,
-            mp_sorted + 2 * se_sorted,
-            alpha=0.3,
-            color="red",
-            label="±2σ (95% CI)",
-            zorder=1,
-        )
-
-        ax.fill_between(
-            X_sorted,
-            mp_sorted - se_sorted,
-            mp_sorted + se_sorted,
-            alpha=0.5,
-            color="red",
-            label="±1σ (68% CI)",
-            zorder=2,
-        )
-
-        # Plot mean prediction
-        ax.plot(X_sorted, mp_sorted, "r-", label="KANLLPR prediction", linewidth=2.5, zorder=3)
-
-        # Plot data
-        ax.plot(X_plot, y, "b.", label="data", alpha=0.7, markersize=8, zorder=4)
-
-        ax.set_xlabel("X")
-        ax.set_ylabel("y")
-        ax.legend()
-        ax.set_title(f"KANLLPR Predictions (grid={self.grid_size}, layers={self.layers})")
-        ax.grid(True, alpha=0.3)
-
+        plot_prediction(
+            ax, X, y, mp, se, label="KANLLPR prediction", inner_band=True,
+            title=f"KANLLPR predictions (grid={self.grid_size}, layers={self.layers})",
+        )  # fmt: skip
         return plt.gcf()
 
     def uncertainty_metrics(self, X, y):

@@ -71,6 +71,7 @@ import numpy as onp
 
 from pycse.sklearn.mip import Affine, MIPExportMixin, MIPNetwork, ReLU, StdSpec
 from pycse.sklearn.optimizers import run_optimizer
+from pycse.sklearn._plotstyle import plot_prediction
 
 os.environ["JAX_ENABLE_X64"] = "True"
 jax.config.update("jax_enable_x64", True)
@@ -500,8 +501,8 @@ class DPOSE(MIPExportMixin, BaseEstimator, RegressorMixin):
         """Visualize predictions with uncertainty bands.
 
         Args:
-            X: Input features, shape (n_samples, n_features).
-               For 1D input, will be used as x-axis.
+            X: Input features, shape (n_samples, n_features). One column draws
+               the prediction curve; several columns draw a parity plot.
             y: True target values.
             distribution: If True, plot individual ensemble members.
             ax: Matplotlib axis (optional). If None, uses current axis.
@@ -511,49 +512,13 @@ class DPOSE(MIPExportMixin, BaseEstimator, RegressorMixin):
         """
         if ax is None:
             ax = plt.gca()
-
-        # Get predictions with calibrated uncertainties
+        X = onp.asarray(X)
         mp, se = self.predict(X, return_std=True)
-
-        # For line plots, need to sort by X
-        X_plot = X.ravel()
-        sort_idx = np.argsort(X_plot)
-        X_sorted = X_plot[sort_idx]
-        mp_sorted = mp[sort_idx]
-        se_sorted = se[sort_idx]
-
-        # Plot in correct z-order (back to front):
-
-        # 1. Uncertainty band (background, lowest z-order)
-        ax.fill_between(
-            X_sorted,
-            mp_sorted - 2 * se_sorted,
-            mp_sorted + 2 * se_sorted,
-            alpha=0.3,
-            color="red",
-            label="±2σ (95% CI)",
-            zorder=1,
-        )
-
-        # 2. Individual ensemble members (if requested, middle layer)
-        if distribution:
-            P = self.nn_.apply(self.optpars_, X)
-            P_sorted = P[sort_idx, :]
-            # Plot all members at once (more efficient) with very low alpha
-            ax.plot(X_sorted, P_sorted, "k-", alpha=0.05, linewidth=0.5, zorder=2)
-
-        # 3. Mean prediction line (middle-front, should be visible)
-        ax.plot(X_sorted, mp_sorted, "r-", label="mean prediction", linewidth=2.5, zorder=3)
-
-        # 4. Data points (front, highest z-order so always visible)
-        ax.plot(X_plot, y, "b.", label="data", alpha=0.7, markersize=8, zorder=4)
-
-        ax.set_xlabel("X")
-        ax.set_ylabel("y")
-        ax.legend()
-        ax.set_title(f"DPOSE Predictions (n_ensemble={self.layers[-1]})")
-        ax.grid(True, alpha=0.3)
-
+        members = onp.asarray(self.nn_.apply(self.optpars_, X)) if distribution else None
+        plot_prediction(
+            ax, X, y, mp, se, label="mean prediction", members=members,
+            title=f"DPOSE predictions (n_ensemble={self.layers[-1]})",
+        )  # fmt: skip
         return plt.gcf()
 
     def uncertainty_metrics(self, X, y):

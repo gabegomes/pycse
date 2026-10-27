@@ -53,29 +53,15 @@ os.environ["JAX_ENABLE_X64"] = "True"
 jax.config.update("jax_enable_x64", True)
 
 # Plot colors: ink tokens for text and chrome, categorical slots 1-3 for series.
-_INK = "#0b0b0b"
-_INK_2 = "#52514e"
-_MUTED = "#898781"
-_GRID = "#e1e0d9"
-_BASELINE = "#c3c2b7"
-_SURFACE = "#fcfcfb"
-_SERIES = ("#2a78d6", "#eb6834", "#1baf7a")
-_PX = 0.75  # one CSS pixel in points
-
-
-def _style_axes(ax, grid=True):
-    """Hairline, recessive axes: no top/right spines, solid hairline grid."""
-    ax.set_facecolor(_SURFACE)
-    for side in ("top", "right"):
-        ax.spines[side].set_visible(False)
-    for side in ("left", "bottom"):
-        ax.spines[side].set_color(_BASELINE)
-        ax.spines[side].set_linewidth(_PX)
-    ax.tick_params(colors=_MUTED, labelcolor=_INK_2, length=0)
-    ax.grid(False)
-    if grid:
-        ax.grid(axis="y", color=_GRID, linewidth=_PX, linestyle="-")
-        ax.set_axisbelow(True)
+from pycse.sklearn._plotstyle import BASELINE as _BASELINE  # noqa: E402
+from pycse.sklearn._plotstyle import GRID as _GRID  # noqa: E402,F401
+from pycse.sklearn._plotstyle import INK as _INK  # noqa: E402
+from pycse.sklearn._plotstyle import INK_2 as _INK_2  # noqa: E402
+from pycse.sklearn._plotstyle import MUTED as _MUTED  # noqa: E402
+from pycse.sklearn._plotstyle import PX as _PX  # noqa: E402
+from pycse.sklearn._plotstyle import SERIES as _SERIES  # noqa: E402
+from pycse.sklearn._plotstyle import SURFACE as _SURFACE  # noqa: E402
+from pycse.sklearn._plotstyle import style_axes as _style_axes  # noqa: E402
 
 
 def feature_std(X):

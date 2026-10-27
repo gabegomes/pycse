@@ -92,6 +92,7 @@ import numpy as onp
 
 from pycse.sklearn.mip import Affine, MIPExportMixin, MIPNetwork, ReLU, StdSpec
 from pycse.sklearn.optimizers import run_optimizer
+from pycse.sklearn._plotstyle import plot_prediction
 
 # Enable 64-bit precision for better numerical stability
 os.environ["JAX_ENABLE_X64"] = "True"
@@ -638,18 +639,20 @@ class KfoldNN(MIPExportMixin, BaseEstimator, RegressorMixin):
             "converged": bool(self.state_.iter_num < self.maxiter_),
         }
 
-    def plot(self, X, y, distribution=False):
+    def plot(self, X, y, distribution=False, ax=None):
         """Create visualization of predictions with uncertainty bands.
 
         Parameters
         ----------
         X : array-like of shape (n_samples, n_features)
-            Input features (typically training or test data).
+            Input features. One column draws the prediction curve; several
+            columns draw a parity plot.
         y : array-like of shape (n_samples,)
             True target values.
         distribution : bool, default=False
-            If True, plot all individual predictions from each output neuron
-            (shows ensemble diversity). If False, only show mean ± 2std bands.
+            If True, also draw every output neuron's prediction as a faint line.
+        ax : matplotlib axis, optional
+            Axis to plot on. If None, uses the current axis.
 
         Returns
         -------
@@ -661,45 +664,21 @@ class KfoldNN(MIPExportMixin, BaseEstimator, RegressorMixin):
         RuntimeError
             If model has not been fitted yet.
 
-        Examples
-        --------
-        >>> import matplotlib.pyplot as plt
-        >>>
-        >>> # Basic plot with confidence bands
-        >>> fig = model.plot(X_train, y_train)
-        >>> plt.show()
-        >>>
-        >>> # Plot showing full distribution
-        >>> fig = model.plot(X_train, y_train, distribution=True)
-        >>> plt.title("K-fold NN with Ensemble Distribution")
-        >>> plt.show()
-
         Notes
         -----
-        The plot includes:
-        - Blue points: actual data
-        - Solid line: mean prediction
-        - Dashed lines: ±2 standard deviations (~95% interval)
-        - Faint lines (if distribution=True): individual neuron predictions
+        The plot shows the data as neutral dots, the mean prediction as a line
+        and ``mean ± 2 std`` as a wash (about a 95% interval).
         """
         if not self.is_fitted:
             raise RuntimeError("Model must be fitted before plotting. Call fit() first.")
-
-        P = self.nn_.apply(self.optpars_, X)
-        mp = P.mean(axis=1)
-        se = P.std(axis=1)
-
-        plt.plot(X, y, "b.", label="data")
-        plt.plot(X, mp, label="mean")
-        plt.plot(X, mp + 2 * se, "k--")
-        plt.plot(X, mp - 2 * se, "k--", label="+/- 2std")
-
-        if distribution:
-            plt.plot(X, P, alpha=0.2)
-
-        plt.xlabel("X")
-        plt.ylabel("y")
-        plt.legend()
+        if ax is None:
+            ax = plt.gca()
+        X = onp.asarray(X)
+        P = onp.asarray(self.nn_.apply(self.optpars_, X))
+        plot_prediction(
+            ax, X, y, P.mean(axis=1), P.std(axis=1), label="mean prediction",
+            members=P if distribution else None, title="K-fold NN predictions",
+        )  # fmt: skip
         return plt.gcf()
 
     def __repr__(self):
