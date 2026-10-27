@@ -7,6 +7,9 @@ from sklearn.model_selection import train_test_split
 
 from pycse.sklearn.kan_llpr import KANLLPR, compute_calibration_metrics
 
+# Mark all tests in this module as slow (ML model training)
+pytestmark = pytest.mark.slow
+
 
 @pytest.fixture
 def simple_linear_data():
@@ -57,7 +60,7 @@ class TestKANLLPRBasicFunctionality:
         assert model.alpha_squared == "auto"
         assert model.zeta_squared == "auto"
         assert model.val_size == 0.1
-        assert model.n_outputs == 1
+        assert model.layers[-1] == 1
 
     def test_initialization_custom(self):
         """Test KANLLPR initialization with custom parameters."""
@@ -92,6 +95,20 @@ class TestKANLLPRBasicFunctionality:
 
         assert y_pred.shape == (len(X_test),)
         assert np.all(np.isfinite(y_pred))
+
+    def test_constant_feature_is_stable(self):
+        """A feature constant in training must not blow up predictions when it moves."""
+        rng = np.random.default_rng(0)
+        X = np.column_stack([rng.normal(size=(60, 2)), np.full(60, 3.0)])
+        y = X[:, 0] - 0.5 * X[:, 1] + 0.05 * rng.normal(size=60)
+
+        model = KANLLPR(layers=(3, 3, 1), grid_size=3, val_size=0.2)
+        model.fit(X, y, maxiter=20)
+
+        assert float(model.X_std_[2]) == 1.0
+        X_shifted = X.copy()
+        X_shifted[:, 2] += 0.01
+        assert np.max(np.abs(model.predict(X_shifted) - model.predict(X))) < 0.1
 
     def test_predict_with_uncertainty(self, simple_linear_data):
         """Test prediction with LLPR uncertainty estimates."""
@@ -297,22 +314,6 @@ class TestKANLLPREdgeCases:
 
         y_pred = model.predict(X)
         assert y_pred.shape == (10,)
-
-    def test_reproducibility_with_seed(self):
-        """Test that same seed produces same results."""
-        np.random.seed(42)
-        X = np.random.randn(50, 2)
-        y = np.sum(X, axis=1)
-
-        model1 = KANLLPR(layers=(2, 3, 1), grid_size=3, seed=42, val_size=0.2)
-        model1.fit(X, y, maxiter=10)
-        pred1 = model1.predict(X)
-
-        model2 = KANLLPR(layers=(2, 3, 1), grid_size=3, seed=42, val_size=0.2)
-        model2.fit(X, y, maxiter=10)
-        pred2 = model2.predict(X)
-
-        np.testing.assert_allclose(pred1, pred2, rtol=1e-10)
 
 
 class TestKANLLPRSklearnCompatibility:

@@ -52,8 +52,10 @@ from sklearn.neural_network._base import ACTIVATIONS
 import numpy as np
 import matplotlib.pyplot as plt
 
+from pycse.sklearn.mip import Affine, MIPExportMixin, MIPNetwork, ReLU, std_from_covariance
 
-class NeuralNetworkBLR(BaseEstimator, RegressorMixin):
+
+class NeuralNetworkBLR(MIPExportMixin, BaseEstimator, RegressorMixin):
     """sklearn-compatible neural network with Bayesian Regression in last layer.
 
     The idea is you fit a neural network and replace the last linear layer with
@@ -69,7 +71,6 @@ class NeuralNetworkBLR(BaseEstimator, RegressorMixin):
         """
         self.nn = nn
         self.br = br
-        self.calibration_factor = 1.0  # For post-hoc calibration
 
     def _feat(self, X):
         """Return neural network features for X."""
@@ -108,6 +109,8 @@ class NeuralNetworkBLR(BaseEstimator, RegressorMixin):
         """
         import warnings
 
+        self.calibration_factor_ = 1.0
+
         # Suppress numerical warnings during training
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
@@ -117,6 +120,10 @@ class NeuralNetworkBLR(BaseEstimator, RegressorMixin):
 
             # Stage 2: Bayesian linear regression on features
             self.br.fit(self._feat(X), y)
+
+        # Number of training samples, needed for the intercept variance term
+        # in _predict_std when the Bayesian regressor fits an intercept.
+        self.n_train_ = int(np.asarray(X).shape[0])
 
         # Stage 3: Post-hoc calibration if validation data provided
         if val_X is not None and val_y is not None:
@@ -143,24 +150,24 @@ class NeuralNetworkBLR(BaseEstimator, RegressorMixin):
             print("\n⚠ WARNING: Uncertainties are near zero!")
             print(f"  Mean uncertainty: {mean_std:.2e}")
             print("  Skipping calibration (using α = 1.0)")
-            self.calibration_factor = 1.0
+            self.calibration_factor_ = 1.0
             return
 
         # Calibration factor: ratio of empirical to predicted variance
         alpha_sq = np.mean(errs**2) / np.mean(y_std**2)
-        self.calibration_factor = float(np.sqrt(alpha_sq))
+        self.calibration_factor_ = float(np.sqrt(alpha_sq))
 
         # Check for numerical issues
-        if not np.isfinite(self.calibration_factor):
-            print(f"\n⚠ WARNING: Calibration failed (α = {self.calibration_factor})")
+        if not np.isfinite(self.calibration_factor_):
+            print(f"\n⚠ WARNING: Calibration failed (α = {self.calibration_factor_})")
             print("  Skipping calibration (using α = 1.0)")
-            self.calibration_factor = 1.0
+            self.calibration_factor_ = 1.0
             return
 
-        print(f"\nCalibration factor α = {self.calibration_factor:.4f}")
-        if self.calibration_factor > 1.5:
+        print(f"\nCalibration factor α = {self.calibration_factor_:.4f}")
+        if self.calibration_factor_ > 1.5:
             print("  ⚠ Model is overconfident (α > 1.5)")
-        elif self.calibration_factor < 0.7:
+        elif self.calibration_factor_ < 0.7:
             print("  ⚠ Model is underconfident (α < 0.7)")
         else:
             print("  ✓ Model is well-calibrated")
@@ -181,16 +188,100 @@ class NeuralNetworkBLR(BaseEstimator, RegressorMixin):
         # Suppress numerical warnings during prediction
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
-            result = self.br.predict(self._feat(X), return_std=return_std)
+            feat = self._feat(X)
+            result = self.br.predict(feat, return_std=return_std)
 
         if return_std:
-            y_pred, y_std = result
+            y_pred, _ = result
+            y_std = self._predict_std(feat)
             # Apply calibration if available
-            if hasattr(self, "calibration_factor") and self.calibration_factor != 1.0:
-                y_std = y_std * self.calibration_factor
+            if hasattr(self, "calibration_factor_") and self.calibration_factor_ != 1.0:
+                y_std = y_std * self.calibration_factor_
             return y_pred, y_std
         else:
             return result
+
+    def mip_network(self):
+        """Return the trained model as a ``MIPNetwork`` for MIP export.
+
+        Requires an ``MLPRegressor`` with ``activation='relu'`` (or ``'identity'``).
+        The prediction is the Bayesian regressor's linear model on the last hidden
+        layer, and the std (when the regressor exposes ``sigma_`` and ``alpha_``) is
+        the same posterior predictive std as ``predict(return_std=True)``, a
+        second-order cone in the features. See ``pycse.sklearn.mip``.
+        """
+        if not hasattr(self.nn, "coefs_") or not hasattr(self.br, "coef_"):
+            raise ValueError("Fit the model before exporting it.")
+        if self.nn.activation not in ("relu", "identity"):
+            raise ValueError(
+                "MIP export requires MLPRegressor(activation='relu') (piecewise linear); "
+                f"got activation={self.nn.activation!r}."
+            )
+
+        layers = []
+        for W, b in zip(self.nn.coefs_[:-1], self.nn.intercepts_[:-1]):
+            layers.append(Affine(W, b))
+            if self.nn.activation == "relu":
+                layers.append(ReLU())
+        coef = np.asarray(self.br.coef_, dtype=float).reshape(-1, 1)
+        layers.append(Affine(coef, np.atleast_1d(self.br.intercept_)))
+
+        br = self.br
+        std = None
+        if hasattr(br, "sigma_") and hasattr(br, "alpha_"):
+            n_feat = coef.shape[0]
+            keep = np.arange(n_feat)
+            if hasattr(br, "threshold_lambda") and br.sigma_.shape[0] != n_feat:
+                keep = np.flatnonzero(br.lambda_ < br.threshold_lambda)
+            cov = np.zeros((n_feat, n_feat))
+            cov[np.ix_(keep, keep)] = br.sigma_
+
+            fit_intercept = getattr(br, "fit_intercept", False)
+            offset = br.X_offset_ if fit_intercept and hasattr(br, "X_offset_") else None
+            d = 1.0 / br.alpha_
+            n = getattr(self, "n_train_", None)
+            if fit_intercept and n:
+                d += 1.0 / (br.alpha_ * n)
+            cf = float(getattr(self, "calibration_factor_", 1.0))
+            std = [std_from_covariance(cov, len(layers) - 2, scale=cf, offset=offset, d=d)]
+        return MIPNetwork(layers, std=std)
+
+    def _predict_std(self, feat):
+        """Posterior predictive standard deviation of the Bayesian last layer.
+
+        sklearn's ``BayesianRidge`` / ``ARDRegression`` compute the posterior
+        covariance ``sigma_`` of the coefficients on *centered* features when
+        ``fit_intercept=True``, but ``predict(return_std=True)`` applies it to
+        the *uncentered* features, ``x @ sigma_ @ x``. Neural-network features
+        (e.g. ReLU/tanh activations) have large non-zero means, so that term is
+        dominated by the feature offset and the returned std is inflated and
+        nearly constant. Here we use the centered features and add the variance
+        of the fitted intercept (the mean of y, ``1 / (alpha_ * n)``) instead:
+
+            var(x) = (x - x_off) @ sigma_ @ (x - x_off) + 1 / (alpha_ n) + 1 / alpha_
+
+        With ``fit_intercept=False`` this reduces to sklearn's formula. Estimators
+        that do not expose ``sigma_``/``alpha_`` fall back to their own
+        ``predict(return_std=True)``.
+        """
+        br = self.br
+        if not (hasattr(br, "sigma_") and hasattr(br, "alpha_")):
+            return br.predict(feat, return_std=True)[1]
+
+        feat = np.asarray(feat, dtype=float)
+        fit_intercept = getattr(br, "fit_intercept", False)
+        if fit_intercept and hasattr(br, "X_offset_"):
+            feat = feat - br.X_offset_
+        if hasattr(br, "threshold_lambda") and br.sigma_.shape[0] != feat.shape[1]:
+            # ARDRegression keeps sigma_ only for the non-pruned features
+            feat = feat[:, br.lambda_ < br.threshold_lambda]
+
+        var = np.einsum("ij,jk,ik->i", feat, br.sigma_, feat) + 1.0 / br.alpha_
+        if fit_intercept:
+            n = getattr(self, "n_train_", None)
+            if n:
+                var = var + 1.0 / (br.alpha_ * n)
+        return np.sqrt(np.maximum(var, 0.0))
 
     def report(self):
         """Print model diagnostics."""
@@ -209,8 +300,8 @@ class NeuralNetworkBLR(BaseEstimator, RegressorMixin):
         print(f"    Alpha (precision): {self.br.alpha_:.6f}")
         print(f"    Lambda (noise): {self.br.lambda_:.6f}")
         print(f"    Scores available: {len(self.br.scores_) if hasattr(self.br, 'scores_') else 0}")
-        if hasattr(self, "calibration_factor"):
-            print(f"  Calibration: α = {self.calibration_factor:.4f}")
+        if hasattr(self, "calibration_factor_"):
+            print(f"  Calibration: α = {self.calibration_factor_:.4f}")
 
     def plot(self, X, y, ax=None):
         """Visualize predictions with uncertainty bands.

@@ -27,7 +27,7 @@ Example usage:
     from sklearn.model_selection import train_test_split
     x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2, random_state=42)
 
-    # Train with DPOSE (uses CRPS loss and BFGS optimizer by default)
+    # Train with DPOSE (uses CRPS loss and L-BFGS by default)
     from pycse.sklearn.dpose import DPOSE
     model = DPOSE(layers=(1, 15, 32))
     model.fit(x_train, y_train, val_X=x_val, val_y=y_val)
@@ -67,6 +67,9 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from flax import linen as nn
 from flax.linen.initializers import xavier_uniform
 
+import numpy as onp
+
+from pycse.sklearn.mip import Affine, MIPExportMixin, MIPNetwork, ReLU, StdSpec
 from pycse.sklearn.optimizers import run_optimizer
 
 os.environ["JAX_ENABLE_X64"] = "True"
@@ -103,7 +106,7 @@ class _NN(nn.Module):
         return x
 
 
-class DPOSE(BaseEstimator, RegressorMixin):
+class DPOSE(MIPExportMixin, BaseEstimator, RegressorMixin):
     """DPOSE: Direct Propagation of Shallow Ensembles.
 
     A shallow ensemble neural network where only the last layer differs across
@@ -148,26 +151,25 @@ class DPOSE(BaseEstimator, RegressorMixin):
             min_sigma: Minimum standard deviation for numerical stability (default: 1e-3).
                       Prevents division by zero when ensemble members are nearly identical.
             optimizer: Optimization algorithm (default: 'bfgs'). Options:
-                      - 'bfgs': BFGS (quasi-Newton, recommended for smooth objectives)
-                      - 'lbfgs': Limited-memory BFGS (for larger problems)
+                      - 'bfgs', 'lbfgs': L-BFGS with a line search
+                        (see pycse.sklearn.optimizers.run_lbfgs)
+                      - 'adam_cosine': Adam with a cosine-decay schedule (what
+                        'bfgs' used to run)
                       - 'adam': Adam (adaptive learning rate)
+                      - 'adamw': AdamW (Adam with weight decay)
                       - 'sgd': Stochastic gradient descent
                       - 'muon': Muon (orthogonalized momentum, state-of-the-art 2024)
-                      - 'lbfgsb': L-BFGS-B (with box constraints)
-                      - 'nonlinear_cg': Nonlinear conjugate gradient
                       - 'gradient_descent': Basic gradient descent
+                      - 'lbfgsb', 'nonlinear_cg': legacy jaxopt names, run as
+                        L-BFGS (with a UserWarning); no box constraints or
+                        conjugate gradient.
         """
         self.layers = layers
-        self.n_ensemble = layers[-1]
-        self.key = jax.random.PRNGKey(seed)
-        # Handle activation=None by defaulting to ReLU
-        if activation is None:
-            activation = nn.relu
-        self.nn = _NN(layers, activation)
+        self.activation = activation
+        self.seed = seed
         self.loss_type = loss_type
         self.min_sigma = min_sigma
-        self.optimizer = optimizer.lower()
-        self.calibration_factor = 1.0  # Default: no calibration
+        self.optimizer = optimizer
 
     def fit(self, X, y, val_X=None, val_y=None, pretrain_with_mse=None, **kwargs):
         """Fit the DPOSE model with calibrated uncertainty estimation.
@@ -195,6 +197,12 @@ class DPOSE(BaseEstimator, RegressorMixin):
         Returns:
             self: Fitted model.
         """
+        # Create derived objects from constructor params
+        activation = self.activation if self.activation is not None else nn.relu
+        self.nn_ = _NN(self.layers, activation)
+        self.key_ = jax.random.PRNGKey(self.seed)
+        self.calibration_factor_ = 1.0
+
         # Auto-detect if we should pre-train
         if pretrain_with_mse is None:
             pretrain_with_mse = self.loss_type == "nll"
@@ -210,24 +218,17 @@ class DPOSE(BaseEstimator, RegressorMixin):
             print(f"Stage 1: MSE pre-training ({pretrain_maxiter} iterations)")
             print("         → Ensures good predictions before uncertainty calibration")
 
-            # Temporarily switch to MSE
-            original_loss = self.loss_type
-            self.loss_type = "mse"
-
             # Create kwargs for pre-training
             pretrain_kwargs = kwargs.copy()
             pretrain_kwargs["maxiter"] = pretrain_maxiter
 
-            # Pre-train with MSE
-            self._fit_internal(X, y, val_X=None, val_y=None, **pretrain_kwargs)
+            # Pre-train with MSE (pass loss_type override, don't mutate self)
+            self._fit_internal(X, y, val_X=None, val_y=None, loss_type="mse", **pretrain_kwargs)
 
             # Report pre-training results
             y_pred_pretrain = self.predict(X)
             mae_pretrain = np.mean(np.abs(y - y_pred_pretrain))
             print(f"         ✓ Pre-training complete: MAE = {mae_pretrain:.6f}")
-
-            # Restore NLL
-            self.loss_type = original_loss
 
             print("\nStage 2: NLL fine-tuning (uncertainty calibration)")
             print("         → Calibrating uncertainties while maintaining accuracy")
@@ -236,22 +237,27 @@ class DPOSE(BaseEstimator, RegressorMixin):
         # Stage 2: Main training (NLL, CRPS, or MSE)
         return self._fit_internal(X, y, val_X, val_y, **kwargs)
 
-    def _fit_internal(self, X, y, val_X=None, val_y=None, **kwargs):
+    def _fit_internal(self, X, y, val_X=None, val_y=None, loss_type=None, **kwargs):
         """Internal method for actual fitting (used by fit() for each stage).
 
         This is separated out to enable two-stage training for NLL.
+
+        Args:
+            loss_type: Override for self.loss_type (used for MSE pre-training stage).
         """
+        loss_type = loss_type or self.loss_type
+
         # Initialize or reuse parameters
-        if not hasattr(self, "optpars"):
-            params = self.nn.init(self.key, X)  # Dummy input to init
+        if not hasattr(self, "optpars_"):
+            params = self.nn_.init(self.key_, X)  # Dummy input to init
         else:
-            params = self.optpars
+            params = self.optpars_
 
         @jit
         def objective(pars):
             """Loss function with per-sample uncertainty from ensemble spread."""
             # Get ensemble predictions: shape (n_samples, n_ensemble)
-            pY = self.nn.apply(pars, np.asarray(X))
+            pY = self.nn_.apply(pars, np.asarray(X))
 
             # Ensemble statistics
             py = pY.mean(axis=1)  # Predicted mean (n_samples,)
@@ -263,13 +269,13 @@ class DPOSE(BaseEstimator, RegressorMixin):
             # Prediction errors
             errs = np.asarray(y).ravel() - py
 
-            if self.loss_type == "nll":
+            if loss_type == "nll":
                 # Negative Log-Likelihood (Kellner & Ceriotti, Eq. 6)
                 # Penalizes both prediction errors AND miscalibrated uncertainties
                 nll = 0.5 * (errs**2 / sigma**2 + np.log(2 * np.pi * sigma**2))
                 return np.mean(nll)
 
-            elif self.loss_type == "crps":
+            elif loss_type == "crps":
                 # Continuous Ranked Probability Score (Kellner & Ceriotti, Eq. 18)
                 # More robust than NLL, less sensitive to outliers
                 z = errs / sigma
@@ -278,21 +284,19 @@ class DPOSE(BaseEstimator, RegressorMixin):
                 crps = sigma * (z * (2 * Phi_z - 1) + 2 * phi_z - 1 / np.sqrt(np.pi))
                 return np.mean(crps)
 
-            elif self.loss_type == "mse":
+            elif loss_type == "mse":
                 # Simple MSE (no uncertainty training)
                 return np.mean(errs**2)
 
             else:
-                raise ValueError(
-                    f"Unknown loss_type: {self.loss_type}. Use 'nll', 'crps', or 'mse'."
-                )
+                raise ValueError(f"Unknown loss_type: {loss_type}. Use 'nll', 'crps', or 'mse'.")
 
         # Solver configuration
-        maxiter = kwargs.pop("maxiter", 1500)
+        maxiter = kwargs.pop("maxiter", 300)
         tol = kwargs.pop("tol", 1e-3)
 
         # Run optimization using optax-based optimizers
-        self.optpars, self.state = run_optimizer(
+        self.optpars_, self.state_ = run_optimizer(
             self.optimizer, objective, params, maxiter=maxiter, tol=tol, **kwargs
         )
 
@@ -315,7 +319,7 @@ class DPOSE(BaseEstimator, RegressorMixin):
             X: Validation features.
             y: Validation targets.
         """
-        pY = self.nn.apply(self.optpars, np.asarray(X))
+        pY = self.nn_.apply(self.optpars_, np.asarray(X))
         py = pY.mean(axis=1)
         sigma = np.sqrt(pY.var(axis=1) + self.min_sigma**2)
 
@@ -328,30 +332,30 @@ class DPOSE(BaseEstimator, RegressorMixin):
             print(f"  Mean uncertainty: {mean_sigma:.2e} (nearly zero)")
             print(f"  Ensemble spread: {sigma.min():.2e} to {sigma.max():.2e}")
             print("\n  Possible causes:")
-            print(f"    - Ensemble size too small (current: {self.n_ensemble})")
+            print(f"    - Ensemble size too small (current: {self.layers[-1]})")
             print("    - Training with MSE loss (use 'nll' or 'crps')")
             print("    - Model overfit (reduce training iterations)")
             print("\n  Skipping calibration (using α = 1.0)")
-            self.calibration_factor = 1.0
+            self.calibration_factor_ = 1.0
             return
 
         # Calibration factor: ratio of empirical to predicted variance
         alpha_sq = np.mean(errs**2) / np.mean(sigma**2)
-        self.calibration_factor = float(np.sqrt(alpha_sq))
+        self.calibration_factor_ = float(np.sqrt(alpha_sq))
 
         # Check for numerical issues
-        if not np.isfinite(self.calibration_factor):
-            print(f"\n⚠ WARNING: Calibration failed (α = {self.calibration_factor})")
+        if not np.isfinite(self.calibration_factor_):
+            print(f"\n⚠ WARNING: Calibration failed (α = {self.calibration_factor_})")
             print(f"  Mean error²: {np.mean(errs**2):.6f}")
             print(f"  Mean σ²: {np.mean(sigma**2):.6f}")
             print("  Skipping calibration (using α = 1.0)")
-            self.calibration_factor = 1.0
+            self.calibration_factor_ = 1.0
             return
 
-        print(f"\nCalibration factor α = {self.calibration_factor:.4f}")
-        if self.calibration_factor > 1.5:
+        print(f"\nCalibration factor α = {self.calibration_factor_:.4f}")
+        if self.calibration_factor_ > 1.5:
             print("  ⚠ Model is overconfident (α > 1.5)")
-        elif self.calibration_factor < 0.7:
+        elif self.calibration_factor_ < 0.7:
             print("  ⚠ Model is underconfident (α < 0.7)")
         else:
             print("  ✓ Model is well-calibrated")
@@ -360,19 +364,19 @@ class DPOSE(BaseEstimator, RegressorMixin):
         """Print optimization diagnostics."""
         print("Optimization converged:")
         # Handle different state formats from different optimizers
-        if hasattr(self.state, "iter_num"):
-            print(f"  Iterations: {self.state.iter_num}")
-        elif hasattr(self.state, "num_iter"):
-            print(f"  Iterations: {self.state.num_iter}")
+        if hasattr(self.state_, "iter_num"):
+            print(f"  Iterations: {self.state_.iter_num}")
+        elif hasattr(self.state_, "num_iter"):
+            print(f"  Iterations: {self.state_.num_iter}")
 
-        if hasattr(self.state, "value"):
-            print(f"  Final loss: {self.state.value:.6f}")
+        if hasattr(self.state_, "value"):
+            print(f"  Final loss: {self.state_.value:.6f}")
 
         print(f"  Optimizer: {self.optimizer}")
-        print(f"  Ensemble size: {self.n_ensemble}")
+        print(f"  Ensemble size: {self.layers[-1]}")
         print(f"  Loss type: {self.loss_type}")
-        if hasattr(self, "calibration_factor"):
-            print(f"  Calibration: α = {self.calibration_factor:.4f}")
+        if hasattr(self, "calibration_factor_"):
+            print(f"  Calibration: α = {self.calibration_factor_:.4f}")
 
     def predict(self, X, return_std=False):
         """Make predictions with uncertainty estimates.
@@ -386,14 +390,14 @@ class DPOSE(BaseEstimator, RegressorMixin):
             uncertainties: Standard deviation (if return_std=True), shape (n_samples,).
         """
         X = np.atleast_2d(X)
-        P = self.nn.apply(self.optpars, X)
+        P = self.nn_.apply(self.optpars_, X)
 
         mean_pred = P.mean(axis=1)
         std_pred = np.sqrt(P.var(axis=1) + self.min_sigma**2)
 
         # Apply post-hoc calibration if available
-        if hasattr(self, "calibration_factor") and self.calibration_factor != 1.0:
-            std_pred = std_pred * self.calibration_factor
+        if hasattr(self, "calibration_factor_") and self.calibration_factor_ != 1.0:
+            std_pred = std_pred * self.calibration_factor_
 
         if return_std:
             return mean_pred, std_pred
@@ -420,7 +424,39 @@ class DPOSE(BaseEstimator, RegressorMixin):
             ensemble_predictions: Full ensemble output, shape (n_samples, n_ensemble).
         """
         X = np.atleast_2d(X)
-        return self.nn.apply(self.optpars, X)
+        return self.nn_.apply(self.optpars_, X)
+
+    def mip_network(self):
+        """Return the trained model as a ``MIPNetwork`` for MIP export.
+
+        Requires the ReLU activation (the default). The mean prediction is the
+        average of the ensemble members, and the std is
+        ``calibration_factor * sqrt(var(members) + min_sigma**2)``, a second-order
+        cone in the members. See ``pycse.sklearn.mip`` and ``to_pyomo()``.
+        """
+        if not hasattr(self, "optpars_"):
+            raise ValueError("Fit the model before exporting it.")
+        if self.activation not in (None, nn.relu):
+            raise ValueError(
+                "MIP export requires DPOSE(activation=nn.relu) (piecewise linear); "
+                f"got {getattr(self.activation, '__name__', self.activation)}."
+            )
+
+        params = self.optpars_["params"]
+        dense = [params[f"Dense_{i}"] for i in range(len(params))]
+        layers = []
+        for i, p in enumerate(dense):
+            layers.append(Affine(onp.asarray(p["kernel"]), onp.asarray(p["bias"])))
+            if i < len(dense) - 1:
+                layers.append(ReLU())
+
+        m = layers[-1].n_out
+        layers.append(Affine(onp.full((m, 1), 1.0 / m), onp.zeros(1)))
+
+        cf = float(getattr(self, "calibration_factor_", 1.0))
+        A = cf / onp.sqrt(m) * (onp.eye(m) - onp.full((m, m), 1.0 / m))
+        std = StdSpec(tap=len(layers) - 2, A=A, d=(cf * self.min_sigma) ** 2)
+        return MIPNetwork(layers, std=[std])
 
     def __call__(self, X, return_std=False, distribution=False):
         """Execute the model (alternative interface to predict).
@@ -434,18 +470,18 @@ class DPOSE(BaseEstimator, RegressorMixin):
             If distribution=False: predictions (and uncertainties if return_std=True).
             If distribution=True: full ensemble predictions, shape (n_samples, n_ensemble).
         """
-        if not hasattr(self, "optpars"):
+        if not hasattr(self, "optpars_"):
             raise Exception("You need to fit the model first.")
 
         X = np.atleast_2d(X)
-        P = self.nn.apply(self.optpars, X)
+        P = self.nn_.apply(self.optpars_, X)
 
         if distribution:
             # Return full ensemble
             if return_std:
                 se = np.sqrt(P.var(axis=1) + self.min_sigma**2)
-                if hasattr(self, "calibration_factor") and self.calibration_factor != 1.0:
-                    se = se * self.calibration_factor
+                if hasattr(self, "calibration_factor_") and self.calibration_factor_ != 1.0:
+                    se = se * self.calibration_factor_
                 return (P, se)
             else:
                 return P
@@ -454,8 +490,8 @@ class DPOSE(BaseEstimator, RegressorMixin):
             mean_pred = P.mean(axis=1)
             if return_std:
                 std_pred = np.sqrt(P.var(axis=1) + self.min_sigma**2)
-                if hasattr(self, "calibration_factor") and self.calibration_factor != 1.0:
-                    std_pred = std_pred * self.calibration_factor
+                if hasattr(self, "calibration_factor_") and self.calibration_factor_ != 1.0:
+                    std_pred = std_pred * self.calibration_factor_
                 return (mean_pred, std_pred)
             else:
                 return mean_pred
@@ -501,7 +537,7 @@ class DPOSE(BaseEstimator, RegressorMixin):
 
         # 2. Individual ensemble members (if requested, middle layer)
         if distribution:
-            P = self.nn.apply(self.optpars, X)
+            P = self.nn_.apply(self.optpars_, X)
             P_sorted = P[sort_idx, :]
             # Plot all members at once (more efficient) with very low alpha
             ax.plot(X_sorted, P_sorted, "k-", alpha=0.05, linewidth=0.5, zorder=2)
@@ -515,7 +551,7 @@ class DPOSE(BaseEstimator, RegressorMixin):
         ax.set_xlabel("X")
         ax.set_ylabel("y")
         ax.legend()
-        ax.set_title(f"DPOSE Predictions (n_ensemble={self.n_ensemble})")
+        ax.set_title(f"DPOSE Predictions (n_ensemble={self.layers[-1]})")
         ax.grid(True, alpha=0.3)
 
         return plt.gcf()

@@ -543,3 +543,126 @@ class TestCLIEdgeCases:
 
                                 # Should have made exactly 10 attempts (0-9 range)
                                 assert mock_get.call_count == 10
+
+
+class TestCLICommandNames:
+    """The documented command names (SKILL.md) must be the real ones."""
+
+    @pytest.mark.parametrize("group", ["mcp", "skill"])
+    def test_install_uninstall_names(self, group):
+        """`pycse mcp install` / `pycse skill install` are the visible names."""
+        from pycse.cli import pycse
+
+        result = CliRunner().invoke(pycse, [group, "--help"])
+        assert result.exit_code == 0
+        commands = result.output.split("Commands:")[1].split()
+        assert "install" in commands
+        assert "uninstall" in commands
+        # old names still work but are hidden
+        assert f"install-{group}" not in result.output
+        assert f"uninstall-{group}" not in result.output
+
+    @pytest.mark.parametrize("group", ["mcp", "skill"])
+    @pytest.mark.parametrize("name", ["install", "uninstall"])
+    def test_old_names_are_hidden_aliases(self, group, name):
+        """`install-mcp` etc. still run the same callback."""
+        from pycse import cli
+
+        grp = cli.pycse.commands[group]
+        new = grp.commands[name]
+        old = grp.commands[f"{name}-{group}"]
+        assert old.hidden
+        assert not new.hidden
+        assert old.callback is new.callback
+
+    def test_mcp_install_via_documented_name(self, tmp_path):
+        """`pycse mcp install` writes the Claude Desktop config."""
+        import json
+        from pycse import cli
+
+        cfg = tmp_path / "claude_desktop_config.json"
+        with patch.object(cli, "get_mcp_config_path", return_value=str(cfg)):
+            with patch("shutil.which", return_value="/bin/pycse_mcp"):
+                for args in (["mcp", "install"], ["mcp", "install-mcp"]):
+                    cfg.unlink(missing_ok=True)
+                    result = CliRunner().invoke(cli.pycse, args)
+                    assert result.exit_code == 0, result.output
+                    data = json.loads(cfg.read_text())
+                    assert data["mcpServers"]["pycse"] == {"command": "/bin/pycse_mcp"}
+
+    def test_skill_md_documents_real_commands(self):
+        """Every `pycse <group> <cmd>` in SKILL.md must resolve."""
+        import pathlib
+        import re
+        import pycse as pkg
+        from pycse.cli import pycse
+
+        text = (pathlib.Path(pkg.__file__).parent / "skill" / "SKILL.md").read_text()
+        found = re.findall(r"^pycse (mcp|skill) (\S+)", text, flags=re.M)
+        assert found
+        for group, name in found:
+            assert name in pycse.commands[group].commands, (group, name)
+
+    def test_skill_install_copies_directory(self, tmp_path):
+        """`pycse skill install` copies SKILL.md and its reference files, replacing old ones."""
+        from pycse import cli
+
+        dest = tmp_path / ".claude" / "skills" / "pycse"
+        with patch("pathlib.Path.home", return_value=tmp_path):
+            result = CliRunner().invoke(cli.pycse, ["skill", "install"])
+            assert result.exit_code == 0, result.output
+            assert (dest / "SKILL.md").exists()
+            assert (dest / "reference" / "regression.md").exists()
+
+            stale = dest / "stale.md"
+            stale.write_text("old")
+            result = CliRunner().invoke(cli.pycse, ["skill", "install"], input="y\n")
+            assert result.exit_code == 0, result.output
+            assert not stale.exists()
+            assert (dest / "SKILL.md").exists()
+
+
+class TestSkillContent:
+    """SKILL.md must be a valid skill whose links resolve."""
+
+    @staticmethod
+    def _skill_dir():
+        import pathlib
+        import pycse as pkg
+
+        return pathlib.Path(pkg.__file__).parent / "skill"
+
+    def test_frontmatter(self):
+        """name and description meet the Agent Skills limits."""
+        import re
+
+        text = (self._skill_dir() / "SKILL.md").read_text()
+        m = re.match(r"---\nname: (.+)\ndescription: (.+)\n---\n", text)
+        assert m, "SKILL.md must start with name/description frontmatter"
+        name, description = m.groups()
+        assert re.fullmatch(r"[a-z0-9-]{1,64}", name)
+        assert 0 < len(description) <= 1024
+        assert len(text.splitlines()) < 500
+
+    def test_reference_links_resolve(self):
+        """Every relative markdown link in the skill points to an existing file."""
+        import re
+
+        skill_dir = self._skill_dir()
+        for md in skill_dir.rglob("*.md"):
+            for target in re.findall(r"\]\(([^)#]+)\)", md.read_text()):
+                if "://" in target:
+                    continue
+                assert (md.parent / target).exists(), (md.name, target)
+
+    def test_launch_help_does_not_claim_default(self):
+        """Bare `pycse` shows help; launch must not claim to be the default."""
+        from pycse.cli import pycse
+
+        runner = CliRunner()
+        assert "default command" not in runner.invoke(pycse, ["--help"]).output
+        with patch("subprocess.run") as mock_run, patch("subprocess.Popen") as mock_popen:
+            result = runner.invoke(pycse, [])
+        assert "Usage" in result.output
+        mock_run.assert_not_called()
+        mock_popen.assert_not_called()

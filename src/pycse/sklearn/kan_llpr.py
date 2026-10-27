@@ -32,7 +32,7 @@ Requires: flax, optax, jax, scikit-learn
 import os
 
 import jax
-from jax import jit, vmap
+from jax import jit
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
@@ -41,7 +41,8 @@ from sklearn.model_selection import train_test_split
 from flax import linen as nn
 
 from pycse.sklearn.optimizers import run_optimizer
-from pycse.sklearn.kan import KANLayer
+from pycse.sklearn.kan import KANLayer, feature_std, kan_default_input_bounds, kan_mip_layers
+from pycse.sklearn.mip import MIPExportMixin, MIPNetwork, llpr_std
 
 os.environ["JAX_ENABLE_X64"] = "True"
 jax.config.update("jax_enable_x64", True)
@@ -114,7 +115,7 @@ class _KANNWithFeatures(nn.Module):
         return x
 
 
-class KANLLPR(BaseEstimator, RegressorMixin):
+class KANLLPR(MIPExportMixin, BaseEstimator, RegressorMixin):
     """KAN with Last-Layer Prediction Rigidity for uncertainty quantification.
 
     This model combines Kolmogorov-Arnold Networks (learnable spline activations)
@@ -194,8 +195,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         self.spline_order = spline_order
         self.grid_range = grid_range
         self.seed = seed
-        self.key = jax.random.PRNGKey(seed)
-        self.optimizer = optimizer.lower()
+        self.optimizer = optimizer
         self.l1_spline = l1_spline
         self.l1_activation = l1_activation
         self.entropy_reg = entropy_reg
@@ -203,44 +203,28 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         self.alpha_squared = alpha_squared
         self.zeta_squared = zeta_squared
         self.val_size = val_size
-        self.n_outputs = layers[-1]
-
-        # Create the network
-        self.nn = _KANNWithFeatures(
-            layers=layers,
-            grid_size=grid_size,
-            spline_order=spline_order,
-            grid_range=grid_range,
-            base_activation=base_activation,
-        )
-
-        # Normalization parameters (set during fit)
-        self.X_mean_ = None
-        self.X_std_ = None
-        self.y_mean_ = None
-        self.y_std_ = None
 
     def _normalize_X(self, X):
         """Normalize input features."""
-        if self.X_mean_ is not None and self.X_std_ is not None:
+        if hasattr(self, "X_mean_") and hasattr(self, "X_std_"):
             return (X - self.X_mean_) / (self.X_std_ + 1e-8)
         return X
 
     def _normalize_y(self, y):
         """Normalize target values."""
-        if self.y_mean_ is not None and self.y_std_ is not None:
+        if hasattr(self, "y_mean_") and hasattr(self, "y_std_"):
             return (y - self.y_mean_) / (self.y_std_ + 1e-8)
         return y
 
     def _denormalize_y(self, y):
         """Denormalize predictions."""
-        if self.y_mean_ is not None and self.y_std_ is not None:
+        if hasattr(self, "y_mean_") and hasattr(self, "y_std_"):
             return y * self.y_std_ + self.y_mean_
         return y
 
     def _denormalize_std(self, std):
         """Denormalize standard deviations."""
-        if self.y_std_ is not None:
+        if hasattr(self, "y_std_"):
             return std * self.y_std_
         return std
 
@@ -270,11 +254,22 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         if y.ndim == 1:
             y = y.reshape(-1, 1)
 
-        if y.shape[1] != self.n_outputs:
+        n_outputs = self.layers[-1]
+        if y.shape[1] != n_outputs:
             raise ValueError(
-                f"Target has {y.shape[1]} outputs but model expects {self.n_outputs}. "
+                f"Target has {y.shape[1]} outputs but model expects {n_outputs}. "
                 f"Set layers[-1]={y.shape[1]} to match."
             )
+
+        # Create derived objects from constructor params
+        key = jax.random.PRNGKey(self.seed)
+        self.nn_ = _KANNWithFeatures(
+            layers=self.layers,
+            grid_size=self.grid_size,
+            spline_order=self.spline_order,
+            grid_range=self.grid_range,
+            base_activation=self.base_activation,
+        )
 
         # Train/validation split for calibration
         if self.val_size > 0:
@@ -291,7 +286,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
 
         # Store normalization parameters
         self.X_mean_ = jnp.mean(X_train, axis=0)
-        self.X_std_ = jnp.std(X_train, axis=0)
+        self.X_std_ = feature_std(X_train)
         self.y_mean_ = jnp.mean(y_train, axis=0)
         self.y_std_ = jnp.std(y_train, axis=0)
 
@@ -300,7 +295,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         y_norm = self._normalize_y(y_train)
 
         # Initialize parameters
-        params = self.nn.init(self.key, X_norm)
+        params = self.nn_.init(key, X_norm)
 
         # Store regularization params for closure
         l1_spline = self.l1_spline
@@ -310,7 +305,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         @jit
         def objective(pars):
             """Loss function with optional regularization."""
-            pY = self.nn.apply(pars, X_norm)
+            pY = self.nn_.apply(pars, X_norm)
 
             # MSE loss
             errs = y_norm - pY
@@ -341,10 +336,10 @@ class KANLLPR(BaseEstimator, RegressorMixin):
             return loss + reg_loss
 
         # Run optimization
-        maxiter = kwargs.pop("maxiter", 1500)
+        maxiter = kwargs.pop("maxiter", 300)
         tol = kwargs.pop("tol", 1e-3)
 
-        self.optpars, self.state = run_optimizer(
+        self.optpars_, self.state_ = run_optimizer(
             self.optimizer, objective, params, maxiter=maxiter, tol=tol, **kwargs
         )
 
@@ -357,16 +352,16 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         else:
             # Set default values as arrays (one per output)
             if self.alpha_squared == "auto":
-                self.alpha_squared_ = jnp.ones(self.n_outputs)
+                self.alpha_squared_ = jnp.ones(self.layers[-1])
             elif np.isscalar(self.alpha_squared):
-                self.alpha_squared_ = jnp.full(self.n_outputs, self.alpha_squared)
+                self.alpha_squared_ = jnp.full(self.layers[-1], self.alpha_squared)
             else:
                 self.alpha_squared_ = jnp.array(self.alpha_squared)
 
             if self.zeta_squared == "auto":
-                self.zeta_squared_ = jnp.full(self.n_outputs, 1e-6)
+                self.zeta_squared_ = jnp.full(self.layers[-1], 1e-6)
             elif np.isscalar(self.zeta_squared):
-                self.zeta_squared_ = jnp.full(self.n_outputs, self.zeta_squared)
+                self.zeta_squared_ = jnp.full(self.layers[-1], self.zeta_squared)
             else:
                 self.zeta_squared_ = jnp.array(self.zeta_squared)
 
@@ -383,7 +378,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         X_norm = self._normalize_X(X)
 
         # Extract last-layer features
-        _, features = self.nn.apply(self.optpars, X_norm, return_features=True)
+        _, features = self.nn_.apply(self.optpars_, X_norm, return_features=True)
 
         # Store feature dimension
         self.n_features_ = features.shape[1]
@@ -423,7 +418,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
 
         # Get predictions and features
         X_norm = self._normalize_X(X_val)
-        predictions_norm, features = self.nn.apply(self.optpars, X_norm, return_features=True)
+        predictions_norm, features = self.nn_.apply(self.optpars_, X_norm, return_features=True)
 
         # Normalize y_val for comparison
         y_val_norm = self._normalize_y(y_val)
@@ -436,7 +431,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         alpha_squared_list = []
         zeta_squared_list = []
 
-        for j in range(self.n_outputs):
+        for j in range(self.layers[-1]):
             best_nll = float("inf")
             best_alpha = 1.0
             best_zeta = 1e-6
@@ -473,7 +468,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
                     self.zeta_squared if np.isscalar(self.zeta_squared) else self.zeta_squared[j]
                 )
 
-            if self.n_outputs > 1:
+            if self.layers[-1] > 1:
                 print(
                     f"Output {j}: α²={alpha_squared_list[-1]:.2e}, "
                     f"ζ²={zeta_squared_list[-1]:.2e}, NLL={best_nll:.4f}"
@@ -483,7 +478,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         self.alpha_squared_ = jnp.array(alpha_squared_list)
         self.zeta_squared_ = jnp.array(zeta_squared_list)
 
-        if self.n_outputs == 1:
+        if self.layers[-1] == 1:
             print(
                 f"Calibrated: α²={self.alpha_squared_[0]:.2e}, "
                 f"ζ²={self.zeta_squared_[0]:.2e}, NLL={best_nll:.4f}"
@@ -512,35 +507,65 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         reg_cov = self.cov_matrix_ + zeta_squared * jnp.eye(self.n_features_)
         inv_cov = jnp.linalg.inv(reg_cov)
 
-        # Vectorized computation
-        @jit
-        def compute_single_uncertainty(f):
-            return alpha_squared * f.T @ inv_cov @ f
+        # alpha^2 f^T inv_cov f for every row. A single vectorized expression: a jitted
+        # closure defined here would be recompiled on every call (once per candidate in
+        # the calibration grid search).
+        return alpha_squared * jnp.einsum("ij,jk,ik->i", features, inv_cov, features)
 
-        uncertainties = vmap(compute_single_uncertainty)(features)
+    def mip_network(self):
+        """Return the trained model as a ``MIPNetwork`` for MIP export.
 
-        return uncertainties
+        Requires ``spline_order=1`` and ``base_activation="linear"`` (see
+        ``KAN.mip_network``). Output j has the LLPR std
+        ``y_std_j * sqrt(alpha_j f^T (F^T F + zeta_j I)^{-1} f)`` on the features
+        ``f`` entering the last layer, a second-order cone.
+        """
+        if not hasattr(self, "optpars_"):
+            raise ValueError("Fit the model before exporting it.")
+        layers = kan_mip_layers(
+            self.optpars_, self.grid_size, self.spline_order, self.grid_range, self.base_activation
+        )
+        std = None
+        if hasattr(self, "cov_matrix_"):
+            # The features are the output of the second-to-last layer (or the inputs).
+            std = llpr_std(
+                self.cov_matrix_, self.alpha_squared_, self.zeta_squared_, len(layers) - 2
+            )
+        net = MIPNetwork(layers, std=std)
+        net = net.scale_inputs(np.asarray(self.X_mean_), np.asarray(self.X_std_) + 1e-8)
+        return net.scale_outputs(np.asarray(self.y_mean_), np.asarray(self.y_std_))
 
-    def predict(self, X):
-        """Make predictions.
+    def _mip_default_input_bounds(self):
+        """The input range covered by the first layer's spline grid."""
+        return kan_default_input_bounds(self.X_mean_, self.X_std_, self.grid_range)
+
+    def predict(self, X, return_std=False):
+        """Make predictions with optional uncertainty estimates.
 
         Parameters
         ----------
         X : array-like of shape (n_samples, n_features)
             Input features.
+        return_std : bool, default=False
+            If True, return standard deviation alongside predictions.
 
         Returns
         -------
         y_pred : array of shape (n_samples,) or (n_samples, n_outputs)
             Predicted values.
+        y_std : array of shape (n_samples,) or (n_samples, n_outputs), optional
+            Standard deviation (only if return_std=True).
         """
+        if return_std:
+            return self.predict_with_uncertainty(X, return_std=True)
+
         X = jnp.atleast_2d(X)
         X_norm = self._normalize_X(X)
-        predictions_norm = self.nn.apply(self.optpars, X_norm)
+        predictions_norm = self.nn_.apply(self.optpars_, X_norm)
         predictions = self._denormalize_y(predictions_norm)
 
         # Squeeze if single output
-        if self.n_outputs == 1:
+        if self.layers[-1] == 1:
             predictions = predictions.squeeze(axis=1)
 
         return np.array(predictions)
@@ -569,13 +594,13 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         X_norm = self._normalize_X(X)
 
         # Get predictions and features
-        predictions_norm, features = self.nn.apply(self.optpars, X_norm, return_features=True)
+        predictions_norm, features = self.nn_.apply(self.optpars_, X_norm, return_features=True)
 
         # Compute uncertainties for each output with its own calibration
         n_samples = X.shape[0]
-        variances_norm = jnp.zeros((n_samples, self.n_outputs))
+        variances_norm = jnp.zeros((n_samples, self.layers[-1]))
 
-        for j in range(self.n_outputs):
+        for j in range(self.layers[-1]):
             alpha_j = self.alpha_squared_[j]
             zeta_j = self.zeta_squared_[j]
             var_j = self._compute_uncertainties_batch(features, alpha_j, zeta_j)
@@ -585,14 +610,10 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         predictions = self._denormalize_y(predictions_norm)
 
         # Denormalize uncertainties (variance scales with y_std² per output)
-        if self.y_std_ is not None:
-            # Scale each output's variance by its own y_std²
-            variances = variances_norm * (self.y_std_**2)
-        else:
-            variances = variances_norm
+        variances = variances_norm * (self.y_std_**2)
 
         # Squeeze if single output
-        if self.n_outputs == 1:
+        if self.layers[-1] == 1:
             predictions = predictions.squeeze(axis=1)
             variances = variances.squeeze(axis=1)
 
@@ -645,21 +666,21 @@ class KANLLPR(BaseEstimator, RegressorMixin):
             if self.entropy_reg > 0:
                 print(f"    Entropy: {self.entropy_reg}")
 
-        if hasattr(self, "state"):
-            if hasattr(self.state, "iter_num"):
-                print(f"  Iterations: {self.state.iter_num}")
-            if hasattr(self.state, "value"):
-                print(f"  Final loss: {self.state.value:.6f}")
-            if hasattr(self.state, "converged"):
-                print(f"  Converged: {self.state.converged}")
+        if hasattr(self, "state_"):
+            if hasattr(self.state_, "iter_num"):
+                print(f"  Iterations: {self.state_.iter_num}")
+            if hasattr(self.state_, "value"):
+                print(f"  Final loss: {self.state_.value:.6f}")
+            if hasattr(self.state_, "converged"):
+                print(f"  Converged: {self.state_.converged}")
 
         if hasattr(self, "alpha_squared_"):
-            if self.n_outputs == 1:
+            if self.layers[-1] == 1:
                 print(f"  LLPR α²: {self.alpha_squared_[0]:.2e}")
                 print(f"  LLPR ζ²: {self.zeta_squared_[0]:.2e}")
             else:
                 print("  LLPR calibration (per output):")
-                for j in range(self.n_outputs):
+                for j in range(self.layers[-1]):
                     print(
                         f"    Output {j}: α²={self.alpha_squared_[j]:.2e}, ζ²={self.zeta_squared_[j]:.2e}"
                     )
@@ -781,7 +802,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         per_output_metrics = []
         all_z_scores = []
 
-        for j in range(self.n_outputs):
+        for j in range(self.layers[-1]):
             errs_j = y[:, j] - mp[:, j]
             se_j = se[:, j]
 
@@ -835,7 +856,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
             "fraction_within_3_sigma": actual_fractions[2],
         }
 
-        if self.n_outputs > 1:
+        if self.layers[-1] > 1:
             result["per_output"] = per_output_metrics
 
         return result
@@ -856,8 +877,8 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         print("KANLLPR UNCERTAINTY QUANTIFICATION METRICS")
         print("=" * 50)
 
-        if self.n_outputs > 1:
-            print(f"(Aggregated over {self.n_outputs} outputs)")
+        if self.layers[-1] > 1:
+            print(f"(Aggregated over {self.layers[-1]} outputs)")
 
         print("\nPrediction Accuracy:")
         print(f"  RMSE: {metrics['rmse']:.6f}")
@@ -877,7 +898,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         print(f"  Within 3σ: {metrics['fraction_within_3_sigma']:.3f} (expected: 0.997)")
 
         # Per-output metrics for multi-output models
-        if self.n_outputs > 1 and "per_output" in metrics:
+        if self.layers[-1] > 1 and "per_output" in metrics:
             print("\nPer-Output Metrics:")
             for j, m in enumerate(metrics["per_output"]):
                 print(
@@ -901,7 +922,7 @@ class KANLLPR(BaseEstimator, RegressorMixin):
         -------
         Predictions (and uncertainties if requested).
         """
-        if not hasattr(self, "optpars"):
+        if not hasattr(self, "optpars_"):
             raise Exception("You need to fit the model first.")
 
         if return_std:
@@ -985,7 +1006,7 @@ if __name__ == "__main__":
         seed=42,
     )
 
-    model.fit(X_train, y_train, maxiter=1000)
+    model.fit(X_train, y_train, maxiter=5000)
 
     # Report
     model.report()
