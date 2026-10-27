@@ -39,13 +39,13 @@ jobs:
 
       - name: Install package with dependencies
         run: |
-          uv pip install --system -e ".[test]"
+          uv sync --frozen --extra test --python ${{ matrix.python-version }}
 
       - name: Run slow tests batch 2 (second half)
         run: |
           # Run second half of slow tests using pytest-split
           # --splits=2 --group=2 runs second half of tests
-          pytest src/pycse/tests -v -m "slow" --cov=src/pycse --cov-report=term-missing --cov-report=xml -n auto --durations=30 --splits=2 --group=2
+          uv run --no-sync pytest src/pycse/tests -v -m "slow" --cov=src/pycse --cov-report=term-missing --cov-report=xml -n auto --durations=30 --splits=2 --group=2
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
