@@ -53,16 +53,16 @@ PR event subscriptions belong to one session at a time. The previous session uns
 
 ## What is NOT done (your job)
 
-1. **Re-execute the Buchwald notebook and commit its outputs.** The Sigman notebook on
-   `claude/kan-viz-style` has fresh outputs from a clean run (exit 0, no errors, 17 figures;
-   committed as an UNVERIFIED checkpoint, see item 2 and 3). The Buchwald notebook still holds
-   the new source with the OLD outputs (stale figures); its clean run was still going in the
-   previous container and is lost with it. Re-run it (setup below), about 15-30 minutes.
+1. **Both notebooks have fresh outputs from a clean run** (exit 0, no cell errors, 17 figures
+   each), committed as UNVERIFIED checkpoints. Only the Buchwald summary table (cell 14) was
+   spot-checked: it matches the previous run exactly (KAN 0.7025 / 10.83%). Nothing else has
+   been compared, and no clean-run figure has been looked at. If you change any plotting cell,
+   re-run (setup below), about 15-30 minutes.
 2. **Verify numbers did not change.** Compare every stream output against the notebooks branch
    (`claude/improve-kan-visualizations-vkP9h`) with a small script: the only expected
    differences are removed emoji (`Note:` instead of the warning sign) and figure titles.
 3. **Look at every figure** (extract the PNGs from the executed notebook, open them), in both
-   notebooks. None of the clean-run figures has been looked at yet. The workers did not
+   notebooks. The workers did not
    re-check the final renders of Buchwald cells 18, 37, 52, the cell 45 swatch change, or
    Sigman cell 44. Check against the acceptance list in `viz_brief.md`.
 4. **Gates:** `uvx ruff@0.16.7 format --check src/pycse` and `uvx ruff@0.16.7 check src/pycse`
