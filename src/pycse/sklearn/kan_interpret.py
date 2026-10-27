@@ -221,8 +221,8 @@ class PartialEffect:
     def n_unique(self):
         return int(len(np.unique(np.round(self.support, 6))))
 
-    def shape(self, linear_r2=LINEAR_R2):
-        return classify_shape(self.x_std, self.y, linear_r2=linear_r2)
+    def shape(self, linear_r2=LINEAR_R2, scale=None):
+        return classify_shape(self.x_std, self.y, linear_r2=linear_r2, scale=scale)
 
     def nonlinearity(self):
         return nonlinearity_score(self.x_std, self.y)
@@ -386,48 +386,97 @@ def nonlinearity_score(x, y):
     return float(np.sqrt(np.mean((y - line) ** 2)) / y.std())
 
 
-def classify_shape(x, y, linear_r2=LINEAR_R2):
-    """Label a response curve: Constant, Linear, U-shaped, Saturating, Sigmoidal, Threshold or Complex.
+def _r2(y, fit):
+    return 1 - np.sum((y - fit) ** 2) / (np.sum((y - y.mean()) ** 2) + 1e-12)
 
-    "Linear" means a straight line explains at least ``linear_r2`` of the variance
-    of ``y`` over the grid; the other labels come from the sign pattern of the
-    first and second derivatives of the standardized curve.
+
+def _logistic(x, a, b, c, w):
+    return a + b / (1.0 + np.exp(-(x - c) / w))
+
+
+def classify_shape(x, y, linear_r2=LINEAR_R2, scale=None):
+    """Label a response curve by the simplest template that explains it.
+
+    Labels: ``Constant``, ``Linear``, ``Step``, ``Saturating``, ``Monotone``,
+    ``U-shaped``, ``Inverted U`` or ``Complex``.
+
+    Three templates are fit by least squares: a line, a parabola and a logistic
+    step. "Linear" means the line explains at least ``linear_r2`` of the variance
+    of ``y`` over the grid. Otherwise the better of the parabola and the step is
+    taken if it reaches the same criterion: a parabola with its vertex inside the
+    grid is "U-shaped" or "Inverted U", one that flattens at an end is
+    "Saturating", one that does not is "Monotone"; a step whose width is under
+    15 % of the grid is "Step", a wider one that levels off inside the grid is
+    "Saturating", else "Monotone". A curve that no template explains is
+    "Monotone" when it never reverses direction and "Complex" otherwise. Spline wiggles on a plateau therefore do not change the label as
+    long as the template still explains 90 % of the curve.
+
+    Args:
+        x, y: the grid and the curve.
+        linear_r2: the criterion for every template.
+        scale: when given, a curve whose range is below 5 % of ``scale`` (for
+            example the sd of the target) is "Constant".
 
     Returns:
         ``(label, one-line interpretation)``.
     """
+    from scipy.optimize import curve_fit
+
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
-    if y.std() < 1e-8:
+    if y.std() < 1e-8 or (scale is not None and np.ptp(y) < 0.05 * scale):
         return "Constant", "No effect"
     y_norm = (y - y.mean()) / y.std()
-    slope, intercept = np.polyfit(x, y_norm, 1)
-    r2_linear = 1 - np.sum((y_norm - (slope * x + intercept)) ** 2) / (
-        np.sum((y_norm - y_norm.mean()) ** 2) + 1e-12
-    )
-    if r2_linear >= linear_r2:
+    line = np.polyval(np.polyfit(x, y_norm, 1), x)
+    if _r2(y_norm, line) >= linear_r2:
         return "Linear", "Constant marginal effect"
-    dy = np.gradient(y_norm)
-    d2y = np.gradient(dy)
-    monotonicity = np.abs(np.sum(np.sign(dy))) / len(dy)
-    has_extremum = bool(np.any(dy[:-1] * dy[1:] < 0))
-    curvature = float(np.mean(np.abs(d2y)))
-    if has_extremum and not monotonicity > 0.5:
-        return "U-shaped", "Optimal intermediate range"
-    if curvature > 0.3 and monotonicity > 0.7:
-        if np.abs(dy[-5:]).mean() < np.abs(dy[:5]).mean() * 0.3:
+    lo, hi = x.min(), x.max()
+    span = hi - lo
+    # parabola
+    qa, qb, qc = np.polyfit(x, y_norm, 2)
+    r2_quad = _r2(y_norm, np.polyval((qa, qb, qc), x))
+    vertex = -qb / (2 * qa) if abs(qa) > 1e-12 else np.inf
+    # logistic step
+    r2_step, width, center = -np.inf, np.nan, np.nan
+    try:
+        rising = y_norm[-1] >= y_norm[0]
+        p0 = [y_norm.min() if rising else y_norm.max(), np.ptp(y_norm) * (1 if rising else -1),
+              x[np.argmin(np.abs(y_norm - y_norm.mean()))], 0.1 * span]  # fmt: skip
+        popt, _ = curve_fit(
+            _logistic, x, y_norm, p0=p0, maxfev=4000,
+            bounds=([-np.inf, -np.inf, lo - span, 1e-3 * span], [np.inf, np.inf, hi + span, 2 * span]),
+        )  # fmt: skip
+        r2_step, center, width = _r2(y_norm, _logistic(x, *popt)), popt[2], popt[3]
+    except (RuntimeError, ValueError):
+        pass
+    yn = (y_norm - y_norm.min()) / np.ptp(y_norm)
+    q = max(2, len(yn) // 4)
+    flat_end = abs(yn[-1] - yn[-q]) < 0.1  # levels off over the last quarter of the grid
+    net_over_tv = abs(yn[-1] - yn[0]) / (np.sum(np.abs(np.diff(yn))) + 1e-12)
+    if max(r2_quad, r2_step) < linear_r2:
+        if net_over_tv >= 0.95:
+            return "Monotone", "Curved but one-directional"
+        return "Complex", "Multi-regime behavior"
+    if r2_step >= r2_quad:
+        if width <= 0.15 * span and lo + 0.05 * span < center < hi - 0.05 * span:
+            return "Step", "Threshold transition"
+        if flat_end:
             return "Saturating", "Diminishing returns"
-        return "Sigmoidal", "Critical threshold transition"
-    if monotonicity > 0.9:
-        return "Threshold", "Critical value required"
-    return "Complex", "Multi-regime behavior"
+        return "Monotone", "Curved but one-directional"
+    if lo + 0.1 * span < vertex < hi - 0.1 * span:
+        if qa > 0:
+            return "U-shaped", "Minimum at an intermediate value"
+        return "Inverted U", "Optimum at an intermediate value"
+    if flat_end:
+        return "Saturating", "Diminishing returns"
+    return "Monotone", "Curved but one-directional"
 
 
-def shape_table(effects, linear_r2=LINEAR_R2):
+def shape_table(effects, linear_r2=LINEAR_R2, scale=None):
     """One row per :class:`PartialEffect`: shape, interpretation, nonlinearity, support size."""
     rows = []
     for f, pe in effects.items():
-        label, note = pe.shape(linear_r2)
+        label, note = pe.shape(linear_r2, scale=scale)
         rows.append(
             {
                 "Feature": f,

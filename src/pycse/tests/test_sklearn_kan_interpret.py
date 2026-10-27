@@ -34,7 +34,16 @@ def test_classify_shape_known_curves():
     x = np.linspace(-2, 2, 80)
     assert classify_shape(x, 3 * x + 1)[0] == "Linear"
     assert classify_shape(x, x**2)[0] == "U-shaped"
+    assert classify_shape(x, -(x**2))[0] == "Inverted U"
     assert classify_shape(x, np.full_like(x, 2.0))[0] == "Constant"
+    assert classify_shape(x, 0.01 * x**2, scale=10.0)[0] == "Constant"
+    step = 1 / (1 + np.exp(-x / 0.1))
+    assert classify_shape(x, step)[0] == "Step"
+    assert classify_shape(x, step + 0.01 * np.sin(9 * x))[0] == "Step"  # wiggles on a plateau
+    assert classify_shape(x, 1 - np.exp(-2 * (x + 2)))[0] == "Saturating"
+    assert classify_shape(x, x**3)[0] == "Monotone"
+    assert classify_shape(x, 1 / (1 + np.exp(-x / 0.8)))[0] == "Linear"  # a wide sigmoid is a line here
+    assert classify_shape(x, np.sin(3 * x))[0] == "Complex"
     assert nonlinearity_score(x, 3 * x + 1) < 1e-6
     assert nonlinearity_score(x, x**2) > 0.3
 
