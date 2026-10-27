@@ -53,29 +53,15 @@ os.environ["JAX_ENABLE_X64"] = "True"
 jax.config.update("jax_enable_x64", True)
 
 # Plot colors: ink tokens for text and chrome, categorical slots 1-3 for series.
-_INK = "#0b0b0b"
-_INK_2 = "#52514e"
-_MUTED = "#898781"
-_GRID = "#e1e0d9"
-_BASELINE = "#c3c2b7"
-_SURFACE = "#fcfcfb"
-_SERIES = ("#2a78d6", "#eb6834", "#1baf7a")
-_PX = 0.75  # one CSS pixel in points
-
-
-def _style_axes(ax, grid=True):
-    """Hairline, recessive axes: no top/right spines, solid hairline grid."""
-    ax.set_facecolor(_SURFACE)
-    for side in ("top", "right"):
-        ax.spines[side].set_visible(False)
-    for side in ("left", "bottom"):
-        ax.spines[side].set_color(_BASELINE)
-        ax.spines[side].set_linewidth(_PX)
-    ax.tick_params(colors=_MUTED, labelcolor=_INK_2, length=0)
-    ax.grid(False)
-    if grid:
-        ax.grid(axis="y", color=_GRID, linewidth=_PX, linestyle="-")
-        ax.set_axisbelow(True)
+from pycse.sklearn._plotstyle import BASELINE as _BASELINE  # noqa: E402
+from pycse.sklearn._plotstyle import GRID as _GRID  # noqa: E402,F401
+from pycse.sklearn._plotstyle import INK as _INK  # noqa: E402
+from pycse.sklearn._plotstyle import INK_2 as _INK_2  # noqa: E402
+from pycse.sklearn._plotstyle import MUTED as _MUTED  # noqa: E402
+from pycse.sklearn._plotstyle import PX as _PX  # noqa: E402
+from pycse.sklearn._plotstyle import SERIES as _SERIES  # noqa: E402
+from pycse.sklearn._plotstyle import SURFACE as _SURFACE  # noqa: E402
+from pycse.sklearn._plotstyle import style_axes as _style_axes  # noqa: E402
 
 
 def feature_std(X):
@@ -712,8 +698,14 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
 
         # Get predictions
         mp, se = self.predict(X, return_std=True)
-        mp = np.asarray(mp)
-        se = np.asarray(se)
+        mp = np.asarray(mp).ravel()
+        se = np.asarray(se).ravel()
+        y = y.ravel()
+
+        # Several input columns: no single x axis to draw the curve against, so
+        # show a parity plot (predicted vs observed) with the uncertainty as bars.
+        if X.ndim == 2 and X.shape[1] > 1:
+            return self._plot_parity(ax, y, mp, se)
 
         # For 1D input, sort for line plot
         X_plot = X.ravel()
@@ -776,6 +768,46 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
             color=_INK,
         )
 
+        return plt.gcf()
+
+    def _plot_parity(self, ax, y, mp, se):
+        """Predicted vs observed for multi-column inputs, same styling as ``plot``."""
+        _style_axes(ax)
+        lo, hi = float(min(y.min(), mp.min())), float(max(y.max(), mp.max()))
+        ax.plot([lo, hi], [lo, hi], color=_MUTED, linewidth=_PX, zorder=1, label="y = x")
+        if self.n_ensemble > 1:
+            ax.errorbar(
+                y,
+                mp,
+                yerr=2 * se,
+                fmt="none",
+                ecolor=_INK_2,
+                elinewidth=_PX,
+                capsize=2,
+                alpha=0.6,
+                zorder=2,
+                label="±2σ (95% CI)",
+            )
+        ax.scatter(
+            y,
+            mp,
+            s=(8 * _PX) ** 2,
+            color=_SERIES[0],
+            edgecolors=_SURFACE,
+            linewidths=_PX,
+            alpha=0.8,
+            label="KAN prediction",
+            zorder=3,
+        )
+        ax.set_xlabel("observed y", color=_INK_2)
+        ax.set_ylabel("predicted y", color=_INK_2)
+        ax.legend(frameon=False, labelcolor=_INK_2)
+        ax.set_title(
+            f"KAN parity plot (grid={self.grid_size}, layers={self.layers})",
+            loc="left",
+            fontweight="bold",
+            color=_INK,
+        )
         return plt.gcf()
 
     def uncertainty_metrics(self, X, y):

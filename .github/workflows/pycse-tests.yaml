@@ -43,29 +43,31 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: Install package with dependencies
+      - name: Install package with dependencies (from uv.lock)
         run: |
-          uv pip install --system -e ".[test]"
-          uv pip install --system pytest-testmon
+          # --frozen: install exactly the locked versions so results do not drift
+          # with upstream releases; refresh with `uv lock --upgrade` on purpose.
+          uv sync --frozen --extra test --python ${{ matrix.python-version }}
+          uv pip install pytest-testmon
 
       - name: Run ruff format check
         run: |
           # Pinned: ruff format behavior changes between releases (e.g. 0.15
           # added Markdown code-block formatting), which breaks CI unexpectedly.
           # Keep in sync with .pre-commit-config.yaml.
-          uv pip install --system ruff==0.16.7
-          ruff format --check src/pycse
+          uv pip install ruff==0.16.7
+          uv run --no-sync ruff format --check src/pycse
 
       - name: Run ruff linter
         run: |
-          ruff check src/pycse
+          uv run --no-sync ruff check src/pycse
 
       - name: Run fast tests (affected tests only)
         if: github.event_name == 'pull_request'
         run: |
           # On PRs, run only affected fast tests (exclude slow ML tests)
           # -n auto uses all available CPU cores (2 on ubuntu-latest)
-          pytest src/pycse/tests -v --testmon -m "not slow" -n auto
+          uv run --no-sync pytest src/pycse/tests -v --testmon -m "not slow" -n auto
 
       - name: Run fast tests (full suite with coverage)
         if: github.event_name == 'push'
@@ -73,7 +75,7 @@ jobs:
           # On push, run full fast test suite with coverage (exclude slow ML tests)
           # Slow tests are run in a separate workflow
           # -n auto uses all available CPU cores (2 on ubuntu-latest)
-          pytest src/pycse/tests -v -m "not slow" --cov=src/pycse --cov-report=term-missing --cov-report=xml -n auto --durations=20
+          uv run --no-sync pytest src/pycse/tests -v -m "not slow" --cov=src/pycse --cov-report=term-missing --cov-report=xml -n auto --durations=20
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

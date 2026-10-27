@@ -49,6 +49,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.linalg import cholesky, pinvh, solve_triangular
 from gmr import GMM
+from pycse.sklearn._plotstyle import plot_prediction
 
 
 class NeuralNetworkGMM(BaseEstimator, RegressorMixin):
@@ -296,67 +297,29 @@ class NeuralNetworkGMM(BaseEstimator, RegressorMixin):
     def plot(self, X, y, ax=None):
         """Plot predictions with uncertainty bands.
 
-        Only works for 1D input (or shows first feature if multidimensional).
+        One input column draws the prediction curve; several columns draw a
+        parity plot (predicted vs observed).
 
         Args:
             X: Input features
             y: True targets
             ax: Optional matplotlib axes object
+
+        Returns:
+            The axes.
         """
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 6))
-
-        # Get predictions
+        X = np.asarray(X)
+        y = np.asarray(y)
         y_pred, y_std = self.predict(X, return_std=True)
-
-        # Flatten predictions to 1D (GMM returns 2D arrays)
-        y_pred = y_pred.ravel()
-        y_std = y_std.ravel()
-
-        # Handle multi-dimensional input (use first feature)
-        if X.ndim > 1 and X.shape[1] > 1:
-            X_plot = X[:, 0]
-            print(f"Note: Plotting first feature only (input has {X.shape[1]} features)")
-        else:
-            X_plot = X.ravel()
-
-        # Sort by X for smooth line plots
-        sort_idx = np.argsort(X_plot)
-        X_sorted = X_plot[sort_idx]
-        y_pred_sorted = y_pred[sort_idx]
-        y_std_sorted = y_std[sort_idx]
-
-        # Plot uncertainty band (95% CI)
-        ax.fill_between(
-            X_sorted,
-            y_pred_sorted - 2 * y_std_sorted,
-            y_pred_sorted + 2 * y_std_sorted,
-            alpha=0.3,
-            color="red",
-            label="±2σ (95% CI)",
-            zorder=1,
-        )
-
-        # Plot mean prediction
-        ax.plot(X_sorted, y_pred_sorted, "r-", linewidth=2.5, label="GMM prediction", zorder=3)
-
-        # Plot data points
-        ax.scatter(X_plot, y, alpha=0.5, s=30, color="blue", label="Data", zorder=4)
-
-        # Set y-axis limits: ±20% of data range
-        y_data_min = np.min(y)
-        y_data_max = np.max(y)
-        y_range = y_data_max - y_data_min
-        ax.set_ylim(y_data_min - 0.2 * y_range, y_data_max + 0.2 * y_range)
-
-        ax.set_xlabel("X" if X.ndim == 1 else "X[0]", fontsize=12)
-        ax.set_ylabel("y", fontsize=12)
-        ax.set_title(
-            "Neural Network GMM: Predictions with Uncertainty", fontsize=13, fontweight="bold"
-        )
-        ax.legend(fontsize=10)
-        ax.grid(True, alpha=0.3)
-
+        plot_prediction(
+            ax, X, y, y_pred, y_std, label="GMM prediction",
+            title="Neural network GMM: predictions with uncertainty",
+        )  # fmt: skip
+        if X.ndim == 1 or X.shape[1] == 1:
+            y_range = np.max(y) - np.min(y)
+            ax.set_ylim(np.min(y) - 0.2 * y_range, np.max(y) + 0.2 * y_range)
         plt.tight_layout()
         return ax
 

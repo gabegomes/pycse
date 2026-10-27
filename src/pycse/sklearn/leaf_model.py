@@ -79,6 +79,15 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn import clone
 
 from pycse.sklearn.mip import Leaf, MIPExportMixin, TreeModel, affine_from_predict
+from pycse.sklearn._plotstyle import (
+    INK_2,
+    MUTED,
+    PX,
+    SURFACE,
+    finish_axes,
+    plot_prediction,
+    style_axes,
+)
 
 
 class LeafModelRegressor(MIPExportMixin, DecisionTreeRegressor):
@@ -561,69 +570,53 @@ class LeafModelRegressor(MIPExportMixin, DecisionTreeRegressor):
 
         print("=" * 70)
 
-    def plot(self, X, y, title="LeafModelRegressor Predictions"):
-        """Visualize predictions with uncertainties.
+    def plot(self, X, y, title="LeafModelRegressor predictions"):
+        """Visualize predictions with uncertainties and the residuals.
 
         Parameters
         ----------
         X : array-like, shape (n_samples, n_features)
-            Input data (only 1D supported for visualization)
+            Input data. One column draws the prediction curve; several columns
+            draw a parity plot.
         y : array-like, shape (n_samples,)
             True values
         title : str, optional
             Plot title
+
+        Returns
+        -------
+        matplotlib figure
         """
-        try:
-            import matplotlib.pyplot as plt
-        except ImportError:
-            print("matplotlib is required for plotting")
-            return
+        import matplotlib.pyplot as plt
 
-        if X.shape[1] != 1:
-            print("Plotting only supported for 1D input data")
-            return
-
-        X_plot = X.ravel()
+        X = np.asarray(X)
+        y = np.asarray(y).ravel()
         y_pred, y_std = self.predict(X, return_std=True, warn_extrapolation=False)
+        y_pred, y_std = np.asarray(y_pred).ravel(), np.asarray(y_std).ravel()
 
-        # Create figure
         fig, axes = plt.subplots(2, 1, figsize=(10, 8))
-
-        # Plot 1: Predictions with uncertainties
-        ax = axes[0]
-        ax.scatter(X_plot, y, alpha=0.5, label="True data", s=20)
-        ax.plot(X_plot, y_pred, "r-", label="Predictions", linewidth=2)
-        ax.fill_between(
-            X_plot, y_pred - y_std, y_pred + y_std, alpha=0.3, label="±1 std", color="red"
+        plot_prediction(
+            axes[0], X, y, y_pred, y_std, label="prediction", inner_band=True, title=title
         )
-        ax.fill_between(
-            X_plot,
-            y_pred - 2 * y_std,
-            y_pred + 2 * y_std,
-            alpha=0.2,
-            label="±2 std",
-            color="red",
-        )
-        ax.set_xlabel("X")
-        ax.set_ylabel("y")
-        ax.set_title(title)
-        ax.legend()
-        ax.grid(True, alpha=0.3)
 
-        # Plot 2: Residuals
+        # Residuals against the first input column, with the ±1 std band
         ax = axes[1]
-        residuals = y - y_pred
-        ax.scatter(X_plot, residuals, alpha=0.5, s=20)
-        ax.axhline(y=0, color="k", linestyle="--", alpha=0.5)
-        ax.fill_between(X_plot, -y_std, y_std, alpha=0.3, color="gray", label="±1 std")
-        ax.set_xlabel("X")
-        ax.set_ylabel("Residuals")
-        ax.set_title("Residuals")
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-
-        plt.tight_layout()
-        plt.show()
+        x = X[:, 0] if X.ndim == 2 else X.ravel()
+        order = np.argsort(x)
+        style_axes(ax)
+        ax.fill_between(
+            x[order], -y_std[order], y_std[order], alpha=0.15, color=MUTED, linewidth=0,
+            label="±1 std", zorder=1,
+        )  # fmt: skip
+        ax.axhline(0, color=MUTED, linewidth=PX, zorder=2)
+        ax.scatter(
+            x, y - y_pred, s=(8 * PX) ** 2, color=INK_2, edgecolors=SURFACE, linewidths=PX,
+            alpha=0.8, zorder=3,
+        )  # fmt: skip
+        xlabel = "X" if X.ndim == 1 or X.shape[1] == 1 else "X[0]"
+        finish_axes(ax, "Residuals", xlabel=xlabel, ylabel="y - prediction")
+        fig.tight_layout()
+        return fig
 
     def uncertainty_metrics(self, X, y):
         """Compute uncertainty quantification metrics.

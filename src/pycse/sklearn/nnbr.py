@@ -53,6 +53,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pycse.sklearn.mip import Affine, MIPExportMixin, MIPNetwork, ReLU, std_from_covariance
+from pycse.sklearn._plotstyle import plot_prediction
 
 
 class NeuralNetworkBLR(MIPExportMixin, BaseEstimator, RegressorMixin):
@@ -307,8 +308,8 @@ class NeuralNetworkBLR(MIPExportMixin, BaseEstimator, RegressorMixin):
         """Visualize predictions with uncertainty bands.
 
         Args:
-            X: Input features, shape (n_samples, n_features)
-               For 1D input, will be used as x-axis
+            X: Input features, shape (n_samples, n_features). One column draws
+               the prediction curve; several columns draw a parity plot.
             y: True target values
             ax: Matplotlib axis (optional). If None, uses current axis
 
@@ -317,48 +318,17 @@ class NeuralNetworkBLR(MIPExportMixin, BaseEstimator, RegressorMixin):
         """
         if ax is None:
             ax = plt.gca()
-
-        # Get predictions with calibrated uncertainties
+        X = np.asarray(X)
+        y = np.asarray(y)
         y_pred, y_std = self.predict(X, return_std=True)
-
-        # For line plots, need to sort by X
-        X_plot = X.ravel()
-        sort_idx = np.argsort(X_plot)
-        X_sorted = X_plot[sort_idx]
-        y_pred_sorted = y_pred[sort_idx]
-        y_std_sorted = y_std[sort_idx]
-
-        # Plot in correct z-order (back to front):
-
-        # 1. Uncertainty band (background)
-        ax.fill_between(
-            X_sorted,
-            y_pred_sorted - 2 * y_std_sorted,
-            y_pred_sorted + 2 * y_std_sorted,
-            alpha=0.3,
-            color="red",
-            label="±2σ (95% CI)",
-            zorder=1,
-        )
-
-        # 2. Mean prediction line
-        ax.plot(X_sorted, y_pred_sorted, "r-", label="mean prediction", linewidth=2.5, zorder=3)
-
-        # 3. Data points (front)
-        ax.plot(X_plot, y, "b.", label="data", alpha=0.7, markersize=8, zorder=4)
-
-        # Set y-axis limits: ±20% of data range
-        y_data_min = np.min(y)
-        y_data_max = np.max(y)
-        y_range = y_data_max - y_data_min
-        ax.set_ylim(y_data_min - 0.2 * y_range, y_data_max + 0.2 * y_range)
-
-        ax.set_xlabel("X")
-        ax.set_ylabel("y")
-        ax.legend()
-        ax.set_title(f"NNBR Predictions (NN: {self.nn.hidden_layer_sizes})")
-        ax.grid(True, alpha=0.3)
-
+        plot_prediction(
+            ax, X, y, y_pred, y_std, label="mean prediction",
+            title=f"NNBR predictions (NN: {self.nn.hidden_layer_sizes})",
+        )  # fmt: skip
+        if X.ndim == 1 or X.shape[1] == 1:
+            # ±20% of the data range keeps a wide uncertainty band from dominating
+            y_range = np.max(y) - np.min(y)
+            ax.set_ylim(np.min(y) - 0.2 * y_range, np.max(y) + 0.2 * y_range)
         return plt.gcf()
 
     def uncertainty_metrics(self, X, y):
