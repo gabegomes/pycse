@@ -236,7 +236,16 @@ def run_first_order(
     # Initialize
     opt_state = opt.init(init_params)
     params = init_params
-    grad_fn = jax.grad(loss_fn)
+
+    # One jitted step: gradient, optimizer update and parameter update. Running the
+    # update eagerly dispatches every optax op separately on each iteration, which
+    # leaks XLA JIT state; Muon on a KAN with a few thousand parameters hit
+    # "LLVM compilation error: Cannot allocate memory" after a few hundred steps.
+    @jax.jit
+    def step(params, opt_state):
+        grad = jax.grad(loss_fn)(params)
+        updates, opt_state = opt.update(grad, opt_state, params)
+        return optax.apply_updates(params, updates), opt_state, optax.global_norm(grad)
 
     # Run optimization loop
     iter_num = 0
@@ -244,14 +253,12 @@ def run_first_order(
     grad_norm = float("inf")
 
     for i in range(maxiter):
-        grad = grad_fn(params)
-        updates, opt_state = opt.update(grad, opt_state, params)
-        params = optax.apply_updates(params, updates)
+        params, opt_state, step_grad_norm = step(params, opt_state)
         iter_num = i + 1
 
         # Check convergence (every 10 iterations to save compute)
         if i % 10 == 0:
-            grad_norm = float(optax.global_norm(grad))
+            grad_norm = float(step_grad_norm)
             if grad_norm < tol:
                 converged = True
                 break

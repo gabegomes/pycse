@@ -80,3 +80,27 @@ def test_adam_cosine_is_old_schedule():
     params, state = run_optimizer("adam_cosine", _loss, P0, maxiter=300)
     assert np.all(np.isfinite(params))
     assert state.value < _loss(P0)
+
+
+@pytest.mark.parametrize("name", ["adam", "adamw", "sgd", "muon"])
+def test_first_order_step_is_jitted(name):
+    """Every first-order optimizer runs through one jitted step and still converges."""
+    params, state = run_optimizer(name, _loss, P0, maxiter=400, learning_rate=0.05)
+    assert np.all(np.isfinite(params))
+    assert state.value < _loss(P0)
+    assert np.isfinite(state.grad_norm)
+
+
+@pytest.mark.slow
+def test_muon_long_run_on_kan():
+    """Regression: Muon on a KAN used to die with an LLVM allocation error after a
+    few hundred eager steps (optax ops dispatched one by one leak JIT state)."""
+    from pycse.sklearn.kan import KAN
+
+    rng = np.random.default_rng(0)
+    X = rng.normal(size=(600, 12))
+    y = np.sin(X[:, 0]) + X[:, 1] ** 2
+    model = KAN(layers=(12, 6, 1), grid_size=5, spline_order=3, optimizer="muon")
+    model.fit(X, y, maxiter=1500, learning_rate=1e-2)
+    assert model.state_.iter_num == 1500
+    assert np.isfinite(model.state_.value)
