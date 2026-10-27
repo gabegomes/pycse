@@ -16,41 +16,44 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
     <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
     <script kind="utterances">
 
@@ -92,6 +95,12 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-4H7VFJKEZY');
             </script>
@@ -101,6 +110,12 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-4H7VFJKEZY');
             </script>
@@ -108,40 +123,37 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'blog/math';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Linear algebra" href="linear-algebra.html" />
     <link rel="prev" title="Basic python usage" href="basic-python.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
   
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -149,7 +161,6 @@ commentsRunWhenDOMLoaded(addUtterances);
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -157,15 +168,59 @@ commentsRunWhenDOMLoaded(addUtterances);
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
     </header>
   
 
@@ -174,7 +229,8 @@ commentsRunWhenDOMLoaded(addUtterances);
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -204,21 +260,17 @@ commentsRunWhenDOMLoaded(addUtterances);
     
     
     <img src="../_static/pycse.png" class="logo__image only-light" alt="pycse - Python Computations in Science and Engineering - Home"/>
-    <script>document.write(`<img src="../_static/pycse.png" class="logo__image only-dark" alt="pycse - Python Computations in Science and Engineering - Home"/>`);</script>
+    <img src="../_static/pycse.png" class="logo__image only-dark pst-js-only" alt="pycse - Python Computations in Science and Engineering - Home"/>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script></div>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -291,6 +343,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="../docs/mip.html">Optimizing over machine-learned models with MIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../docs/execution-statistics.html">Build statistics</a></li>
 </ul>
 
@@ -300,9 +353,14 @@ commentsRunWhenDOMLoaded(addUtterances);
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -498,7 +556,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 <button onclick="toggleFullScreen()"
-  class="btn btn-sm btn-fullscreen-button"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
   title="Fullscreen mode"
   data-bs-placement="bottom" data-bs-toggle="tooltip"
 >
@@ -512,25 +570,17 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
 </div></div>
@@ -552,7 +602,7 @@ document.write(`
                 <h2> Contents </h2>
             </div>
             <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numeric-derivatives-by-differences">Numeric derivatives by differences</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#vectorized-numeric-derivatives">Vectorized numeric derivatives</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#point-vs-4-point-numerical-derivatives">2-point vs. 4-point numerical derivatives</a></li>
@@ -617,21 +667,21 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">These are the brainless way to calculate numerical derivatives. They</span>
 <span class="sd">work well for very smooth data. they are surprisingly fast even up to</span>
 <span class="sd">10000 points in the vector.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.78</span><span class="p">,</span> <span class="mf">0.79</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="n">dy_analytical</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">lets use a forward difference method:</span>
 <span class="sd">that works up until the last point, where there is not</span>
 <span class="sd">a forward difference to use. there, we use a backward difference.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">tf1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">dyf</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -640,9 +690,9 @@ document.write(`
 <span class="c1"># set last element by backwards difference</span>
 <span class="n">dyf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Forward difference took </span><span class="si">%f</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tf1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">" Forward difference took </span><span class="si">%f</span><span class="s2"> seconds"</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tf1</span><span class="p">))</span>
 
-<span class="sd">&quot;&quot;&quot;and now a backwards difference&quot;&quot;&quot;</span>
+<span class="sd">"""and now a backwards difference"""</span>
 <span class="n">tb1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">dyb</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="c1"># set first element by forward difference</span>
@@ -650,9 +700,9 @@ document.write(`
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span>
     <span class="n">dyb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Backward difference took </span><span class="si">%f</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tb1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">" Backward difference took </span><span class="si">%f</span><span class="s2"> seconds"</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tb1</span><span class="p">))</span>
 
-<span class="sd">&quot;&quot;&quot;and now, a centered formula&quot;&quot;&quot;</span>
+<span class="sd">"""and now, a centered formula"""</span>
 <span class="n">tc1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">dyc</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="n">dyc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -660,28 +710,28 @@ document.write(`
     <span class="n">dyc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
 <span class="n">dyc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Centered difference took </span><span class="si">%f</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tc1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">" Centered difference took </span><span class="si">%f</span><span class="s2"> seconds"</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tc1</span><span class="p">))</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">the centered formula is the most accurate formula here</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy_analytical</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;analytical derivative&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dyf</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;forward&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dyb</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;backward&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dyc</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;centered&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy_analytical</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"analytical derivative"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dyf</span><span class="p">,</span> <span class="s2">"--"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"forward"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dyb</span><span class="p">,</span> <span class="s2">"--"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"backward"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dyc</span><span class="p">,</span> <span class="s2">"--"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"centered"</span><span class="p">)</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"lower left"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> Forward difference took 0.000213 seconds
- Backward difference took 0.000192 seconds
- Centered difference took 0.000221 seconds
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> Forward difference took 0.000237 seconds
+ Backward difference took 0.000212 seconds
+ Centered difference took 0.000264 seconds
 </pre></div>
 </div>
-<img alt="../_images/21df04c8ddb0f58ad81bf49260e34009678cc67d5eb567f121d5259a15ee7c8d.png" src="../_images/21df04c8ddb0f58ad81bf49260e34009678cc67d5eb567f121d5259a15ee7c8d.png" />
+<img alt="../_images/20d9e78f4f03d5c9a272f38eeefc8bb4ade1ad4eea84d56cad88d11e32901a91.png" src="../_images/20d9e78f4f03d5c9a272f38eeefc8bb4ade1ad4eea84d56cad88d11e32901a91.png" />
 </div>
 </div>
 </section>
@@ -705,9 +755,9 @@ document.write(`
 <span class="n">dy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
 
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">calculate dy by center differencing using array slices</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">dy2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>  <span class="c1"># we know it will be this size</span>
 <span class="n">dy2</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
@@ -717,15 +767,15 @@ document.write(`
 <span class="n">dy2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy_analytical</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;analytical derivative&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;forward diff&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy2</span><span class="p">,</span> <span class="s2">&quot;k--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;centered diff&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy_analytical</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"analytical derivative"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"forward diff"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy2</span><span class="p">,</span> <span class="s2">"k--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"centered diff"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"lower left"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/64e324b77fee09445347092feada57dfef7a1fe2d14f8ca7e4d42272c9e87ca0.png" src="../_images/64e324b77fee09445347092feada57dfef7a1fe2d14f8ca7e4d42272c9e87ca0.png" />
+<img alt="../_images/2c551d6a15e316d7ac9dfc2e4c42b451ed989ce41c594ba6b116098de27adc34.png" src="../_images/2c551d6a15e316d7ac9dfc2e4c42b451ed989ce41c594ba6b116098de27adc34.png" />
 </div>
 </div>
 </section>
@@ -749,14 +799,14 @@ document.write(`
 <span class="c1"># set last element by backwards difference</span>
 <span class="n">dyf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">calculate dy by 4-point center differencing using array slices</span>
 
 <span class="sd">\frac{y[i-2] - 8y[i-1] + 8[i+1] - y[i+2]}{12h}</span>
 
 <span class="sd">y[0] and y[1] must be defined by lower order methods</span>
 <span class="sd">and y[-1] and y[-2] must be defined by lower order methods</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>  <span class="c1"># we know it will be this size</span>
 <span class="n">h</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># this assumes the points are evenely spaced!</span>
@@ -770,15 +820,15 @@ document.write(`
 
 
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy_analytical</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;analytical derivative&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dyf</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;2pt-forward diff&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="s2">&quot;k--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;4pt-centered diff&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy_analytical</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"analytical derivative"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dyf</span><span class="p">,</span> <span class="s2">"r-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"2pt-forward diff"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="s2">"k--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"4pt-centered diff"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"lower left"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8e892464529587d9df79cb4faca4ba6fbe57bd2df3ed352013d376bda3a3cf2b.png" src="../_images/8e892464529587d9df79cb4faca4ba6fbe57bd2df3ed352013d376bda3a3cf2b.png" />
+<img alt="../_images/cfde8b5373f03b6dfbeb3448d493bd86ba79f88182fefc34eb96ee956febb131.png" src="../_images/cfde8b5373f03b6dfbeb3448d493bd86ba79f88182fefc34eb96ee956febb131.png" />
 </div>
 </div>
 </section>
@@ -796,7 +846,7 @@ document.write(`
 <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">Ca_data</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">Ca_data</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">tspan</span><span class="p">),</span> <span class="s2">&quot;g-&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">tspan</span><span class="p">),</span> <span class="s2">"g-"</span><span class="p">)</span>
 
 <span class="c1"># compute derivatives</span>
 <span class="n">dp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyder</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -806,18 +856,18 @@ document.write(`
 <span class="n">dCdt_numeric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">Ca_data</span><span class="p">,</span> <span class="n">tspan</span><span class="p">)</span>  <span class="c1"># 2-point deriv</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">dCdt_numeric</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;numeric derivative&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">dCdt_fit</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fitted derivative&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">dCdt_numeric</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"numeric derivative"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">dCdt_fit</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"fitted derivative"</span><span class="p">)</span>
 
 <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">tspan</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">tspan</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;resampled derivative&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">"resampled derivative"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c701e03421c99d4eeec65fbe85757412cc088ddf212204801aeb2859cce74cfe.png" src="../_images/c701e03421c99d4eeec65fbe85757412cc088ddf212204801aeb2859cce74cfe.png" />
-<img alt="../_images/c75d8a6414f060de810e2548290ffcac3cbeef879276ec4d54603a94ac81d273.png" src="../_images/c75d8a6414f060de810e2548290ffcac3cbeef879276ec4d54603a94ac81d273.png" />
+<img alt="../_images/a962ef5d2da5221d4f01910443697083b9f6e391a181a13670cf9122d698e977.png" src="../_images/a962ef5d2da5221d4f01910443697083b9f6e391a181a13670cf9122d698e977.png" />
+<img alt="../_images/1571b340186c986490dfe601cc7921335cdf244f1b29b6af725ca5764fdf0afd.png" src="../_images/1571b340186c986490dfe601cc7921335cdf244f1b29b6af725ca5764fdf0afd.png" />
 </div>
 </div>
 <p>You can see a third order polynomial is a reasonable fit here. There are only 6 data points here, so any higher order risks overfitting. Here is the comparison of the numerical derivative and the fitted derivative. We have “resampled” the fitted derivative to show the actual shape. Note the derivative appears to go through a maximum near t = 0.9. In this case, that is probably unphysical as the data is related to the consumption of species A in a reaction. The derivative should increase monotonically to zero. The increase is an artefact of the fitting process. End points are especially sensitive to this kind of error.</p>
@@ -842,7 +892,7 @@ document.write(`
 <span class="n">pars</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">tspan</span><span class="p">,</span> <span class="n">Ca_data</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mf">2.3</span><span class="p">])</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">Ca_data</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="o">*</span><span class="n">pars</span><span class="p">),</span> <span class="s2">&quot;g-&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="o">*</span><span class="n">pars</span><span class="p">),</span> <span class="s2">"g-"</span><span class="p">)</span>
 
 <span class="c1"># analytical derivative</span>
 <span class="n">k</span><span class="p">,</span> <span class="n">Ca0</span> <span class="o">=</span> <span class="n">pars</span>
@@ -851,16 +901,16 @@ document.write(`
 <span class="n">dCdt_res</span> <span class="o">=</span> <span class="o">-</span><span class="n">k</span> <span class="o">*</span> <span class="n">Ca0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">k</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">Ca_data</span><span class="p">,</span> <span class="n">tspan</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;numerical derivative&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">dCdt</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;analytical derivative of fit&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dCdt_res</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;extrapolated&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">Ca_data</span><span class="p">,</span> <span class="n">tspan</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">"numerical derivative"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">dCdt</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"analytical derivative of fit"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dCdt_res</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"extrapolated"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/9ee47a2ee878fc7dbe036347a07924bff7b27ff48e392a14e315cf6754cb656f.png" src="../_images/9ee47a2ee878fc7dbe036347a07924bff7b27ff48e392a14e315cf6754cb656f.png" />
-<img alt="../_images/ae2e58e1545f340e791b9d0142eac2444c5c1a47eadaaa4fa80032d184c7cd45.png" src="../_images/ae2e58e1545f340e791b9d0142eac2444c5c1a47eadaaa4fa80032d184c7cd45.png" />
+<img alt="../_images/76968459cd340140370d950014470799d0d393c53609eea610f5c9228885dd10.png" src="../_images/76968459cd340140370d950014470799d0d393c53609eea610f5c9228885dd10.png" />
+<img alt="../_images/de87855157927e6e01f5d63fad0c7914c13371124c4533e1ec61765a5508a419.png" src="../_images/de87855157927e6e01f5d63fad0c7914c13371124c4533e1ec61765a5508a419.png" />
 </div>
 </div>
 <p>Visually this fit is about the same as a third order polynomial. Note the difference in the derivative though. We can readily extrapolate this derivative and get reasonable predictions of the derivative. That is true in this case because we fitted a physically relevant model for concentration vs. time for an irreversible, first order reaction.</p>
@@ -881,11 +931,11 @@ document.write(`
 <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">dy_analytical</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">http://sci.tech-archive.net/Archive/sci.math/2008-05/msg00401.html</span>
 
 <span class="sd">you can use fft to calculate derivatives!</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="k">if</span> <span class="n">N</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
     <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">N</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
@@ -896,15 +946,15 @@ document.write(`
 
 <span class="n">fd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="mf">1.0</span><span class="n">j</span> <span class="o">*</span> <span class="n">k</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy_analytical</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;analytical der&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fft der&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"function"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dy_analytical</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"analytical der"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"fft der"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"lower left"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8404c69c59f4319184b462dc25aef51b8fd2d057a5b5c7f29482884e175a3ee8.png" src="../_images/8404c69c59f4319184b462dc25aef51b8fd2d057a5b5c7f29482884e175a3ee8.png" />
+<img alt="../_images/320903c3a89835ee602a24bdc789c2d98df3f7a0bed66d3570df4478a7ff0552.png" src="../_images/320903c3a89835ee602a24bdc789c2d98df3f7a0bed66d3570df4478a7ff0552.png" />
 </div>
 </div>
 </section>
@@ -1019,14 +1069,14 @@ f(x) &amp;=&amp;  0, x &lt; 0 \
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c6863e6e3c40b4134ccbbb90efa0860d3f959e07ea9a1e6da4b0ec95ad78f652.png" src="../_images/c6863e6e3c40b4134ccbbb90efa0860d3f959e07ea9a1e6da4b0ec95ad78f652.png" />
+<img alt="../_images/2123bc4ff05ba1d7728f9864c3564cd199e93f2b33197a8f6a00a037afe6a174.png" src="../_images/2123bc4ff05ba1d7728f9864c3564cd199e93f2b33197a8f6a00a037afe6a174.png" />
 </div>
 </div>
 <p>Neither of those methods is convenient. It would be nicer if the function was vectorized, which would allow the direct notation f1([0, 1, 2, 3, 4]). A simple way to achieve this is through the use of logical arrays. We create logical arrays from comparison statements.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">f2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="s2">&quot;fully vectorized version&quot;</span>
+    <span class="s2">"fully vectorized version"</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">+=</span> <span class="p">((</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">x</span>
@@ -1044,7 +1094,7 @@ f(x) &amp;=&amp;  0, x &lt; 0 \
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[0. 0. 1. 0. 0. 0.]
 </pre></div>
 </div>
-<img alt="../_images/c6863e6e3c40b4134ccbbb90efa0860d3f959e07ea9a1e6da4b0ec95ad78f652.png" src="../_images/c6863e6e3c40b4134ccbbb90efa0860d3f959e07ea9a1e6da4b0ec95ad78f652.png" />
+<img alt="../_images/2123bc4ff05ba1d7728f9864c3564cd199e93f2b33197a8f6a00a037afe6a174.png" src="../_images/2123bc4ff05ba1d7728f9864c3564cd199e93f2b33197a8f6a00a037afe6a174.png" />
 </div>
 </div>
 <p>A third approach is to use Heaviside functions. The Heaviside function is defined to be zero for x less than some value, and 0.5 for x=0, and 1 for x &gt;= 0. If you can live with y=0.5 for x=0, you can define a vectorized function in terms of Heaviside functions like this.</p>
@@ -1092,7 +1142,7 @@ f(x) &amp;=&amp;  0, x &lt; 0 \
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c6863e6e3c40b4134ccbbb90efa0860d3f959e07ea9a1e6da4b0ec95ad78f652.png" src="../_images/c6863e6e3c40b4134ccbbb90efa0860d3f959e07ea9a1e6da4b0ec95ad78f652.png" />
+<img alt="../_images/2123bc4ff05ba1d7728f9864c3564cd199e93f2b33197a8f6a00a037afe6a174.png" src="../_images/2123bc4ff05ba1d7728f9864c3564cd199e93f2b33197a8f6a00a037afe6a174.png" />
 </div>
 </div>
 <p>There are many ways to define piecewise functions, and vectorization is not always necessary. The advantages of vectorization are usually notational simplicity and speed; loops in python are usually very slow compared to vectorized functions.</p>
@@ -1143,16 +1193,16 @@ f(x) &amp;=&amp;  0, x &lt; 0 \
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Re1</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;laminar&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Re2</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;turbulent&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Re&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$f_F$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Re1</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"laminar"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Re2</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"turbulent"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Re"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"$f_F$"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/a0c8667a657099dbd388c2e8a2341ccac3e88c4303fc3d02da86226550c694f0.png" src="../_images/a0c8667a657099dbd388c2e8a2341ccac3e88c4303fc3d02da86226550c694f0.png" />
+<img alt="../_images/7ce501839faceebdabe51b6acb22a28b9728599b81119b19a9d66b963aacf6e2.png" src="../_images/7ce501839faceebdabe51b6acb22a28b9728599b81119b19a9d66b963aacf6e2.png" />
 </div>
 </div>
 <p>You can see the discontinuity at Re = 3000. What we need is a method to join these two functions smoothly. We can do that with a sigmoid function.
@@ -1165,25 +1215,31 @@ Sigmoid functions</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;$\sigma(x)$&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"$\sigma(x)$"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/a99569c6caf8a1cf3db0db40d373487118f45602758b08c31d2560848b21edbd.png" src="../_images/a99569c6caf8a1cf3db0db40d373487118f45602758b08c31d2560848b21edbd.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;&gt;:8: SyntaxWarning: invalid escape sequence '\s'
+&lt;&gt;:8: SyntaxWarning: invalid escape sequence '\s'
+/tmp/ipykernel_2559/1604887123.py:8: SyntaxWarning: invalid escape sequence '\s'
+  plt.title("$\sigma(x)$");
+</pre></div>
+</div>
+<img alt="../_images/cf8713dadeebe5e485c2805e156ccb6ee0a7d1788a1720dcf97ec89560e231f9.png" src="../_images/cf8713dadeebe5e485c2805e156ccb6ee0a7d1788a1720dcf97ec89560e231f9.png" />
 </div>
 </div>
 <p>If we have two functions, <span class="math notranslate nohighlight">\(f_1(x)\)</span> and <span class="math notranslate nohighlight">\(f_2(x)\)</span> we want to smoothly join, we do it like this: <span class="math notranslate nohighlight">\(f(x) = (1-\sigma(x))f_1(x) + \sigma(x)f_2(x)\)</span>. There is no formal justification for this form of joining, it is simply a mathematical convenience to get a numerically smooth function. Other functions besides the sigmoid function could also be used, as long as they smoothly transition from 0 to 1, or from 1 to zero.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fanning_friction_factor</span><span class="p">(</span><span class="n">Re</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;combined, continuous correlation for the fanning friction factor.</span>
+<span class="w">    </span><span class="sd">"""combined, continuous correlation for the fanning friction factor.</span>
 <span class="sd">    the alpha parameter is chosen to provide the desired smoothness.</span>
 <span class="sd">    The transition region is about +- 4*alpha. The value 450 was</span>
 <span class="sd">    selected to reasonably match the shape of the correlation</span>
-<span class="sd">    function provided by Morrison (see last section of this file)&quot;&quot;&quot;</span>
+<span class="sd">    function provided by Morrison (see last section of this file)"""</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">Re</span> <span class="o">-</span> <span class="mf">3000.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">450.0</span><span class="p">))</span>
     <span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">fF_laminar</span><span class="p">(</span><span class="n">Re</span><span class="p">)</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">fF_turbulent</span><span class="p">(</span><span class="n">Re</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">f</span>
@@ -1191,15 +1247,15 @@ Sigmoid functions</p>
 
 <span class="n">Re</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
 <span class="n">f</span> <span class="o">=</span> <span class="n">fanning_friction_factor</span><span class="p">(</span><span class="n">Re</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Re</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;smooth transition&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Re&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$f_F$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Re</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"smooth transition"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Re"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"$f_F$"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/dcc07bc657e8aa6c63d54d5a5de890d971ee1c14e317a9b684e4b6b719ea1ec7.png" src="../_images/dcc07bc657e8aa6c63d54d5a5de890d971ee1c14e317a9b684e4b6b719ea1ec7.png" />
+<img alt="../_images/992343e2d5e7bb4849bfe6cea8ffe2369583bf459a5d1e5a79c4c448a31b9357.png" src="../_images/992343e2d5e7bb4849bfe6cea8ffe2369583bf459a5d1e5a79c4c448a31b9357.png" />
 </div>
 </div>
 <p>You can see that away from the transition the combined function is practically equivalent to the original two functions. That is because away from the transition the sigmoid function is 0 or 1. Near Re = 3000 is a smooth transition from one curve to the other curve.</p>
@@ -1230,13 +1286,13 @@ Sigmoid functions</p>
 <span class="n">x</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sigmaD</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"D"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"x"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/fb81ef250134d4035ce67b26258216bd0ae3d4755fd4697033ac20aeff4cd126.png" src="../_images/fb81ef250134d4035ce67b26258216bd0ae3d4755fd4697033ac20aeff4cd126.png" />
+<img alt="../_images/e2ba3eb609b2a6c4033fcee8ed9ab8c44ee3ae8c40cb0c07a1b81b94088e29f4.png" src="../_images/e2ba3eb609b2a6c4033fcee8ed9ab8c44ee3ae8c40cb0c07a1b81b94088e29f4.png" />
 </div>
 </div>
 <p>This is a nice trick to get an analytical function with continuous derivatives for a transition between two constants. You could have the transition occur at a value other than D = 1, as well by changing the argument to the exponential function.</p>
@@ -1305,18 +1361,25 @@ Sigmoid functions</p>
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
 <span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">20</span><span class="p">],</span> <span class="n">line</span> <span class="mi">6</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> 
 <span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 <span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> 
 <span class="ne">----&gt; </span><span class="mi">6</span> <span class="n">i2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> 
 <span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="n">i2</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="nb">print</span><span class="p">(</span><span class="n">i2</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> 
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/numpy/__init__.py:792,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
-<span class="g g-Whitespace">    </span><span class="mi">789</span>     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.char</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">char</span>
-<span class="g g-Whitespace">    </span><span class="mi">790</span>     <span class="k">return</span> <span class="n">char</span><span class="o">.</span><span class="n">chararray</span>
-<span class="ne">--&gt; </span><span class="mi">792</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/numpy/__init__.py:769,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
+<span class="g g-Whitespace">    </span><span class="mi">762</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">__expired_attributes__</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">763</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">764</span>         <span class="sa">f</span><span class="s2">"`np.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` was removed in the NumPy 2.0 release. "</span>
+<span class="g g-Whitespace">    </span><span class="mi">765</span>         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">__expired_attributes__</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">766</span>         <span class="n">name</span><span class="o">=</span><span class="kc">None</span>
+<span class="g g-Whitespace">    </span><span class="mi">767</span>     <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">769</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="ne">AttributeError</span>: module &#39;numpy&#39; has no attribute &#39;trapz&#39;
+<span class="ne">AttributeError</span>: module 'numpy' has no attribute 'trapz'
 </pre></div>
 </div>
 </div>
@@ -1333,14 +1396,14 @@ Sigmoid functions</p>
 <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">y2</span> <span class="o">=</span> <span class="n">x2</span><span class="o">**</span><span class="mi">3</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;5 points&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;50 points&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"5 points"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"50 points"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8bbc148bd4f7a4ff54987978dbd9eaaa5c12c28ab55894047c0c551e65e87596.png" src="../_images/8bbc148bd4f7a4ff54987978dbd9eaaa5c12c28ab55894047c0c551e65e87596.png" />
+<img alt="../_images/5595c6bb56e7296f0798188dc8673bfdcebe90773c96a185827bbae839e0b6e3.png" src="../_images/5595c6bb56e7296f0798188dc8673bfdcebe90773c96a185827bbae839e0b6e3.png" />
 </div>
 </div>
 <p>The trapezoid method is overestimating the area significantly. With more points, we get much closer to the analytical value.</p>
@@ -1359,16 +1422,22 @@ Sigmoid functions</p>
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
 <span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">22</span><span class="p">],</span> <span class="n">line</span> <span class="mi">6</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> 
 <span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">x2</span><span class="o">**</span><span class="mi">3</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> 
 <span class="ne">----&gt; </span><span class="mi">6</span> <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="n">x2</span><span class="p">))</span>
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/numpy/__init__.py:792,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
-<span class="g g-Whitespace">    </span><span class="mi">789</span>     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.char</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">char</span>
-<span class="g g-Whitespace">    </span><span class="mi">790</span>     <span class="k">return</span> <span class="n">char</span><span class="o">.</span><span class="n">chararray</span>
-<span class="ne">--&gt; </span><span class="mi">792</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/numpy/__init__.py:769,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
+<span class="g g-Whitespace">    </span><span class="mi">762</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">__expired_attributes__</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">763</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">764</span>         <span class="sa">f</span><span class="s2">"`np.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` was removed in the NumPy 2.0 release. "</span>
+<span class="g g-Whitespace">    </span><span class="mi">765</span>         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">__expired_attributes__</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">766</span>         <span class="n">name</span><span class="o">=</span><span class="kc">None</span>
+<span class="g g-Whitespace">    </span><span class="mi">767</span>     <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">769</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="ne">AttributeError</span>: module &#39;numpy&#39; has no attribute &#39;trapz&#39;
+<span class="ne">AttributeError</span>: module 'numpy' has no attribute 'trapz'
 </pre></div>
 </div>
 </div>
@@ -1406,18 +1475,25 @@ y = [0    0.1250    1.0000    3.3750    8.0000];</p>
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
 <span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">23</span><span class="p">],</span> <span class="n">line</span> <span class="mi">13</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> 
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="c1"># numerical trapezoid method</span>
 <span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="n">xfine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">1.75</span><span class="p">)</span>
 <span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="n">yfine</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">xfine</span><span class="p">)</span>
 <span class="ne">---&gt; </span><span class="mi">13</span> <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">yfine</span><span class="p">,</span> <span class="n">xfine</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span> 
 <span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="c1"># quadrature with interpolation</span>
 <span class="g g-Whitespace">     </span><span class="mi">16</span> <span class="n">ans</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">1.75</span><span class="p">)</span>
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/numpy/__init__.py:792,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
-<span class="g g-Whitespace">    </span><span class="mi">789</span>     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.char</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">char</span>
-<span class="g g-Whitespace">    </span><span class="mi">790</span>     <span class="k">return</span> <span class="n">char</span><span class="o">.</span><span class="n">chararray</span>
-<span class="ne">--&gt; </span><span class="mi">792</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/numpy/__init__.py:769,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
+<span class="g g-Whitespace">    </span><span class="mi">762</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">__expired_attributes__</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">763</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">764</span>         <span class="sa">f</span><span class="s2">"`np.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` was removed in the NumPy 2.0 release. "</span>
+<span class="g g-Whitespace">    </span><span class="mi">765</span>         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">__expired_attributes__</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">766</span>         <span class="n">name</span><span class="o">=</span><span class="kc">None</span>
+<span class="g g-Whitespace">    </span><span class="mi">767</span>     <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">769</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="ne">AttributeError</span>: module &#39;numpy&#39; has no attribute &#39;trapz&#39;
+<span class="ne">AttributeError</span>: module 'numpy' has no attribute 'trapz'
 </pre></div>
 </div>
 </div>
@@ -1572,7 +1648,7 @@ y = [0    0.1250    1.0000    3.3750    8.0000];</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1b6163b110790dd0659b87c5a5ffbe4a2a34c0bf013aaff835e7c4229c136114.png" src="../_images/1b6163b110790dd0659b87c5a5ffbe4a2a34c0bf013aaff835e7c4229c136114.png" />
+<img alt="../_images/a2977d92f374d9238be6e26b1c3a3ead8f4c67eed581ec66e464d7a35322b894.png" src="../_images/a2977d92f374d9238be6e26b1c3a3ead8f4c67eed581ec66e464d7a35322b894.png" />
 </div>
 </div>
 <p>Let us consider the expanded version of the polynomial. We will use sympy to expand the polynomial.</p>
@@ -1581,7 +1657,7 @@ y = [0    0.1250    1.0000    3.3750    8.0000];</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">Poly</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.polys.polytools</span><span class="w"> </span><span class="kn">import</span> <span class="n">poly_from_expr</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
 <span class="n">W</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">):</span>
     <span class="n">W</span> <span class="o">=</span> <span class="n">W</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
@@ -1595,7 +1671,7 @@ y = [0    0.1250    1.0000    3.3750    8.0000];</p>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>x**20 - 210*x**19 + 20615*x**18 - 1256850*x**17 + 53327946*x**16 - 1672280820*x**15 + 40171771630*x**14 - 756111184500*x**13 + 11310276995381*x**12 - 135585182899530*x**11 + 1307535010540395*x**10 - 10142299865511450*x**9 + 63030812099294896*x**8 - 311333643161390640*x**7 + 1206647803780373360*x**6 - 3599979517947607200*x**5 + 8037811822645051776*x**4 - 12870931245150988800*x**3 + 13803759753640704000*x**2 - 8752948036761600000*x + 2432902008176640000
-Poly(x**20 - 210*x**19 + 20615*x**18 - 1256850*x**17 + 53327946*x**16 - 1672280820*x**15 + 40171771630*x**14 - 756111184500*x**13 + 11310276995381*x**12 - 135585182899530*x**11 + 1307535010540395*x**10 - 10142299865511450*x**9 + 63030812099294896*x**8 - 311333643161390640*x**7 + 1206647803780373360*x**6 - 3599979517947607200*x**5 + 8037811822645051776*x**4 - 12870931245150988800*x**3 + 13803759753640704000*x**2 - 8752948036761600000*x + 2432902008176640000, x, domain=&#39;ZZ&#39;)
+Poly(x**20 - 210*x**19 + 20615*x**18 - 1256850*x**17 + 53327946*x**16 - 1672280820*x**15 + 40171771630*x**14 - 756111184500*x**13 + 11310276995381*x**12 - 135585182899530*x**11 + 1307535010540395*x**10 - 10142299865511450*x**9 + 63030812099294896*x**8 - 311333643161390640*x**7 + 1206647803780373360*x**6 - 3599979517947607200*x**5 + 8037811822645051776*x**4 - 12870931245150988800*x**3 + 13803759753640704000*x**2 - 8752948036761600000*x + 2432902008176640000, x, domain='ZZ')
 </pre></div>
 </div>
 </div>
@@ -1608,7 +1684,7 @@ Poly(x**20 - 210*x**19 + 20615*x**18 - 1256850*x**17 + 53327946*x**16 - 16722808
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.polys.polytools</span><span class="w"> </span><span class="kn">import</span> <span class="n">poly_from_expr</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
 <span class="n">W</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">):</span>
     <span class="n">W</span> <span class="o">=</span> <span class="n">W</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
@@ -1616,17 +1692,17 @@ Poly(x**20 - 210*x**19 + 20615*x**18 - 1256850*x**17 + 53327946*x**16 - 16722808
 <span class="n">P</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">poly_from_expr</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">expand</span><span class="p">())</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">all_coeffs</span><span class="p">()</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">These are the known roots</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">These are the known roots</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
 <span class="c1"># evaluate the polynomial at the known roots</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The polynomial evaluates to </span><span class="si">{0}</span><span class="s2"> at the known roots&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">The polynomial evaluates to </span><span class="si">{0}</span><span class="s2"> at the known roots"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
 
 <span class="c1"># find the roots ourselves</span>
 <span class="n">roots</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roots</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Here are the roots from numpy:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">roots</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Here are the roots from numpy:</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">roots</span><span class="p">)</span>
 
 <span class="c1"># evaluate solution at roots</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Here is the polynomial evaluated at the calculated roots:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">roots</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Here is the polynomial evaluated at the calculated roots:</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">roots</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1660,7 +1736,7 @@ Here is the polynomial evaluated at the calculated roots:
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.polys.polytools</span><span class="w"> </span><span class="kn">import</span> <span class="n">poly_from_expr</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
 <span class="n">W</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">):</span>
     <span class="n">W</span> <span class="o">=</span> <span class="n">W</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
@@ -1668,10 +1744,10 @@ Here is the polynomial evaluated at the calculated roots:
 <span class="n">P</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">poly_from_expr</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">expand</span><span class="p">())</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">all_coeffs</span><span class="p">()</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">These are the known roots</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">These are the known roots</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
 <span class="c1"># evaluate the polynomial at the known roots</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The polynomial evaluates to </span><span class="si">{0}</span><span class="s2"> at the known roots&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">The polynomial evaluates to </span><span class="si">{0}</span><span class="s2"> at the known roots"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
@@ -1679,26 +1755,29 @@ Here is the polynomial evaluated at the calculated roots:
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
 <span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">32</span><span class="p">],</span> <span class="n">line</span> <span class="mi">12</span>
+<span class="g g-Whitespace">      </span><span class="mi">8</span>     <span class="n">W</span> <span class="o">=</span> <span class="n">W</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> 
 <span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="n">P</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">poly_from_expr</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">expand</span><span class="p">())</span>
 <span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="n">p</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">all_coeffs</span><span class="p">()</span>
 <span class="ne">---&gt; </span><span class="mi">12</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">These are the known roots</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">These are the known roots</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span> 
 <span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="c1"># evaluate the polynomial at the known roots</span>
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/numpy/__init__.py:775,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
-<span class="g g-Whitespace">    </span><span class="mi">770</span>     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">771</span>         <span class="sa">f</span><span class="s2">&quot;In the future `np.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` will be defined as the &quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">772</span>         <span class="s2">&quot;corresponding NumPy scalar.&quot;</span><span class="p">,</span> <span class="ne">FutureWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">774</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">__former_attrs__</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">775</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">__former_attrs__</span><span class="p">[</span><span class="n">attr</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">777</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">__expired_attributes__</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">778</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">779</span>         <span class="sa">f</span><span class="s2">&quot;`np.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` was removed in the NumPy 2.0 release. &quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">780</span>         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">__expired_attributes__</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">781</span>         <span class="n">name</span><span class="o">=</span><span class="kc">None</span>
-<span class="g g-Whitespace">    </span><span class="mi">782</span>     <span class="p">)</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/numpy/__init__.py:760,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
+<span class="g g-Whitespace">    </span><span class="mi">755</span>     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">756</span>         <span class="sa">f</span><span class="s2">"In the future `np.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` will be defined as the "</span>
+<span class="g g-Whitespace">    </span><span class="mi">757</span>         <span class="s2">"corresponding NumPy scalar."</span><span class="p">,</span> <span class="ne">FutureWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">759</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">__former_attrs__</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">760</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">__former_attrs__</span><span class="p">[</span><span class="n">attr</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">762</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">__expired_attributes__</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">763</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">764</span>         <span class="sa">f</span><span class="s2">"`np.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` was removed in the NumPy 2.0 release. "</span>
+<span class="g g-Whitespace">    </span><span class="mi">765</span>         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">__expired_attributes__</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">766</span>         <span class="n">name</span><span class="o">=</span><span class="kc">None</span>
+<span class="g g-Whitespace">    </span><span class="mi">767</span>     <span class="p">)</span>
 
-<span class="ne">AttributeError</span>: module &#39;numpy&#39; has no attribute &#39;float&#39;.
+<span class="ne">AttributeError</span>: module 'numpy' has no attribute 'float'.
 <span class="err">`</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="err">`</span> <span class="n">was</span> <span class="n">a</span> <span class="n">deprecated</span> <span class="n">alias</span> <span class="k">for</span> <span class="n">the</span> <span class="n">builtin</span> <span class="err">`</span><span class="nb">float</span><span class="err">`</span><span class="o">.</span> <span class="n">To</span> <span class="n">avoid</span> <span class="n">this</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">existing</span> <span class="n">code</span><span class="p">,</span> <span class="n">use</span> <span class="err">`</span><span class="nb">float</span><span class="err">`</span> <span class="n">by</span> <span class="n">itself</span><span class="o">.</span> <span class="n">Doing</span> <span class="n">this</span> <span class="n">will</span> <span class="ow">not</span> <span class="n">modify</span> <span class="nb">any</span> <span class="n">behavior</span> <span class="ow">and</span> <span class="ow">is</span> <span class="n">safe</span><span class="o">.</span> <span class="n">If</span> <span class="n">you</span> <span class="n">specifically</span> <span class="n">wanted</span> <span class="n">the</span> <span class="n">numpy</span> <span class="n">scalar</span> <span class="nb">type</span><span class="p">,</span> <span class="n">use</span> <span class="err">`</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="err">`</span> <span class="n">here</span><span class="o">.</span>
 <span class="n">The</span> <span class="n">aliases</span> <span class="n">was</span> <span class="n">originally</span> <span class="n">deprecated</span> <span class="ow">in</span> <span class="n">NumPy</span> <span class="mf">1.20</span><span class="p">;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">details</span> <span class="ow">and</span> <span class="n">guidance</span> <span class="n">see</span> <span class="n">the</span> <span class="n">original</span> <span class="n">release</span> <span class="n">note</span> <span class="n">at</span><span class="p">:</span>
     <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">numpy</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">devdocs</span><span class="o">/</span><span class="n">release</span><span class="o">/</span><span class="mf">1.20.0</span><span class="o">-</span><span class="n">notes</span><span class="o">.</span><span class="n">html</span><span class="c1">#deprecations</span>
@@ -1713,7 +1792,7 @@ Here is the polynomial evaluated at the calculated roots:
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.polys.polytools</span><span class="w"> </span><span class="kn">import</span> <span class="n">poly_from_expr</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
 <span class="n">W</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">):</span>
     <span class="n">W</span> <span class="o">=</span> <span class="n">W</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
@@ -1721,10 +1800,10 @@ Here is the polynomial evaluated at the calculated roots:
 <span class="n">P</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">poly_from_expr</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">expand</span><span class="p">())</span>
 <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">P</span><span class="o">.</span><span class="n">all_coeffs</span><span class="p">()]</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">These are the known roots</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">These are the known roots</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
 <span class="c1"># evaluate the polynomial at the known roots</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The polynomial evaluates to </span><span class="si">{0}</span><span class="s2"> at the known roots&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">The polynomial evaluates to </span><span class="si">{0}</span><span class="s2"> at the known roots"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
@@ -1748,7 +1827,7 @@ The polynomial evaluates to [ 0.00000000e+00 -8.19200000e+03 -1.84320000e+04 -6.
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.polys.polytools</span><span class="w"> </span><span class="kn">import</span> <span class="n">poly_from_expr</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
 <span class="n">W</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">):</span>
     <span class="n">W</span> <span class="o">=</span> <span class="n">W</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
@@ -1756,9 +1835,9 @@ The polynomial evaluates to [ 0.00000000e+00 -8.19200000e+03 -1.84320000e+04 -6.
 <span class="n">P</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">poly_from_expr</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">expand</span><span class="p">())</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">all_coeffs</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:&lt;30s}{1:&lt;30s}{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;Integer&quot;</span><span class="p">,</span> <span class="s2">&quot;Float&quot;</span><span class="p">,</span> <span class="s2">&quot;\delta&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{0:&lt;30s}{1:&lt;30s}{2}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"Integer"</span><span class="p">,</span> <span class="s2">"Float"</span><span class="p">,</span> <span class="s2">"\delta"</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">pj</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:&lt;30d}{1:&lt;30f}{2:3e}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pj</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">pj</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">pj</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">pj</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{0:&lt;30d}{1:&lt;30f}{2:3e}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pj</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">pj</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">pj</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">pj</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
@@ -1786,6 +1865,12 @@ Integer                       Float                         \delta
 13803759753640704000          13803759753640704000.000000   0.000000e+00
 -8752948036761600000          -8752948036761600000.000000   0.000000e+00
 2432902008176640000           2432902008176640000.000000    0.000000e+00
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;&gt;:13: SyntaxWarning: invalid escape sequence '\d'
+&lt;&gt;:13: SyntaxWarning: invalid escape sequence '\d'
+/tmp/ipykernel_2559/645147405.py:13: SyntaxWarning: invalid escape sequence '\d'
+  print("{0:&lt;30s}{1:&lt;30s}{2}".format("Integer", "Float", "\delta"))
 </pre></div>
 </div>
 </div>
@@ -1826,14 +1911,14 @@ Integer                       Float                         \delta
     <span class="n">f</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
 
 <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time elapsed = </span><span class="si">{0}</span><span class="s2"> sec&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tf</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"time elapsed = </span><span class="si">{0}</span><span class="s2"> sec"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tf</span><span class="p">))</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>time elapsed = 0.0006461143493652344 sec
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>time elapsed = 0.0009770393371582031 sec
 1.9999983517708524
 </pre></div>
 </div>
@@ -1847,14 +1932,14 @@ Integer                       Float                         \delta
 
 <span class="n">f</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Xk</span> <span class="o">*</span> <span class="n">Yk</span><span class="p">)</span>  <span class="c1"># vectorized version of the loop above</span>
 <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time elapsed = </span><span class="si">{0}</span><span class="s2"> sec&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tf</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"time elapsed = </span><span class="si">{0}</span><span class="s2"> sec"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tf</span><span class="p">))</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>time elapsed = 0.00017380714416503906 sec
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>time elapsed = 0.00021195411682128906 sec
 1.9999934070923728
 </pre></div>
 </div>
@@ -1866,14 +1951,14 @@ Integer                       Float                         \delta
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">f</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Xk</span><span class="p">,</span> <span class="n">Yk</span><span class="p">)</span>
 <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time elapsed = </span><span class="si">{0}</span><span class="s2"> sec&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tf</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"time elapsed = </span><span class="si">{0}</span><span class="s2"> sec"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tf</span><span class="p">))</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>time elapsed = 7.224082946777344e-05 sec
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>time elapsed = 0.00010991096496582031 sec
 1.999993407092373
 </pre></div>
 </div>
@@ -1901,9 +1986,9 @@ Integer                       Float                         \delta
 <span class="n">s</span> <span class="o">=</span> <span class="n">simps</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;trapz = </span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1:%}</span><span class="s2"> error)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">a</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simps = </span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1:%}</span><span class="s2"> error)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">a</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;analy = </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"trapz = </span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1:%}</span><span class="s2"> error)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">a</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"simps = </span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1:%}</span><span class="s2"> error)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">a</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"analy = </span><span class="si">{0}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1913,10 +1998,11 @@ Integer                       Float                         \delta
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">38</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
 <span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="ne">----&gt; </span><span class="mi">2</span> <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">simps</span><span class="p">,</span> <span class="n">romb</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> 
 <span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">a</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">4.0</span>
 
-<span class="ne">ImportError</span>: cannot import name &#39;simps&#39; from &#39;scipy.integrate&#39; (/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/scipy/integrate/__init__.py)
+<span class="ne">ImportError</span>: cannot import name 'simps' from 'scipy.integrate' (/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/integrate/__init__.py)
 </pre></div>
 </div>
 </div>
@@ -1971,7 +2057,7 @@ Integer                       Float                         \delta
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">integrand</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-    <span class="s2">&quot;y must be the first argument, and x the second.&quot;</span>
+    <span class="s2">"y must be the first argument, and x the second."</span>
     <span class="k">return</span> <span class="n">y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
 
@@ -2045,7 +2131,7 @@ Integer                       Float                         \delta
 <span class="n">t0</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">tfinal</span> <span class="o">=</span> <span class="mf">10.0</span>
 <span class="n">V</span><span class="p">,</span> <span class="n">estimated_error</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">tfinal</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:1.2f}</span><span class="s2"> L flowed into the tank over 10 minutes&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">V</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{0:1.2f}</span><span class="s2"> L flowed into the tank over 10 minutes"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">V</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -2079,11 +2165,13 @@ Integer                       Float                         \delta
 <span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">43</span><span class="p">],</span> <span class="n">line</span> <span class="mi">3</span>
 <span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> 
 <span class="ne">----&gt; </span><span class="mi">3</span> <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">quad</span><span class="p">,</span> <span class="n">romberg</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> 
 <span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">a</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">4.0</span>
 
-<span class="ne">ImportError</span>: cannot import name &#39;romberg&#39; from &#39;scipy.integrate&#39; (/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/scipy/integrate/__init__.py)
+<span class="ne">ImportError</span>: cannot import name 'romberg' from 'scipy.integrate' (/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/integrate/__init__.py)
 </pre></div>
 </div>
 </div>
@@ -2099,7 +2187,7 @@ Python has capability to do symbolic math through the sympy package.</p>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">solve</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">pprint</span>
 
-<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s2">&quot;a,b,c,x&quot;</span><span class="p">)</span>
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s2">"a,b,c,x"</span><span class="p">)</span>
 
 <span class="n">f</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">c</span>
 
@@ -2170,9 +2258,9 @@ a/3 + b/2 + c
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">dsolve</span>
 
-<span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">fprime</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># f&#39; = f(x)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="s2">"f"</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
+<span class="n">fprime</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># f' = f(x)</span>
 
 <span class="n">y</span> <span class="o">=</span> <span class="n">dsolve</span><span class="p">(</span><span class="n">fprime</span><span class="p">,</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
@@ -2230,8 +2318,8 @@ False
 You can see here why the equality statement fails. We will print the two numbers to sixteen decimal places.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:1.16f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mf">49.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">49.0</span><span class="p">)))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:1.16f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mf">1.0</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{0:1.16f}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mf">49.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">49.0</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{0:1.16f}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mf">1.0</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">49.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">49.0</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -2257,7 +2345,7 @@ You can see here why the equality statement fails. We will print the two numbers
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">feq</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
-    <span class="s2">&quot;x == y&quot;</span>
+    <span class="s2">"x == y"</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="p">((</span><span class="n">x</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)))</span>
 
 
@@ -2279,22 +2367,22 @@ True
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">flt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
-    <span class="s2">&quot;x &lt; y&quot;</span>
+    <span class="s2">"x &lt; y"</span>
     <span class="k">return</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">fgt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
-    <span class="s2">&quot;x &gt; y&quot;</span>
+    <span class="s2">"x &gt; y"</span>
     <span class="k">return</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">fle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
-    <span class="s2">&quot;x &lt;= y&quot;</span>
+    <span class="s2">"x &lt;= y"</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">fge</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
-    <span class="s2">&quot;x &gt;= y&quot;</span>
+    <span class="s2">"x &gt;= y"</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">))</span>
 
 
@@ -2374,15 +2462,17 @@ True
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numeric-derivatives-by-differences">Numeric derivatives by differences</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#vectorized-numeric-derivatives">Vectorized numeric derivatives</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#point-vs-4-point-numerical-derivatives">2-point vs. 4-point numerical derivatives</a></li>
@@ -2941,8 +3031,8 @@ By John Kitchin
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
   </footer>

@@ -16,41 +16,44 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
     <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
     <script kind="utterances">
 
@@ -92,6 +95,12 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-4H7VFJKEZY');
             </script>
@@ -101,6 +110,12 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-4H7VFJKEZY');
             </script>
@@ -108,40 +123,37 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'blog/data-analysis';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Interpolation" href="interpolation.html" />
     <link rel="prev" title="Statistics" href="statistics.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
   
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -149,7 +161,6 @@ commentsRunWhenDOMLoaded(addUtterances);
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -157,15 +168,59 @@ commentsRunWhenDOMLoaded(addUtterances);
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
     </header>
   
 
@@ -174,7 +229,8 @@ commentsRunWhenDOMLoaded(addUtterances);
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -204,21 +260,17 @@ commentsRunWhenDOMLoaded(addUtterances);
     
     
     <img src="../_static/pycse.png" class="logo__image only-light" alt="pycse - Python Computations in Science and Engineering - Home"/>
-    <script>document.write(`<img src="../_static/pycse.png" class="logo__image only-dark" alt="pycse - Python Computations in Science and Engineering - Home"/>`);</script>
+    <img src="../_static/pycse.png" class="logo__image only-dark pst-js-only" alt="pycse - Python Computations in Science and Engineering - Home"/>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script></div>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -291,6 +343,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="../docs/mip.html">Optimizing over machine-learned models with MIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../docs/execution-statistics.html">Build statistics</a></li>
 </ul>
 
@@ -300,9 +353,14 @@ commentsRunWhenDOMLoaded(addUtterances);
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -498,7 +556,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 <button onclick="toggleFullScreen()"
-  class="btn btn-sm btn-fullscreen-button"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
   title="Fullscreen mode"
   data-bs-placement="bottom" data-bs-toggle="tooltip"
 >
@@ -512,25 +570,17 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
 </div></div>
@@ -552,7 +602,7 @@ document.write(`
                 <h2> Contents </h2>
             </div>
             <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fit-a-line-to-numerical-data">Fit a line to numerical data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linear-least-squares-fitting-with-linear-algebra">Linear least squares fitting with linear algebra</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linear-regression-with-confidence-intervals-updated">Linear regression with confidence intervals (updated)</a></li>
@@ -617,16 +667,16 @@ document.write(`
 <span class="n">xfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">yfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">xfit</span><span class="p">)</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;bo&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;raw data&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xfit</span><span class="p">,</span> <span class="n">yfit</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"bo"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"raw data"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xfit</span><span class="p">,</span> <span class="n">yfit</span><span class="p">,</span> <span class="s2">"r-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"fit"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5e29fe7486d803440a55b9774a46809cb688c58a2714f2ec07544fafb6f63cba.png" src="../_images/5e29fe7486d803440a55b9774a46809cb688c58a2714f2ec07544fafb6f63cba.png" />
+<img alt="../_images/5addb7317902b5c97776cd9264780a55b243be2abbdcf98a5e00c0c551f32892.png" src="../_images/5addb7317902b5c97776cd9264780a55b243be2abbdcf98a5e00c0c551f32892.png" />
 </div>
 </div>
 </section>
@@ -662,19 +712,19 @@ etc...
 <span class="c1"># plot data and fit</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;bo&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">slope1</span><span class="p">]),</span> <span class="s2">&quot;r--&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"bo"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">slope1</span><span class="p">]),</span> <span class="s2">"r--"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"y"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.0006245733788397211 -0.31452218430034123
-0.000624573378839699 -0.3145221843003413
+0.0006245733788397446 -0.3145221843003413
 </pre></div>
 </div>
-<img alt="../_images/4333b52b199b888b066d99dbfaecfeb6580f837494083dcd950c6dcf92403b8c.png" src="../_images/4333b52b199b888b066d99dbfaecfeb6580f837494083dcd950c6dcf92403b8c.png" />
+<img alt="../_images/f2ff8df68149d178ca0d8b05befa7e7e8510ff6b94121d590ec7f8d3c799f97a.png" src="../_images/f2ff8df68149d178ca0d8b05befa7e7e8510ff6b94121d590ec7f8d3c799f97a.png" />
 </div>
 </div>
 <p>This method can be readily extended to fitting any polynomial model, or other linear model that is fit in a least squares sense. This method does not provide confidence intervals.</p>
@@ -702,11 +752,11 @@ etc...
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[ 4.96802466e-02  5.03002726e-02]
- [-3.15461979e-04 -2.80230661e-04]
- [ 1.07149475e-06  1.61547492e-06]
- [-4.90319671e-09 -2.06650009e-09]
- [ 1.35006805e-12  6.04387103e-12]]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[ 4.96802467e-02  5.03002727e-02]
+ [-3.15461981e-04 -2.80230663e-04]
+ [ 1.07149479e-06  1.61547496e-06]
+ [-4.90319695e-09 -2.06650033e-09]
+ [ 1.35006847e-12  6.04387145e-12]]
 </pre></div>
 </div>
 </div>
@@ -745,23 +795,23 @@ etc...
 <span class="n">CI</span> <span class="o">=</span> <span class="n">sT</span> <span class="o">*</span> <span class="n">se</span>
 
 <span class="k">for</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">CI</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{2: 1.2e}</span><span class="s2"> [</span><span class="si">{0: 1.4e}</span><span class="s2"> </span><span class="si">{1: 1.4e}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{2: 1.2e}</span><span class="s2"> [</span><span class="si">{0: 1.4e}</span><span class="s2"> </span><span class="si">{1: 1.4e}</span><span class="s2">]"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span><span class="p">))</span>
 
 <span class="n">SS_tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">Ca</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Ca</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">SS_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="n">Ca</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
 <span class="c1">#  http://en.wikipedia.org/wiki/Coefficient_of_determination</span>
 <span class="n">Rsq</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">SS_err</span> <span class="o">/</span> <span class="n">SS_tot</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;R^2 = </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Rsq</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"R^2 = </span><span class="si">{0}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Rsq</span><span class="p">))</span>
 
 <span class="c1"># plot fit</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">Ca</span><span class="p">,</span> <span class="s2">&quot;bo&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;raw data&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Ca (mol/L)&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">Ca</span><span class="p">,</span> <span class="s2">"bo"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"raw data"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="s2">"r-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"fit"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Ca (mol/L)"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -774,7 +824,7 @@ etc...
 R^2 = 0.9999869672459537
 </pre></div>
 </div>
-<img alt="../_images/1cf9f16c7cd07dc18fbf986ca58685dc01c6cec8549bb086e67400214cf6bea3.png" src="../_images/1cf9f16c7cd07dc18fbf986ca58685dc01c6cec8549bb086e67400214cf6bea3.png" />
+<img alt="../_images/0d4ea5da0c6f7a517d36d437fc8ea4be254a8d02ac9b5dd6dfbecf0562d3e7cf.png" src="../_images/0d4ea5da0c6f7a517d36d437fc8ea4be254a8d02ac9b5dd6dfbecf0562d3e7cf.png" />
 </div>
 </div>
 <p>A fourth order polynomial fits the data well, with a good R^2 value. All of the parameters appear to be significant, i.e. zero is not included in any of the parameter confidence intervals. This does not mean this is the best model for the data, just that the model fits well.</p>
@@ -793,7 +843,7 @@ R^2 = 0.9999869672459537
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">Murnaghan</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">vol</span><span class="p">):</span>
-    <span class="s2">&quot;From Phys. Rev. B 28, 5480 (1983)&quot;</span>
+    <span class="s2">"From Phys. Rev. B 28, 5480 (1983)"</span>
     <span class="n">E0</span><span class="p">,</span> <span class="n">B0</span><span class="p">,</span> <span class="n">BP</span><span class="p">,</span> <span class="n">V0</span> <span class="o">=</span> <span class="n">parameters</span>
 
     <span class="n">E</span> <span class="o">=</span> <span class="n">E0</span> <span class="o">+</span> <span class="n">B0</span> <span class="o">*</span> <span class="n">vol</span> <span class="o">/</span> <span class="n">BP</span> <span class="o">*</span> <span class="p">(((</span><span class="n">V0</span> <span class="o">/</span> <span class="n">vol</span><span class="p">)</span> <span class="o">**</span> <span class="n">BP</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">BP</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">V0</span> <span class="o">*</span> <span class="n">B0</span> <span class="o">/</span> <span class="p">(</span><span class="n">BP</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -811,18 +861,18 @@ R^2 = 0.9999869672459537
 
 <span class="n">plsq</span> <span class="o">=</span> <span class="n">leastsq</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">vols</span><span class="p">))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fitted parameters = </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plsq</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Fitted parameters = </span><span class="si">{0}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plsq</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vols</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span> <span class="s2">&quot;ro&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vols</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span> <span class="s2">"ro"</span><span class="p">)</span>
 
 <span class="c1"># plot the fitted curve on top</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">vols</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">vols</span><span class="p">),</span> <span class="mi">50</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">Murnaghan</span><span class="p">(</span><span class="n">plsq</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;k-&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Volume&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Energy&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"k-"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Volume"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Energy"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -830,7 +880,7 @@ R^2 = 0.9999869672459537
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitted parameters = [-56.46839638   0.57233163   2.74081957  16.55905541]
 </pre></div>
 </div>
-<img alt="../_images/551595dedc28b896d8ce13eca55db8dad01c77adfee9e709a090543fa31864f0.png" src="../_images/551595dedc28b896d8ce13eca55db8dad01c77adfee9e709a090543fa31864f0.png" />
+<img alt="../_images/209791039b6ff8df8a14ec6cf8f682b60f1ea7564e33a8c8738b44fabaca44e9.png" src="../_images/209791039b6ff8df8a14ec6cf8f682b60f1ea7564e33a8c8738b44fabaca44e9.png" />
 </div>
 </div>
 <p>See additional examples at \url{<a class="reference external" href="http://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html">http://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html</a>}.</p>
@@ -849,7 +899,7 @@ R^2 = 0.9999869672459537
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">Murnaghan</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">vol</span><span class="p">):</span>
-    <span class="s2">&quot;From PRB 28,5480 (1983&quot;</span>
+    <span class="s2">"From PRB 28,5480 (1983"</span>
     <span class="n">E0</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">B0</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">BP</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
@@ -870,18 +920,18 @@ R^2 = 0.9999869672459537
 
 <span class="n">plsq</span> <span class="o">=</span> <span class="n">fmin</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">volumes</span><span class="p">,))</span>  <span class="c1"># note args is a tuple</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;parameters = </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plsq</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"parameters = </span><span class="si">{0}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plsq</span><span class="p">))</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">volumes</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span> <span class="s2">&quot;ro&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">volumes</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span> <span class="s2">"ro"</span><span class="p">)</span>
 
 <span class="c1"># plot the fitted curve on top</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">volumes</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">volumes</span><span class="p">),</span> <span class="mi">50</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">Murnaghan</span><span class="p">(</span><span class="n">plsq</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;k-&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Volume ($\AA^3$)&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Total energy (eV)&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"k-"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Volume ($\AA^3$)"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Total energy (eV)"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -893,7 +943,13 @@ R^2 = 0.9999869672459537
 parameters = [-56.46932645   0.59141447   1.9044796   16.59341303]
 </pre></div>
 </div>
-<img alt="../_images/4fe5402050f0790c2e038f3c1fa93abd972507e6256b723420656a12295076e6.png" src="../_images/4fe5402050f0790c2e038f3c1fa93abd972507e6256b723420656a12295076e6.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;&gt;:41: SyntaxWarning: invalid escape sequence '\A'
+&lt;&gt;:41: SyntaxWarning: invalid escape sequence '\A'
+/tmp/ipykernel_2457/4049392643.py:41: SyntaxWarning: invalid escape sequence '\A'
+  plt.xlabel("Volume ($\AA^3$)")
+</pre></div>
+</div>
+<img alt="../_images/c3bb794f9479d938c719e87e06a5a7a94e292c47e36de353dcaef300c1e68ae7.png" src="../_images/c3bb794f9479d938c719e87e06a5a7a94e292c47e36de353dcaef300c1e68ae7.png" />
 </div>
 </div>
 </section>
@@ -909,13 +965,13 @@ parameters = [-56.46932645   0.59141447   1.9044796   16.59341303]
 <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0039</span><span class="p">,</span> <span class="mf">1.2270</span><span class="p">,</span> <span class="mf">5.7035</span><span class="p">,</span> <span class="mf">10.6472</span><span class="p">,</span> <span class="mf">18.6032</span><span class="p">,</span> <span class="mf">42.3024</span><span class="p">])</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"y"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/acf756504344e6ca39f1c7520eb177585c8b468d6d4ca0815a6e6ae39a2cc588.png" src="../_images/acf756504344e6ca39f1c7520eb177585c8b468d6d4ca0815a6e6ae39a2cc588.png" />
+<img alt="../_images/64c8319a4003a342405e9f0525ce874f4c698850d8b749c10973c83169f4c480.png" src="../_images/64c8319a4003a342405e9f0525ce874f4c698850d8b749c10973c83169f4c480.png" />
 </div>
 </div>
 <p>We are going to fit the function <span class="math notranslate nohighlight">\(y = x^a\)</span> to the data. The best <span class="math notranslate nohighlight">\(a\)</span> will minimize the summed squared error between the model and the fit.</p>
@@ -932,13 +988,19 @@ parameters = [-56.46932645   0.59141447   1.9044796   16.59341303]
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">arange</span><span class="p">,</span> <span class="n">sse</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$\Sigma (y - y_</span><span class="si">{pred}</span><span class="s2">)^2$&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"a"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"$\Sigma (y - y_</span><span class="si">{pred}</span><span class="s2">)^2$"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/41b8f03e6531e9ceed73fd9c8b95ea74fcc6cd364b81b3dd9632f5703dfc51b6.png" src="../_images/41b8f03e6531e9ceed73fd9c8b95ea74fcc6cd364b81b3dd9632f5703dfc51b6.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;&gt;:13: SyntaxWarning: invalid escape sequence '\S'
+&lt;&gt;:13: SyntaxWarning: invalid escape sequence '\S'
+/tmp/ipykernel_2457/4228780239.py:13: SyntaxWarning: invalid escape sequence '\S'
+  plt.ylabel("$\Sigma (y - y_{pred})^2$");
+</pre></div>
+</div>
+<img alt="../_images/29a5a32b99ed21217f8d0a4db6e65ab2486b0a4aa1f88b5931b2589c332d07fe.png" src="../_images/29a5a32b99ed21217f8d0a4db6e65ab2486b0a4aa1f88b5931b2589c332d07fe.png" />
 </div>
 </div>
 <p>Based on the graph above, you can see a minimum in the summed squared error near <span class="math notranslate nohighlight">\(a = 2.1\)</span>. We use that as our initial guess. Since we know the answer is bounded, we use scipy.optimize.fminbound</p>
@@ -951,11 +1013,11 @@ parameters = [-56.46932645   0.59141447   1.9044796   16.59341303]
 <span class="nb">print</span><span class="p">(</span><span class="n">amin</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;bo&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">**</span><span class="n">amin</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"bo"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"data"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">**</span><span class="n">amin</span><span class="p">,</span> <span class="s2">"r-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"fit"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -963,7 +1025,7 @@ parameters = [-56.46932645   0.59141447   1.9044796   16.59341303]
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2.0900483893314967
 </pre></div>
 </div>
-<img alt="../_images/d9262352a6985944ec76e26846f5662338621e6bf4aef254728ca8c02d0f85a5.png" src="../_images/d9262352a6985944ec76e26846f5662338621e6bf4aef254728ca8c02d0f85a5.png" />
+<img alt="../_images/638f661f4de5e326020e1f311d86ae0524ff5465797bf817e696bbf7bfef553c.png" src="../_images/638f661f4de5e326020e1f311d86ae0524ff5465797bf817e696bbf7bfef553c.png" />
 </div>
 </div>
 <p>We can do nonlinear fitting by directly minimizing the summed squared error between a model and data. This method lacks some of the features of other methods, notably the simple ability to get the confidence interval. However, this method is flexible and may offer more insight into how the solution depends on the parameters.</p>
@@ -987,7 +1049,7 @@ parameters = [-56.46932645   0.59141447   1.9044796   16.59341303]
 
 <span class="c1"># this is the function we want to fit to our data</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-    <span class="s2">&quot;nonlinear function in a and b to fit to data&quot;</span>
+    <span class="s2">"nonlinear function in a and b to fit to data"</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
 
 
@@ -1006,25 +1068,25 @@ parameters = [-56.46932645   0.59141447   1.9044796   16.59341303]
 
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">pars</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">pcov</span><span class="p">)):</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">var</span><span class="o">**</span><span class="mf">0.5</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;p</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2"> [</span><span class="si">{2}</span><span class="s2">  </span><span class="si">{3}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">tval</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">tval</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"p</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2"> [</span><span class="si">{2}</span><span class="s2">  </span><span class="si">{3}</span><span class="s2">]"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">tval</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">tval</span><span class="p">))</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;bo &quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"bo "</span><span class="p">)</span>
 <span class="n">xfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">yfit</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">xfit</span><span class="p">,</span> <span class="n">pars</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pars</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xfit</span><span class="p">,</span> <span class="n">yfit</span><span class="p">,</span> <span class="s2">&quot;b-&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xfit</span><span class="p">,</span> <span class="n">yfit</span><span class="p">,</span> <span class="s2">"b-"</span><span class="p">)</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">"data"</span><span class="p">,</span> <span class="s2">"fit"</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>p0: 1.32753141474737 [1.300536592916514  1.354526236578226]
-p1: 0.02646155699281442 [0.02360765379189375  0.029315460193735092]
+p1: 0.02646155699281442 [0.023607653791893758  0.029315460193735085]
 </pre></div>
 </div>
-<img alt="../_images/b7161cf9aec2b9ee4d50773fd5b05a53cdacc4c525373ded137cf06da2d89a34.png" src="../_images/b7161cf9aec2b9ee4d50773fd5b05a53cdacc4c525373ded137cf06da2d89a34.png" />
+<img alt="../_images/a28f37b2caa18936ccdb072e7b86d8c33a9c1f3f975fbfd370645a8766ad13b5.png" src="../_images/a28f37b2caa18936ccdb072e7b86d8c33a9c1f3f975fbfd370645a8766ad13b5.png" />
 </div>
 </div>
 <p>You can see by inspection that the fit looks pretty reasonable. The parameter confidence intervals are not too big, so we can be pretty confident of their values.</p>
@@ -1076,15 +1138,15 @@ confidence intervals for comparison. The basic idea is to use the covariance mat
 
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">pars</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">pcov</span><span class="p">)):</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">var</span><span class="o">**</span><span class="mf">0.5</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;c</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2"> [</span><span class="si">{2}</span><span class="s2">  </span><span class="si">{3}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">tval</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">tval</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"c</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2"> [</span><span class="si">{2}</span><span class="s2">  </span><span class="si">{3}</span><span class="s2">]"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">tval</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">tval</span><span class="p">))</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;bo &quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"bo "</span><span class="p">)</span>
 <span class="n">xfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">yfit</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">xfit</span><span class="p">,</span> <span class="n">pars</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pars</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xfit</span><span class="p">,</span> <span class="n">yfit</span><span class="p">,</span> <span class="s2">&quot;b-&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xfit</span><span class="p">,</span> <span class="n">yfit</span><span class="p">,</span> <span class="s2">"b-"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">"data"</span><span class="p">,</span> <span class="s2">"fit"</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -1093,7 +1155,7 @@ confidence intervals for comparison. The basic idea is to use the covariance mat
 c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 </pre></div>
 </div>
-<img alt="../_images/865c7fea4b7fb27214b92afc5d6acc019f6b2924b2c0a6e7b72e321b1299351d.png" src="../_images/865c7fea4b7fb27214b92afc5d6acc019f6b2924b2c0a6e7b72e321b1299351d.png" />
+<img alt="../_images/1b22c1faa70c0526adff98d468a16213c102feb21d1fca930052d21e0cfe8aeb.png" src="../_images/1b22c1faa70c0526adff98d468a16213c102feb21d1fca930052d21e0cfe8aeb.png" />
 </div>
 </div>
 </section>
@@ -1115,17 +1177,17 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="mf">3.3079</span><span class="p">,</span> <span class="mf">6.6358</span><span class="p">,</span> <span class="mf">10.3143</span><span class="p">,</span> <span class="mf">13.6492</span><span class="p">,</span> <span class="mf">17.2755</span><span class="p">,</span> <span class="mf">23.6271</span><span class="p">]</span>
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">"3d"</span><span class="p">)</span>
 
 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;x2&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s2">&quot;f(x1,x2)&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"x1"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"x2"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s2">"f(x1,x2)"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c502532a864ef6c2f7138e1822a2d9c48a2ba53e4a66a7cce997ca51c525c2d6.png" src="../_images/c502532a864ef6c2f7138e1822a2d9c48a2ba53e4a66a7cce997ca51c525c2d6.png" />
+<img alt="../_images/83da55ce893cc5f37272d3bdb53e60406c0b1a3adb7a41dee111c579f99d5ea4.png" src="../_images/83da55ce893cc5f37272d3bdb53e60406c0b1a3adb7a41dee111c579f99d5ea4.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1136,7 +1198,7 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-    <span class="s2">&quot;Nested function for the model&quot;</span>
+    <span class="s2">"Nested function for the model"</span>
     <span class="n">x1</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
     <span class="n">x2</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
 
@@ -1155,7 +1217,7 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 <span class="n">SSE</span> <span class="o">=</span> <span class="n">errfunc</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">SSE</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mf">3.2</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.1</span><span class="p">],</span> <span class="s2">&quot;ro&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mf">3.2</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.1</span><span class="p">],</span> <span class="s2">"ro"</span><span class="p">)</span>
 
 <span class="n">guesses</span> <span class="o">=</span> <span class="p">[</span><span class="mf">3.18</span><span class="p">,</span> <span class="mf">2.02</span><span class="p">]</span>
 
@@ -1164,7 +1226,7 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">guesses</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">popt</span><span class="p">)</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">popt</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="s2">&quot;r*&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">popt</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="s2">"r*"</span><span class="p">)</span>
 
 
 <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">))</span>
@@ -1176,24 +1238,24 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 [ 3.25873623  6.59792994 10.29473657 13.68011436 17.29161001 23.62366444]
 </pre></div>
 </div>
-<img alt="../_images/d418645566d7ff7d45a2a5eaeb1918a6134c976db1c6835b69066f6e677a7337.png" src="../_images/d418645566d7ff7d45a2a5eaeb1918a6134c976db1c6835b69066f6e677a7337.png" />
+<img alt="../_images/0148ea26f4d2efad18e38b634cb1bc43c7a09545ec82f12ef1a4c7611450135a.png" src="../_images/0148ea26f4d2efad18e38b634cb1bc43c7a09545ec82f12ef1a4c7611450135a.png" />
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">"3d"</span><span class="p">)</span>
 
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s2">&quot;ko&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">),</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;x2&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s2">&quot;f(x1,x2)&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s2">"ko"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"data"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">),</span> <span class="s2">"r-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"fit"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"x1"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"x2"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s2">"f(x1,x2)"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/fd3c32de1740993a8345c75962ca6b70379ec7badf10c5079727e2e58a3e6a68.png" src="../_images/fd3c32de1740993a8345c75962ca6b70379ec7badf10c5079727e2e58a3e6a68.png" />
+<img alt="../_images/43728241bc4d27d2a87fd8019d06c9d65e8cdf9696d6bc4f1f9f08957f20d9eb.png" src="../_images/43728241bc4d27d2a87fd8019d06c9d65e8cdf9696d6bc4f1f9f08957f20d9eb.png" />
 </div>
 </div>
 <p>It can be difficult to figure out initial guesses for nonlinear fitting problems. For one and two dimensional systems, graphical techniques may be useful to visualize how the summed squared error between the model and data depends on the parameters.</p>
@@ -1214,7 +1276,7 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">fitfunc</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
-    <span class="s2">&quot;Function that returns Ca computed from an ODE for a k&quot;</span>
+    <span class="s2">"Function that returns Ca computed from an ODE for a k"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">myode</span><span class="p">(</span><span class="n">Ca</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
         <span class="k">return</span> <span class="o">-</span><span class="n">k</span> <span class="o">*</span> <span class="n">Ca</span>
@@ -1232,9 +1294,9 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">Ca_data</span><span class="p">,</span> <span class="s2">&quot;ro&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tfit</span><span class="p">,</span> <span class="n">fit</span><span class="p">,</span> <span class="s2">&quot;b-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">Ca_data</span><span class="p">,</span> <span class="s2">"ro"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"data"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tfit</span><span class="p">,</span> <span class="n">fit</span><span class="p">,</span> <span class="s2">"b-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"fit"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -1242,7 +1304,7 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[2.58893455]
 </pre></div>
 </div>
-<img alt="../_images/5e09f8332b1d5b2f4602c672ade67d0d1e42ea0b8e8c727d8cc20aa6fb8332eb.png" src="../_images/5e09f8332b1d5b2f4602c672ade67d0d1e42ea0b8e8c727d8cc20aa6fb8332eb.png" />
+<img alt="../_images/349d59731ef61d2c805ed805691c1c53cd56ac32f9414976388f32fd225b353e.png" src="../_images/349d59731ef61d2c805ed805691c1c53cd56ac32f9414976388f32fd225b353e.png" />
 </div>
 </div>
 </section>
@@ -1261,7 +1323,7 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;data/testdata.txt&quot;</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">"data/testdata.txt"</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
@@ -1331,15 +1393,17 @@ c1: 2.109951129905276 [1.7671162290706537  2.4527860307398983]
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fit-a-line-to-numerical-data">Fit a line to numerical data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linear-least-squares-fitting-with-linear-algebra">Linear least squares fitting with linear algebra</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linear-regression-with-confidence-intervals-updated">Linear regression with confidence intervals (updated)</a></li>
@@ -1869,8 +1933,8 @@ By John Kitchin
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
   </footer>

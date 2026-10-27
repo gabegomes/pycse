@@ -16,41 +16,44 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
     <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
     <script kind="utterances">
 
@@ -92,6 +95,12 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-4H7VFJKEZY');
             </script>
@@ -101,6 +110,12 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-4H7VFJKEZY');
             </script>
@@ -108,40 +123,37 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'blog/statistics';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Data analysis" href="data-analysis.html" />
     <link rel="prev" title="Nonlinear algebra" href="nonlinear-algebra.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
   
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -149,7 +161,6 @@ commentsRunWhenDOMLoaded(addUtterances);
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -157,15 +168,59 @@ commentsRunWhenDOMLoaded(addUtterances);
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
     </header>
   
 
@@ -174,7 +229,8 @@ commentsRunWhenDOMLoaded(addUtterances);
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -204,21 +260,17 @@ commentsRunWhenDOMLoaded(addUtterances);
     
     
     <img src="../_static/pycse.png" class="logo__image only-light" alt="pycse - Python Computations in Science and Engineering - Home"/>
-    <script>document.write(`<img src="../_static/pycse.png" class="logo__image only-dark" alt="pycse - Python Computations in Science and Engineering - Home"/>`);</script>
+    <img src="../_static/pycse.png" class="logo__image only-dark pst-js-only" alt="pycse - Python Computations in Science and Engineering - Home"/>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script></div>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -291,6 +343,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="../docs/mip.html">Optimizing over machine-learned models with MIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../docs/execution-statistics.html">Build statistics</a></li>
 </ul>
 
@@ -300,9 +353,14 @@ commentsRunWhenDOMLoaded(addUtterances);
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -498,7 +556,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 <button onclick="toggleFullScreen()"
-  class="btn btn-sm btn-fullscreen-button"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
   title="Fullscreen mode"
   data-bs-placement="bottom" data-bs-toggle="tooltip"
 >
@@ -512,25 +570,17 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
 </div></div>
@@ -552,7 +602,7 @@ document.write(`
                 <h2> Contents </h2>
             </div>
             <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction-to-statistical-data-analysis">Introduction to statistical data analysis</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-statistics">Basic statistics</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#confidence-interval-on-an-average">Confidence interval on an average</a></li>
@@ -640,10 +690,10 @@ average.</p></li>
 
 <span class="n">ci95</span> <span class="o">=</span> <span class="n">T_multiplier</span> <span class="o">*</span> <span class="n">s</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;T_multiplier = </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">T_multiplier</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ci95 = </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ci95</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"T_multiplier = </span><span class="si">{0}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">T_multiplier</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"ci95 = </span><span class="si">{0}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ci95</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="s2">&quot;The true average is between </span><span class="si">{0}</span><span class="s2"> and </span><span class="si">{1}</span><span class="s2"> at a 95</span><span class="si">% c</span><span class="s2">onfidence level&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="s2">"The true average is between </span><span class="si">{0}</span><span class="s2"> and </span><span class="si">{1}</span><span class="s2"> at a 95</span><span class="si">% c</span><span class="s2">onfidence level"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
         <span class="n">ybar</span> <span class="o">-</span> <span class="n">ci95</span><span class="p">,</span> <span class="n">ybar</span> <span class="o">+</span> <span class="n">ci95</span>
     <span class="p">)</span>
 <span class="p">)</span>
@@ -651,9 +701,9 @@ average.</p></li>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>T_multiplier = 4.302652729696142
-ci95 = 0.14342175765653756
-The true average is between 7.923244909010131 and 8.210088424323207 at a 95% confidence level
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>T_multiplier = 4.302652729749462
+ci95 = 0.1434217576583149
+The true average is between 7.923244909008353 and 8.210088424324983 at a 95% confidence level
 </pre></div>
 </div>
 </div>
@@ -696,7 +746,7 @@ ybar +- T_multiplier*std/sqrt(n).</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[np.float64(7.923244909010131), np.float64(8.210088424323207)]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[np.float64(7.923244909008353), np.float64(8.210088424324983)]
 </pre></div>
 </div>
 </div>
@@ -721,8 +771,8 @@ ybar +- T_multiplier*std/sqrt(n).</p>
 
 <span class="n">pred_interval</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">dof</span><span class="p">)</span> <span class="o">*</span> <span class="n">std_x</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
-<span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;We are 95</span><span class="si">% c</span><span class="s2">onfident the next measurement&quot;</span><span class="p">,</span> <span class="s2">&quot; will be between </span><span class="si">{0:1.3f}</span><span class="s2"> and </span><span class="si">{1:1.3f}</span><span class="s2">&quot;</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">avg_x</span> <span class="o">-</span> <span class="n">pred_interval</span><span class="p">,</span> <span class="n">avg_x</span> <span class="o">+</span> <span class="n">pred_interval</span><span class="p">))</span>
+<span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"We are 95</span><span class="si">% c</span><span class="s2">onfident the next measurement"</span><span class="p">,</span> <span class="s2">" will be between </span><span class="si">{0:1.3f}</span><span class="s2"> and </span><span class="si">{1:1.3f}</span><span class="s2">"</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">avg_x</span> <span class="o">-</span> <span class="n">pred_interval</span><span class="p">,</span> <span class="n">avg_x</span> <span class="o">+</span> <span class="n">pred_interval</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -856,18 +906,18 @@ another way to get there</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;data/PT.txt&quot;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">"data/PT.txt"</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">T</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
 <span class="n">P</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s2">&quot;k.&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Temperature&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Pressure&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s2">"k."</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Temperature"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Pressure"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1f828601748a3364b2488423bc2ee909742adbefe2d90567444f69ec27c50503.png" src="../_images/1f828601748a3364b2488423bc2ee909742adbefe2d90567444f69ec27c50503.png" />
+<img alt="../_images/967bb6cea0beac7aa2715de7abd43686330b45ad22fe6bee891ce8fc5ef30371.png" src="../_images/967bb6cea0beac7aa2715de7abd43686330b45ad22fe6bee891ce8fc5ef30371.png" />
 </div>
 </div>
 <p>It appears the data is roughly linear, and we know from the ideal gas law that PV = nRT, or P = nR/V*T, which says P should be linearly correlated with V. Note that the temperature data is in degC, not in K, so it is not expected that P=0 at T = 0. We will use linear algebra to compute the line coefficients.</p>
@@ -878,7 +928,7 @@ another way to get there</p>
 
 <span class="n">x</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 <span class="n">intercept</span><span class="p">,</span> <span class="n">slope</span> <span class="o">=</span> <span class="n">x</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;b, m =&quot;</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"b, m ="</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
 
 <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
 <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -895,17 +945,17 @@ another way to get there</p>
 <span class="n">sT</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span>  <span class="c1"># student T multiplier</span>
 <span class="n">CI</span> <span class="o">=</span> <span class="n">sT</span> <span class="o">*</span> <span class="n">se</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CI = &quot;</span><span class="p">,</span> <span class="n">CI</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"CI = "</span><span class="p">,</span> <span class="n">CI</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">CI</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ci</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"[</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">]"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ci</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>b, m = 7.748997392381676 3.9301404382402625
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>b, m = 7.748997392381616 3.9301404382402634
 CI =  [4.76511544 0.1026405 ]
-[2.9838819479373777 12.514112836825973]
-[3.827499940822171 4.032780935658354]
+[2.9838819479373155 12.514112836825916]
+[3.8274999408221717 4.032780935658355]
 </pre></div>
 </div>
 </div>
@@ -932,15 +982,15 @@ CI =  [4.76511544 0.1026405 ]
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s2">&quot;k.&quot;</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="s2">&quot;b-&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Temperature&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Pressure&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;R^2 = </span><span class="si">{0:1.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">R2</span><span class="p">));</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s2">"k."</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="s2">"b-"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Temperature"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Pressure"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"R^2 = </span><span class="si">{0:1.3f}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">R2</span><span class="p">));</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/97bf29c3696b308bee999cc37c5db024c62b9d96091d68ea0f63a5b1bfc6cfbc.png" src="../_images/97bf29c3696b308bee999cc37c5db024c62b9d96091d68ea0f63a5b1bfc6cfbc.png" />
+<img alt="../_images/bc553ec6e0a9a34e53d7aead77ffb4342dc20a027ad21ddc2fe6bda5ba0993b9.png" src="../_images/bc553ec6e0a9a34e53d7aead77ffb4342dc20a027ad21ddc2fe6bda5ba0993b9.png" />
 </div>
 </div>
 <p>The fit looks good, and R^2 is near one, but is it a good model? There are a few ways to examine this. We want to make sure that there are no systematic trends in the errors between the fit and the data, and we want to make sure there are not hidden correlations with other variables. The residuals are the error between the fit and the data. The residuals should not show any patterns when plotted against any variables, and they do not in this case.</p>
@@ -950,23 +1000,23 @@ CI =  [4.76511544 0.1026405 ]
 
 <span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="s2">&quot;ko&quot;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Temperature&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="s2">"ko"</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Temperature"</span><span class="p">)</span>
 
 <span class="n">run_order</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">run_order</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="s2">&quot;ko &quot;</span><span class="p">)</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;run order&quot;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">run_order</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="s2">"ko "</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"run order"</span><span class="p">)</span>
 
 <span class="n">ambientT</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
-<span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ambientT</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="s2">&quot;ko&quot;</span><span class="p">)</span>
-<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;ambient temperature&quot;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ambientT</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="s2">"ko"</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"ambient temperature"</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span>  <span class="c1"># make sure plots do not overlap</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/34f4e18f0459c970baef25bd114439ff8e94bc2cce9df791c123f839d456addf.png" src="../_images/34f4e18f0459c970baef25bd114439ff8e94bc2cce9df791c123f839d456addf.png" />
+<img alt="../_images/573f927d7306b61f189f72a0daad2169b9c59ef2c8e9346ef66d1a6dd10fbc42.png" src="../_images/573f927d7306b61f189f72a0daad2169b9c59ef2c8e9346ef66d1a6dd10fbc42.png" />
 </div>
 </div>
 <p>There may be some correlations in the residuals with the run order. That could indicate an experimental source of error.</p>
@@ -975,14 +1025,14 @@ CI =  [4.76511544 0.1026405 ]
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">residuals</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">residuals</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;ko&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;residual[i]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;residual[i-1]&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">residuals</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">residuals</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="s2">"ko"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"residual[i]"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"residual[i-1]"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/10cb6417675a5621fc60c76819921aca8401acb43cd8d5590a91a722258e1929.png" src="../_images/10cb6417675a5621fc60c76819921aca8401acb43cd8d5590a91a722258e1929.png" />
+<img alt="../_images/55512cc022b0d1de95ace86bc0089d9e0871eeebac6c223d851973450bb6943b.png" src="../_images/55512cc022b0d1de95ace86bc0089d9e0871eeebac6c223d851973450bb6943b.png" />
 </div>
 </div>
 <p>It is hard to argue there is any correlation here.</p>
@@ -1009,25 +1059,25 @@ CI =  [4.76511544 0.1026405 ]
 <span class="n">sT</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span>  <span class="c1"># student T multiplier</span>
 <span class="n">CI</span> <span class="o">=</span> <span class="n">sT</span> <span class="o">*</span> <span class="n">se</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CI = &quot;</span><span class="p">,</span> <span class="n">CI</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"CI = "</span><span class="p">,</span> <span class="n">CI</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">CI</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ci</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"[</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">]"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ci</span><span class="p">))</span>
 
 
 <span class="n">ybar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
 <span class="n">SStot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">P</span> <span class="o">-</span> <span class="n">ybar</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">SSerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">P</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">R2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">SSerr</span> <span class="o">/</span> <span class="n">SStot</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;R^2 = </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">R2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"R^2 = </span><span class="si">{0}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">R2</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[9.00353031e+00 3.86669879e+00 7.26244301e-04]
 CI =  [1.38030344e+01 6.62100654e-01 7.48516727e-03]
-[-4.799504121233703 22.806564732889672]
-[3.204598136807022 4.52879944409127]
-[-0.006758922969065006 0.008211411570351112]
+[-4.799504121232012 22.806564732891374]
+[3.204598136807041 4.528799444091289]
+[-0.006758922969065129 0.008211411570350996]
 R^2 = 0.9937219694072356
 </pre></div>
 </div>
@@ -1057,27 +1107,27 @@ R^2 = 0.9937219694072356
 <span class="n">CI</span> <span class="o">=</span> <span class="n">sT</span> <span class="o">*</span> <span class="n">se</span>
 
 <span class="k">for</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">CI</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ci</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"[</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">]"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="n">ci</span><span class="p">,</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ci</span><span class="p">))</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s2">&quot;k. &quot;</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Temperature&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Pressure&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s2">"k. "</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Temperature"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Pressure"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">"data"</span><span class="p">,</span> <span class="s2">"fit"</span><span class="p">])</span>
 
 <span class="n">ybar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
 <span class="n">SStot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">P</span> <span class="o">-</span> <span class="n">ybar</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">SSerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">P</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">R2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">SSerr</span> <span class="o">/</span> <span class="n">SStot</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;R^2 = </span><span class="si">{0:1.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">R2</span><span class="p">));</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"R^2 = </span><span class="si">{0:1.3f}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">R2</span><span class="p">));</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[4.056801244813359 4.123083499127842]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[4.056801244813357 4.123083499127842]
 </pre></div>
 </div>
-<img alt="../_images/fa84c8e35e98e8b57806ec42caeac4d802eaccd6dd90c30aac3399d19f9ac8c0.png" src="../_images/fa84c8e35e98e8b57806ec42caeac4d802eaccd6dd90c30aac3399d19f9ac8c0.png" />
+<img alt="../_images/493703f665ffad55a1d1ef53754d6b4e28c81f9302bebc20aff30c8f516f1fde.png" src="../_images/493703f665ffad55a1d1ef53754d6b4e28c81f9302bebc20aff30c8f516f1fde.png" />
 </div>
 </div>
 <p>The fit is visually still pretty good, and the R^2 value is only slightly worse. Let us examine the residuals again.</p>
@@ -1086,14 +1136,14 @@ R^2 = 0.9937219694072356
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">residuals</span> <span class="o">=</span> <span class="n">P</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="s2">&quot;ko&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Temperature&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;residuals&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="s2">"ko"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Temperature"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"residuals"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/90d5d786e4df380fc46eb26c9cf6d8ee41201b9db2d3dc2b79eaa1504071dbb0.png" src="../_images/90d5d786e4df380fc46eb26c9cf6d8ee41201b9db2d3dc2b79eaa1504071dbb0.png" />
+<img alt="../_images/3cc6db44e68b975d3251d8fb294e1d13e35021790fe293f9e32eebde2fcbef88.png" src="../_images/3cc6db44e68b975d3251d8fb294e1d13e35021790fe293f9e32eebde2fcbef88.png" />
 </div>
 </div>
 <p>You can see a slight trend of decreasing value of the residuals as the Temperature increases. This may indicate a deficiency in the model with no intercept. For the ideal gas law in degC: <span class="math notranslate nohighlight">\(PV = nR(T+273)\)</span> or <span class="math notranslate nohighlight">\(P = nR/V*T + 273*nR/V\)</span>, so the intercept is expected to be non-zero in this case. Specifically, we expect the intercept to be 273*R*n/V. Since the molar density of a gas is pretty small, the intercept may be close to, but not equal to zero. That is why the fit still looks ok, but is not as good as letting the intercept be a fitting parameter. That is an example of the deficiency in our model.</p>
@@ -1136,9 +1186,9 @@ R^2 = 0.9937219694072356
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/4caa7cf08f791ce5ada59c7ed082cc18642887ef75a52cede578596a15423cd6.png" src="../_images/4caa7cf08f791ce5ada59c7ed082cc18642887ef75a52cede578596a15423cd6.png" />
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.4946303600772816
-0.4961412424225537
+<img alt="../_images/d0305559fb5d15765edcdc1f6c0fd1cfb0fc09284ce6cfba7cd3ec93cdd56a21.png" src="../_images/d0305559fb5d15765edcdc1f6c0fd1cfb0fc09284ce6cfba7cd3ec93cdd56a21.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.5050072213154853
+0.49600005655986695
 0.5
 </pre></div>
 </div>
@@ -1163,7 +1213,7 @@ R^2 = 0.9937219694072356
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>11.87579453040205
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>11.83746162600765
 11.872657663724665
 </pre></div>
 </div>
@@ -1182,7 +1232,7 @@ R^2 = 0.9937219694072356
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.2964015707872737
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.29536865643009746
 0.2898598062432779
 </pre></div>
 </div>
@@ -1208,7 +1258,7 @@ R^2 = 0.9937219694072356
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1.730157694729072
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1.7194138214936507
 1.7236544062149992
 </pre></div>
 </div>
@@ -1222,7 +1272,7 @@ R^2 = 0.9937219694072356
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.007545156037323953
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.00756479128619849
 0.007483647387490024
 </pre></div>
 </div>
@@ -1252,7 +1302,7 @@ R^2 = 0.9937219694072356
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3.5886661813121474
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3.6450861513296102
 3.6180105030251086
 </pre></div>
 </div>
@@ -1372,15 +1422,21 @@ R^2 = 0.9937219694072356
 <span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">29</span><span class="p">],</span> <span class="n">line</span> <span class="mi">8</span>
 <span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">u</span><span class="o">.</span><span class="n">ufloat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span> <span class="n">u</span><span class="o">.</span><span class="n">ufloat</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span> <span class="n">u</span><span class="o">.</span><span class="n">ufloat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)])</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> 
 <span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> 
 <span class="ne">----&gt; </span><span class="mi">8</span> <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/numpy/__init__.py:792,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
-<span class="g g-Whitespace">    </span><span class="mi">789</span>     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.char</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">char</span>
-<span class="g g-Whitespace">    </span><span class="mi">790</span>     <span class="k">return</span> <span class="n">char</span><span class="o">.</span><span class="n">chararray</span>
-<span class="ne">--&gt; </span><span class="mi">792</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/numpy/__init__.py:769,</span> in <span class="ni">__getattr__</span><span class="nt">(attr)</span>
+<span class="g g-Whitespace">    </span><span class="mi">762</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">__expired_attributes__</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">763</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">764</span>         <span class="sa">f</span><span class="s2">"`np.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` was removed in the NumPy 2.0 release. "</span>
+<span class="g g-Whitespace">    </span><span class="mi">765</span>         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">__expired_attributes__</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">766</span>         <span class="n">name</span><span class="o">=</span><span class="kc">None</span>
+<span class="g g-Whitespace">    </span><span class="mi">767</span>     <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">769</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="ne">AttributeError</span>: module &#39;numpy&#39; has no attribute &#39;trapz&#39;
+<span class="ne">AttributeError</span>: module 'numpy' has no attribute 'trapz'
 </pre></div>
 </div>
 </div>
@@ -1425,7 +1481,7 @@ R^2 = 0.9937219694072356
 
 <span class="c1"># Step 1</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">Ca</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Fa0</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
-    <span class="s2">&quot;Mole balance for a CSTR. Solve this equation for func(Ca)=0&quot;</span>
+    <span class="s2">"Mole balance for a CSTR. Solve this equation for func(Ca)=0"</span>
     <span class="n">Fa</span> <span class="o">=</span> <span class="n">v0</span> <span class="o">*</span> <span class="n">Ca</span>  <span class="c1"># exit molar flow of A</span>
     <span class="n">ra</span> <span class="o">=</span> <span class="o">-</span><span class="n">k</span> <span class="o">*</span> <span class="n">Ca</span><span class="o">**</span><span class="mi">2</span>  <span class="c1"># rate of reaction of A L/mol/h</span>
     <span class="k">return</span> <span class="n">Fa0</span> <span class="o">-</span> <span class="n">Fa</span> <span class="o">+</span> <span class="n">V</span> <span class="o">*</span> <span class="n">ra</span>
@@ -1433,7 +1489,7 @@ R^2 = 0.9937219694072356
 
 <span class="c1"># Step 2</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">Ca_solve</span><span class="p">(</span><span class="n">v0</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">Fa0</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
-    <span class="s2">&quot;wrap fsolve to pass parameters as float or units&quot;</span>
+    <span class="s2">"wrap fsolve to pass parameters as float or units"</span>
     <span class="c1"># this line is a little fragile. You must put [0] at the end or</span>
     <span class="c1"># you get the NotImplemented result</span>
     <span class="n">guess</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">Fa0</span> <span class="o">/</span> <span class="n">v0</span>
@@ -1474,12 +1530,12 @@ R^2 = 0.9937219694072356
 
     <span class="n">SOL</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fsolve</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">Fa0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">v0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ca(exit) = </span><span class="si">{0}</span><span class="s2">+/-</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">SOL</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">SOL</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Ca(exit) = </span><span class="si">{0}</span><span class="s2">+/-</span><span class="si">{1}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">SOL</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">SOL</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Ca(exit) = 0.005013431186645474+/-0.0001709044633416643
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Ca(exit) = 0.0050075194730040224+/-0.00016902955502706525
 </pre></div>
 </div>
 </div>
@@ -1501,17 +1557,17 @@ R^2 = 0.9937219694072356
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;n = </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"n = </span><span class="si">{0}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
 
 <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mf">0.49</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You win!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"You win!"</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;you lose.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"you lose."</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>n = 0.8800548057170309
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>n = 0.8713387911509238
 You win!
 </pre></div>
 </div>
@@ -1528,7 +1584,7 @@ You win!
 <span class="n">wins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">games</span> <span class="o">&gt;</span> <span class="mf">0.49</span><span class="p">)</span>
 <span class="n">losses</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">wins</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You won </span><span class="si">{0}</span><span class="s2"> times (</span><span class="si">{1:%}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wins</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">wins</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"You won </span><span class="si">{0}</span><span class="s2"> times (</span><span class="si">{1:%}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wins</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">wins</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span><span class="p">))</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
@@ -1537,10 +1593,10 @@ You win!
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>You won 5108 times (51.080000%)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>You won 5037 times (50.370000%)
 </pre></div>
 </div>
-<img alt="../_images/04ba0fc657826cba6dcf8b04279fad4c17a526a2c30113fb13ec8ead99e9edcc.png" src="../_images/04ba0fc657826cba6dcf8b04279fad4c17a526a2c30113fb13ec8ead99e9edcc.png" />
+<img alt="../_images/57c8c7d8509aa36e9c27faccc41d74ec16bd006e1406288a988b8ec24e009b43.png" src="../_images/57c8c7d8509aa36e9c27faccc41d74ec16bd006e1406288a988b8ec24e009b43.png" />
 </div>
 </div>
 <p>As you can see you win slightly more than you lost.</p>
@@ -1556,10 +1612,10 @@ You win!
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>81
-[24 33 74]
-[[18 21]
- [37 81]]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>66
+[97 84 93]
+[[11 17]
+ [17 20]]
 </pre></div>
 </div>
 </div>
@@ -1577,8 +1633,8 @@ You win!
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.6207989318196571
-[1.29444504 0.79303864]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1.1628244213202337
+[1.11196666 0.91700036]
 </pre></div>
 </div>
 </div>
@@ -1602,7 +1658,7 @@ You win!
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/efb2dd0c854c82934610bfe65d5b8a06ad72448968cb21dca4df8d3932adfef2.png" src="../_images/efb2dd0c854c82934610bfe65d5b8a06ad72448968cb21dca4df8d3932adfef2.png" />
+<img alt="../_images/b157374804ef1d9faba8b312a8e07af998579abb036679ad953a7cfecd9d332c.png" src="../_images/b157374804ef1d9faba8b312a8e07af998579abb036679ad953a7cfecd9d332c.png" />
 </div>
 </div>
 <p>What fraction of points lie between plus and minus one standard deviation of the mean?</p>
@@ -1620,14 +1676,14 @@ You win!
 
 <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">samples</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">mu</span> <span class="o">-</span> <span class="n">sigma</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">samples</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">mu</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">)))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
 <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">samples</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">mu</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">samples</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">mu</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:%}</span><span class="s2"> of samples are within +- 1 standard deviations of the mean&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:%}</span><span class="s2"> of samples are within +- 2 standard deviations of the mean&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{0:%}</span><span class="s2"> of samples are within +- 1 standard deviations of the mean"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{0:%}</span><span class="s2"> of samples are within +- 2 standard deviations of the mean"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>68.940000% of samples are within +- 1 standard deviations of the mean
-95.480000% of samples are within +- 2 standard deviations of the mean
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>68.920000% of samples are within +- 1 standard deviations of the mean
+95.900000% of samples are within +- 2 standard deviations of the mean
 </pre></div>
 </div>
 </div>
@@ -1694,15 +1750,17 @@ You win!
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction-to-statistical-data-analysis">Introduction to statistical data analysis</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-statistics">Basic statistics</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#confidence-interval-on-an-average">Confidence interval on an average</a></li>
@@ -2247,8 +2305,8 @@ By John Kitchin
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
   </footer>

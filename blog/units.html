@@ -16,41 +16,44 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
     <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
     <script kind="utterances">
 
@@ -92,6 +95,12 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-4H7VFJKEZY');
             </script>
@@ -101,6 +110,12 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-4H7VFJKEZY');
             </script>
@@ -108,40 +123,37 @@ commentsRunWhenDOMLoaded(addUtterances);
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'blog/units';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Programming" href="programming.html" />
     <link rel="prev" title="Plotting" href="plotting.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
   
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -149,7 +161,6 @@ commentsRunWhenDOMLoaded(addUtterances);
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -157,15 +168,59 @@ commentsRunWhenDOMLoaded(addUtterances);
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
     </header>
   
 
@@ -174,7 +229,8 @@ commentsRunWhenDOMLoaded(addUtterances);
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -204,21 +260,17 @@ commentsRunWhenDOMLoaded(addUtterances);
     
     
     <img src="../_static/pycse.png" class="logo__image only-light" alt="pycse - Python Computations in Science and Engineering - Home"/>
-    <script>document.write(`<img src="../_static/pycse.png" class="logo__image only-dark" alt="pycse - Python Computations in Science and Engineering - Home"/>`);</script>
+    <img src="../_static/pycse.png" class="logo__image only-dark pst-js-only" alt="pycse - Python Computations in Science and Engineering - Home"/>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script></div>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -291,6 +343,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="../docs/mip.html">Optimizing over machine-learned models with MIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../docs/execution-statistics.html">Build statistics</a></li>
 </ul>
 
@@ -300,9 +353,14 @@ commentsRunWhenDOMLoaded(addUtterances);
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -498,7 +556,7 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 <button onclick="toggleFullScreen()"
-  class="btn btn-sm btn-fullscreen-button"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
   title="Fullscreen mode"
   data-bs-placement="bottom" data-bs-toggle="tooltip"
 >
@@ -512,25 +570,17 @@ commentsRunWhenDOMLoaded(addUtterances);
 
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
 </div></div>
@@ -552,7 +602,7 @@ document.write(`
                 <h2> Contents </h2>
             </div>
             <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-units-in-python">Using units in python</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-units-with-the-quantities-module">Handling units with the quantities module</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#units-in-odes">Units in ODEs</a></li>
@@ -610,39 +660,81 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-0.008315638888734178 mol/L
+</pre></div>
+</div>
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">fsolve</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">19</span>
+<span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="n">tguess</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span>
+<span class="g g-Whitespace">     </span><span class="mi">16</span> 
+<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="nb">print</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">tguess</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">18</span> 
+<span class="ne">---&gt; </span><span class="mi">19</span> <span class="nb">print</span><span class="p">(</span><span class="n">fsolve</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">tguess</span><span class="p">))</span>
 
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:171,</span> in <span class="ni">fsolve</span><span class="nt">(func, x0, args, fprime, full_output, col_deriv, xtol, maxfev, band, epsfcn, factor, diag)</span>
+<span class="g g-Whitespace">    </span><span class="mi">161</span> <span class="n">_wrapped_func</span><span class="o">.</span><span class="n">nfev</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="g g-Whitespace">    </span><span class="mi">163</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'col_deriv'</span><span class="p">:</span> <span class="n">col_deriv</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">164</span>            <span class="s1">'xtol'</span><span class="p">:</span> <span class="n">xtol</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">165</span>            <span class="s1">'maxfev'</span><span class="p">:</span> <span class="n">maxfev</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>    <span class="mi">168</span>            <span class="s1">'factor'</span><span class="p">:</span> <span class="n">factor</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">169</span>            <span class="s1">'diag'</span><span class="p">:</span> <span class="n">diag</span><span class="p">}</span>
+<span class="ne">--&gt; </span><span class="mi">171</span> <span class="n">res</span> <span class="o">=</span> <span class="n">_root_hybr</span><span class="p">(</span><span class="n">_wrapped_func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="n">fprime</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">172</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span> <span class="o">=</span> <span class="n">_wrapped_func</span><span class="o">.</span><span class="n">nfev</span>
+<span class="g g-Whitespace">    </span><span class="mi">174</span> <span class="k">if</span> <span class="n">full_output</span><span class="p">:</span>
 
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:239,</span> in <span class="ni">_root_hybr</span><span class="nt">(func, x0, args, jac, col_deriv, xtol, maxfev, band, eps, factor, diag, **unknown_options)</span>
+<span class="g g-Whitespace">    </span><span class="mi">237</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">238</span>     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">args</span><span class="p">,)</span>
+<span class="ne">--&gt; </span><span class="mi">239</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">_check_func</span><span class="p">(</span><span class="s1">'fsolve'</span><span class="p">,</span> <span class="s1">'func'</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,))</span>
+<span class="g g-Whitespace">    </span><span class="mi">240</span> <span class="k">if</span> <span class="n">epsfcn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">241</span>     <span class="n">epsfcn</span> <span class="o">=</span> <span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:24,</span> in <span class="ni">_check_func</span><span class="nt">(checker, argname, thefunc, x0, args, numinputs, output_shape)</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="k">def</span><span class="w"> </span><span class="nf">_check_func</span><span class="p">(</span><span class="n">checker</span><span class="p">,</span> <span class="n">argname</span><span class="p">,</span> <span class="n">thefunc</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">numinputs</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span>                 <span class="n">output_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="ne">---&gt; </span><span class="mi">24</span>     <span class="n">res</span> <span class="o">=</span> <span class="n">atleast_1d</span><span class="p">(</span><span class="n">thefunc</span><span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">x0</span><span class="p">[:</span><span class="n">numinputs</span><span class="p">],)</span> <span class="o">+</span> <span class="n">args</span><span class="p">)))</span>
+<span class="g g-Whitespace">     </span><span class="mi">25</span>     <span class="k">if</span> <span class="p">(</span><span class="n">output_shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shape</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">!=</span> <span class="n">output_shape</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">26</span>         <span class="k">if</span> <span class="p">(</span><span class="n">output_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
 
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:159,</span> in <span class="ni">fsolve.&lt;locals&gt;._wrapped_func</span><span class="nt">(*fargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">154</span><span class="w"> </span><span class="sd">"""</span>
+<span class="g g-Whitespace">    </span><span class="mi">155</span><span class="sd"> Wrapped `func` to track the number of times</span>
+<span class="g g-Whitespace">    </span><span class="mi">156</span><span class="sd"> the function has been called.</span>
+<span class="g g-Whitespace">    </span><span class="mi">157</span><span class="sd"> """</span>
+<span class="g g-Whitespace">    </span><span class="mi">158</span> <span class="n">_wrapped_func</span><span class="o">.</span><span class="n">nfev</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="ne">--&gt; </span><span class="mi">159</span> <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">fargs</span><span class="p">)</span>
+
+<span class="nn">Cell In[1], line 12,</span> in <span class="ni">func</span><span class="nt">(t)</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+<span class="ne">---&gt; </span><span class="mi">12</span>     <span class="k">return</span> <span class="n">CA</span> <span class="o">-</span> <span class="n">CA0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">k</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/quantities/quantity.py:334,</span> in <span class="ni">Quantity.__array_wrap__</span><span class="nt">(self, obj, context, return_scalar)</span>
+<span class="g g-Whitespace">    </span><span class="mi">331</span> <span class="c1"># For NumPy &gt; 2.0 we either do the prepare or the wrap</span>
+<span class="g g-Whitespace">    </span><span class="mi">332</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">333</span>     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">334</span>         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__array_prepare__</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">335</span>     <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">336</span>         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__array_wrap__</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">return_scalar</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/quantities/quantity.py:314,</span> in <span class="ni">Quantity.__array_prepare__</span><span class="nt">(self, obj, context)</span>
+<span class="g g-Whitespace">    </span><span class="mi">311</span>     <span class="k">return</span> <span class="n">obj</span>
+<span class="g g-Whitespace">    </span><span class="mi">313</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">314</span>     <span class="n">res</span><span class="o">.</span><span class="n">_dimensionality</span> <span class="o">=</span> <span class="n">p_dict</span><span class="p">[</span><span class="n">uf</span><span class="p">](</span><span class="o">*</span><span class="n">objs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">315</span> <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">316</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">317</span><span class="w">         </span><span class="sd">"""ufunc %r not supported by quantities</span>
+<span class="g g-Whitespace">    </span><span class="mi">318</span><span class="sd">         please file a bug report at https://github.com/python-quantities</span>
+<span class="g g-Whitespace">    </span><span class="mi">319</span><span class="sd">         """</span> <span class="o">%</span> <span class="n">uf</span>
+<span class="g g-Whitespace">    </span><span class="mi">320</span>         <span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/quantities/dimensionality.py:370,</span> in <span class="ni">_d_dimensionless</span><span class="nt">(q1, out)</span>
+<span class="g g-Whitespace">    </span><span class="mi">368</span> <span class="k">def</span><span class="w"> </span><span class="nf">_d_dimensionless</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">369</span>     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="s1">'dimensionality'</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">370</span>         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"quantity must be dimensionless"</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">371</span>     <span class="k">return</span> <span class="n">Dimensionality</span><span class="p">()</span>
+
+<span class="ne">ValueError</span>: quantity must be dimensionless
 </pre></div>
 </div>
 </div>
@@ -665,11 +757,11 @@ document.write(`
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">fsolve</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">t0</span><span class="p">):</span>
-    <span class="s2">&quot;wrapped fsolve command to work with units&quot;</span>
+    <span class="s2">"wrapped fsolve command to work with units"</span>
     <span class="n">tU</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">t0</span><span class="p">)</span>  <span class="c1"># units on initial guess, normalized</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_func</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
-        <span class="s2">&quot;t will be unitless, so we add unit to it. t * tU has units.&quot;</span>
+        <span class="s2">"t will be unitless, so we add unit to it. t * tU has units."</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="n">tU</span><span class="p">))</span>
 
     <span class="p">(</span><span class="n">sol</span><span class="p">,)</span> <span class="o">=</span> <span class="n">_fsolve</span><span class="p">(</span><span class="n">wrapped_func</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
@@ -684,38 +776,61 @@ document.write(`
 </div>
 <div class="cell_output docutils container">
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">fsolve</span> <span class="k">as</span> <span class="n">_fsolve</span>
+<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">29</span>
+<span class="g g-Whitespace">     </span><span class="mi">25</span> 
+<span class="g g-Whitespace">     </span><span class="mi">26</span> 
+<span class="g g-Whitespace">     </span><span class="mi">27</span> <span class="n">tguess</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span>
+<span class="g g-Whitespace">     </span><span class="mi">28</span> 
+<span class="ne">---&gt; </span><span class="mi">29</span> <span class="nb">print</span><span class="p">(</span><span class="n">fsolve</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">tguess</span><span class="p">))</span>
 
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
+<span class="nn">Cell In[2], line 23,</span> in <span class="ni">fsolve</span><span class="nt">(func, t0)</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span>     <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_func</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span>         <span class="s2">"t will be unitless, so we add unit to it. t * tU has units."</span>
+<span class="g g-Whitespace">     </span><span class="mi">21</span>         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="n">tU</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span> 
+<span class="ne">---&gt; </span><span class="mi">23</span>     <span class="p">(</span><span class="n">sol</span><span class="p">,)</span> <span class="o">=</span> <span class="n">_fsolve</span><span class="p">(</span><span class="n">wrapped_func</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">24</span>     <span class="k">return</span> <span class="n">sol</span> <span class="o">*</span> <span class="n">tU</span>
 
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:171,</span> in <span class="ni">fsolve</span><span class="nt">(func, x0, args, fprime, full_output, col_deriv, xtol, maxfev, band, epsfcn, factor, diag)</span>
+<span class="g g-Whitespace">    </span><span class="mi">161</span> <span class="n">_wrapped_func</span><span class="o">.</span><span class="n">nfev</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="g g-Whitespace">    </span><span class="mi">163</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'col_deriv'</span><span class="p">:</span> <span class="n">col_deriv</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">164</span>            <span class="s1">'xtol'</span><span class="p">:</span> <span class="n">xtol</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">165</span>            <span class="s1">'maxfev'</span><span class="p">:</span> <span class="n">maxfev</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>    <span class="mi">168</span>            <span class="s1">'factor'</span><span class="p">:</span> <span class="n">factor</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">169</span>            <span class="s1">'diag'</span><span class="p">:</span> <span class="n">diag</span><span class="p">}</span>
+<span class="ne">--&gt; </span><span class="mi">171</span> <span class="n">res</span> <span class="o">=</span> <span class="n">_root_hybr</span><span class="p">(</span><span class="n">_wrapped_func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="n">fprime</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">172</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span> <span class="o">=</span> <span class="n">_wrapped_func</span><span class="o">.</span><span class="n">nfev</span>
+<span class="g g-Whitespace">    </span><span class="mi">174</span> <span class="k">if</span> <span class="n">full_output</span><span class="p">:</span>
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:239,</span> in <span class="ni">_root_hybr</span><span class="nt">(func, x0, args, jac, col_deriv, xtol, maxfev, band, eps, factor, diag, **unknown_options)</span>
+<span class="g g-Whitespace">    </span><span class="mi">237</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">238</span>     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">args</span><span class="p">,)</span>
+<span class="ne">--&gt; </span><span class="mi">239</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">_check_func</span><span class="p">(</span><span class="s1">'fsolve'</span><span class="p">,</span> <span class="s1">'func'</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,))</span>
+<span class="g g-Whitespace">    </span><span class="mi">240</span> <span class="k">if</span> <span class="n">epsfcn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">241</span>     <span class="n">epsfcn</span> <span class="o">=</span> <span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
 
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:24,</span> in <span class="ni">_check_func</span><span class="nt">(checker, argname, thefunc, x0, args, numinputs, output_shape)</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="k">def</span><span class="w"> </span><span class="nf">_check_func</span><span class="p">(</span><span class="n">checker</span><span class="p">,</span> <span class="n">argname</span><span class="p">,</span> <span class="n">thefunc</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">numinputs</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span>                 <span class="n">output_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="ne">---&gt; </span><span class="mi">24</span>     <span class="n">res</span> <span class="o">=</span> <span class="n">atleast_1d</span><span class="p">(</span><span class="n">thefunc</span><span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">x0</span><span class="p">[:</span><span class="n">numinputs</span><span class="p">],)</span> <span class="o">+</span> <span class="n">args</span><span class="p">)))</span>
+<span class="g g-Whitespace">     </span><span class="mi">25</span>     <span class="k">if</span> <span class="p">(</span><span class="n">output_shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shape</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">!=</span> <span class="n">output_shape</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">26</span>         <span class="k">if</span> <span class="p">(</span><span class="n">output_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:159,</span> in <span class="ni">fsolve.&lt;locals&gt;._wrapped_func</span><span class="nt">(*fargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">154</span><span class="w"> </span><span class="sd">"""</span>
+<span class="g g-Whitespace">    </span><span class="mi">155</span><span class="sd"> Wrapped `func` to track the number of times</span>
+<span class="g g-Whitespace">    </span><span class="mi">156</span><span class="sd"> the function has been called.</span>
+<span class="g g-Whitespace">    </span><span class="mi">157</span><span class="sd"> """</span>
+<span class="g g-Whitespace">    </span><span class="mi">158</span> <span class="n">_wrapped_func</span><span class="o">.</span><span class="n">nfev</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="ne">--&gt; </span><span class="mi">159</span> <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">fargs</span><span class="p">)</span>
+
+<span class="nn">Cell In[2], line 21,</span> in <span class="ni">fsolve.&lt;locals&gt;.wrapped_func</span><span class="nt">(t)</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span>     <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_func</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span>         <span class="s2">"t will be unitless, so we add unit to it. t * tU has units."</span>
+<span class="ne">---&gt; </span><span class="mi">21</span>         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="n">tU</span><span class="p">))</span>
+
+<span class="ne">TypeError</span>: only 0-dimensional arrays can be converted to Python scalars
 </pre></div>
 </div>
 </div>
@@ -730,11 +845,11 @@ document.write(`
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">fsolve</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">t0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;wrapped fsolve command to work with units. We get the units on</span>
+<span class="w">    </span><span class="sd">"""wrapped fsolve command to work with units. We get the units on</span>
 <span class="sd">    the function argument, then wrap the function so we can add units</span>
 <span class="sd">    to the argument and return floats. Finally we call the original</span>
 <span class="sd">    fsolve from scipy. Note: this does not support all of the options</span>
-<span class="sd">    to fsolve.&quot;&quot;&quot;</span>
+<span class="sd">    to fsolve."""</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">tU</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">t0</span><span class="p">]</span>  <span class="c1"># units on initial guess, normalized</span>
@@ -742,7 +857,7 @@ document.write(`
         <span class="n">tU</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">t0</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_func</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
-        <span class="s2">&quot;t will be unitless, so we add unit to it. t * tU has units.&quot;</span>
+        <span class="s2">"t will be unitless, so we add unit to it. t * tU has units."</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="p">[</span><span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span> <span class="k">for</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">tU</span><span class="p">)]</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
@@ -772,7 +887,7 @@ document.write(`
 
 <span class="n">tguess</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span>
 <span class="p">(</span><span class="n">sol1</span><span class="p">,)</span> <span class="o">=</span> <span class="n">fsolve</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">tguess</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sol1 = &quot;</span><span class="p">,</span> <span class="n">sol1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"sol1 = "</span><span class="p">,</span> <span class="n">sol1</span><span class="p">)</span>
 
 
 <span class="c1">### Problem 2</span>
@@ -783,44 +898,14 @@ document.write(`
 
 <span class="n">Xguess</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.2</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">kg</span><span class="p">,</span> <span class="mf">5.2</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">J</span><span class="p">]</span>
 <span class="n">s2a</span><span class="p">,</span> <span class="n">s2b</span> <span class="o">=</span> <span class="n">fsolve</span><span class="p">(</span><span class="n">func2</span><span class="p">,</span> <span class="n">Xguess</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;s2a = </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">s2b = </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s2a</span><span class="p">,</span> <span class="n">s2b</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"s2a = </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">s2b = </span><span class="si">{1}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s2a</span><span class="p">,</span> <span class="n">s2b</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">fsolve</span> <span class="k">as</span> <span class="n">_fsolve</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
-
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>sol1 =  4.605170185988092 s
+s2a = 1.9999999999999867 kg
+s2b = 5.000000000000002 J
 </pre></div>
 </div>
 </div>
@@ -848,10 +933,10 @@ document.write(`
     <span class="n">factor</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
     <span class="n">diag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;wrapped fsolve command to work with units. We get the units on</span>
+<span class="w">    </span><span class="sd">"""wrapped fsolve command to work with units. We get the units on</span>
 <span class="sd">    the function argument, then wrap the function so we can add units</span>
 <span class="sd">    to the argument and return floats. Finally we call the original</span>
-<span class="sd">    fsolve from scipy.&quot;&quot;&quot;</span>
+<span class="sd">    fsolve from scipy."""</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">tU</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">t0</span><span class="p">]</span>  <span class="c1"># units on initial guess, normalized</span>
@@ -859,7 +944,7 @@ document.write(`
         <span class="n">tU</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">t0</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_func</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="s2">&quot;t will be unitless, so we add unit to it. t * tU has units.&quot;</span>
+        <span class="s2">"t will be unitless, so we add unit to it. t * tU has units."</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="p">[</span><span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span> <span class="k">for</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">tU</span><span class="p">)]</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
@@ -912,7 +997,7 @@ document.write(`
 
 <span class="n">tguess</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span>
 <span class="p">(</span><span class="n">sol1</span><span class="p">,)</span> <span class="o">=</span> <span class="n">fsolve</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">tguess</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sol1 = &quot;</span><span class="p">,</span> <span class="n">sol1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"sol1 = "</span><span class="p">,</span> <span class="n">sol1</span><span class="p">)</span>
 
 
 <span class="c1">### Problem 2</span>
@@ -924,7 +1009,7 @@ document.write(`
 <span class="n">Xguess</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.2</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">kg</span><span class="p">,</span> <span class="mf">5.2</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">J</span><span class="p">]</span>
 <span class="n">sol</span><span class="p">,</span> <span class="n">infodict</span><span class="p">,</span> <span class="n">ier</span><span class="p">,</span> <span class="n">mesg</span> <span class="o">=</span> <span class="n">fsolve</span><span class="p">(</span><span class="n">func2</span><span class="p">,</span> <span class="n">Xguess</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">s2a</span><span class="p">,</span> <span class="n">s2b</span> <span class="o">=</span> <span class="n">sol</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;s2a = </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">s2b = </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s2a</span><span class="p">,</span> <span class="n">s2b</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"s2a = </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">s2b = </span><span class="si">{1}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s2a</span><span class="p">,</span> <span class="n">s2b</span><span class="p">))</span>
 
 
 <span class="c1">### Problem 3 - with an arg</span>
@@ -937,44 +1022,15 @@ document.write(`
 
 <span class="p">(</span><span class="n">sol3</span><span class="p">,)</span> <span class="o">=</span> <span class="n">fsolve</span><span class="p">(</span><span class="n">func3</span><span class="p">,</span> <span class="n">Xguess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">arg</span><span class="p">,))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sol3 = &quot;</span><span class="p">,</span> <span class="n">sol3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"sol3 = "</span><span class="p">,</span> <span class="n">sol3</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">fsolve</span> <span class="k">as</span> <span class="n">_fsolve</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
-
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>sol1 =  4.605170185988092 s
+s2a = 1.9999999999999867 kg
+s2b = 5.000000000000002 J
+sol3 =  2.0 kg
 </pre></div>
 </div>
 </div>
@@ -992,39 +1048,8 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">degC</span>
-<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">rescale</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">))</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
-
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>20.0 K
+36.0 degF
 </pre></div>
 </div>
 </div>
@@ -1059,39 +1084,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">k</span> <span class="o">=</span> <span class="mf">0.23</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">Ca0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">mol</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">L</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
-
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[0.31663678]
 </pre></div>
 </div>
 </div>
@@ -1131,8 +1124,8 @@ document.write(`
 <span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_func</span><span class="p">(</span><span class="n">Y0</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="c1"># put units on T if they are on the original t</span>
-        <span class="c1"># check for units so we don&#39;t put them on twice</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">):</span>
+        <span class="c1"># check for units so we don't put them on twice</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s2">"units"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s2">"units"</span><span class="p">):</span>
             <span class="n">T</span> <span class="o">=</span> <span class="n">T</span> <span class="o">*</span> <span class="n">t</span><span class="o">.</span><span class="n">units</span>
         <span class="c1"># now for the dependent variable units. Y0 may be a scalar or</span>
         <span class="c1"># a list or an array. we want to check each element of y0 for</span>
@@ -1142,12 +1135,12 @@ document.write(`
             <span class="n">uY0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Y0</span><span class="p">]</span>  <span class="c1"># a list copy of contents of Y0</span>
             <span class="c1"># this works if y0 is an iterable, eg. a list or array</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y0</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">uY0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">yi</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">uY0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">"units"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">yi</span><span class="p">,</span> <span class="s2">"units"</span><span class="p">):</span>
                     <span class="n">uY0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">uY0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">yi</span><span class="o">.</span><span class="n">units</span>
 
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="c1"># we have a scalar</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Y0</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">y0</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Y0</span><span class="p">,</span> <span class="s2">"units"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">y0</span><span class="p">,</span> <span class="s2">"units"</span><span class="p">):</span>
                 <span class="n">uY0</span> <span class="o">=</span> <span class="n">Y0</span> <span class="o">*</span> <span class="n">y0</span><span class="o">.</span><span class="n">units</span>
 
         <span class="n">val</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">uY0</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
@@ -1213,7 +1206,7 @@ document.write(`
         <span class="n">uY</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y0</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">uY</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">yi</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">uY</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">"units"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">yi</span><span class="p">,</span> <span class="s2">"units"</span><span class="p">):</span>
                 <span class="n">uY</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">yi</span><span class="o">.</span><span class="n">units</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">uY</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
@@ -1245,8 +1238,8 @@ document.write(`
 <span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tspan</span><span class="p">,</span> <span class="n">sol</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time (</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tspan</span><span class="o">.</span><span class="n">dimensionality</span><span class="o">.</span><span class="n">latex</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$C_A$ (</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">dimensionality</span><span class="o">.</span><span class="n">latex</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Time (</span><span class="si">{0}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tspan</span><span class="o">.</span><span class="n">dimensionality</span><span class="o">.</span><span class="n">latex</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"$C_A$ (</span><span class="si">{0}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">dimensionality</span><span class="o">.</span><span class="n">latex</span><span class="p">))</span>
 
 <span class="c1">##################################################################</span>
 <span class="c1"># test coupled ODEs</span>
@@ -1276,53 +1269,26 @@ document.write(`
 <span class="n">sol</span> <span class="o">=</span> <span class="n">odeint</span><span class="p">(</span><span class="n">dFdW</span><span class="p">,</span> <span class="n">F0</span><span class="p">,</span> <span class="n">wspan</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">alpha</span><span class="p">,))</span>
 <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sol</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test 2&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Test 2"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wspan</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">wspan</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;$P/P_0$&quot;</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Catalyst weight (</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wspan</span><span class="o">.</span><span class="n">dimensionality</span><span class="o">.</span><span class="n">latex</span><span class="p">));</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">"X"</span><span class="p">,</span> <span class="s2">"$P/P_0$"</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Catalyst weight (</span><span class="si">{0}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wspan</span><span class="o">.</span><span class="n">dimensionality</span><span class="o">.</span><span class="n">latex</span><span class="p">));</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
-
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[0.31663678] mol/L
+Test 2
+0.6655695781563288 dimensionless
+0.26330047068114865
 </pre></div>
 </div>
+<img alt="../_images/7f61c56f77fb040b304888045a87017b1e21c70697b48cb3e7565274caff06b3.png" src="../_images/7f61c56f77fb040b304888045a87017b1e21c70697b48cb3e7565274caff06b3.png" />
+<img alt="../_images/21631348b3356d4c76c2118e6a8c501b68ad46e2bd0ac8fbec8daeb68b25c27b.png" src="../_images/21631348b3356d4c76c2118e6a8c501b68ad46e2bd0ac8fbec8daeb68b25c27b.png" />
 </div>
 </div>
 <p>That is not too bad. This is another example of a function you would want to save in a module for reuse. There is one bad feature of the wrapped odeint function, and that is that it changes the solution for coupled ODEs from an ndarray to a list. That is necessary because you apparently cannot have mixed units in an ndarray. It is fine, however, to have a list of mixed units. This is not a huge problem, but it changes the syntax for plotting results for the wrapped odeint function compared to the unwrapped function without units.</p>
@@ -1344,39 +1310,8 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">m</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">L</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">m</span>  <span class="c1"># characteristic length</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
-
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.5 dimensionless
+&lt;class 'quantities.quantity.Quantity'&gt;
 </pre></div>
 </div>
 </div>
@@ -1418,39 +1353,8 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">fsolve</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
-
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-0.1253352832366127 dimensionless
+4.605170185988091 s
 </pre></div>
 </div>
 </div>
@@ -1483,44 +1387,12 @@ document.write(`
 <span class="n">X0</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">X_sol</span> <span class="o">=</span> <span class="n">odeint</span><span class="p">(</span><span class="n">dXdtau</span><span class="p">,</span> <span class="n">X0</span><span class="p">,</span> <span class="n">tauspan</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ca at t = </span><span class="si">{0}</span><span class="s2"> = </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tspan</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">X_sol</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Ca0</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Ca at t = </span><span class="si">{0}</span><span class="s2"> = </span><span class="si">{1}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tspan</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">X_sol</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Ca0</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">import</span><span class="w"> </span><span class="nn">quantities</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">k</span> <span class="o">=</span> <span class="mf">0.23</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">Ca0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">mol</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">L</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">275</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="kn">from</span><span class="w"> </span><span class="nn">._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_registry</span>
-<span class="ne">--&gt; </span><span class="mi">275</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.quantity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">uncertainquantity</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">quantities</span><span class="o">/</span><span class="n">quantity</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">113</span>
-<span class="g g-Whitespace">    </span><span class="mi">109</span>         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="k">return</span> <span class="n">g</span>
-<span class="ne">--&gt; </span><span class="mi">113</span> <span class="k">class</span><span class="w"> </span><span class="nc">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">114</span> 
-<span class="g g-Whitespace">    </span><span class="mi">115</span>     <span class="c1"># TODO: what is an appropriate value?</span>
-<span class="g g-Whitespace">    </span><span class="mi">116</span>     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="g g-Whitespace">    </span><span class="mi">118</span>     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/quantities/quantity.py:632,</span> in <span class="ni">Quantity</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">def</span><span class="w"> </span><span class="nf">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">630</span>     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">632</span> <span class="nd">@with_doc</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">ptp</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">633</span> <span class="k">def</span><span class="w"> </span><span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span>     <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span>     <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span>
-
-<span class="ne">AttributeError</span>: type object &#39;numpy.ndarray&#39; has no attribute &#39;ptp&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Ca at t = 5.0 s = 0.31663677735141815 mol/L
 </pre></div>
 </div>
 </div>
@@ -1584,15 +1456,17 @@ document.write(`
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-units-in-python">Using units in python</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-units-with-the-quantities-module">Handling units with the quantities module</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#units-in-odes">Units in ODEs</a></li>
@@ -2114,8 +1988,8 @@ By John Kitchin
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
   </footer>
