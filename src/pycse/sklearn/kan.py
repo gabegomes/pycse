@@ -1192,17 +1192,34 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
                     if layer_sizes[-1] <= 5:
                         node_labels[node_id] = f"$y_{{{node_idx}}}$"
 
-        nx.draw_networkx_nodes(
+        # Size nodes to the vertical spacing so wide input layers do not overlap, and draw
+        # them above the edges so edges stop at the node boundary.
+        y_span = (max_nodes - 1) * node_spacing + 1.1
+        ax_height_pt = ax.get_position().height * fig.get_size_inches()[1] * 72
+        spacing_pt = node_spacing * ax_height_pt / y_span
+        node_size = min(500, (0.8 * spacing_pt) ** 2)
+
+        nodes = nx.draw_networkx_nodes(
             G,
             pos,
             node_color=_SURFACE,
-            node_size=500,
+            node_size=node_size,
             edgecolors=_INK_2,
             linewidths=1.5 * _PX,
             ax=ax,
         )
+        nodes.set_zorder(7)
 
-        nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=9, font_color=_INK, ax=ax)
+        labels = nx.draw_networkx_labels(
+            G,
+            pos,
+            labels=node_labels,
+            font_size=min(9, 0.45 * np.sqrt(node_size)),
+            font_color=_INK,
+            ax=ax,
+        )
+        for text in labels.values():
+            text.set_zorder(8)
 
         # Add layer labels above the top node of each column
         for layer_idx, n_nodes in enumerate(layer_sizes):
