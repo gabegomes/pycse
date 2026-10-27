@@ -56,57 +56,55 @@ jax.config.update("jax_enable_x64", True)
 def b_spline_basis(x, grid, k=3):
     """Compute B-spline basis functions using Cox-de Boor recursion.
 
+    Vectorized over the basis index, so the traced graph size depends only on
+    ``k`` and not on the number of knots or input features.
+
     Args:
-        x: Input values, shape (n_samples,).
+        x: Input values, any shape (e.g. (n_samples,) or (n_samples, n_features)).
         grid: Knot positions, shape (n_knots,).
         k: Spline order (default 3 for cubic splines).
 
     Returns:
-        B-spline basis values, shape (n_samples, n_basis).
+        B-spline basis values, shape ``x.shape + (n_basis,)``.
     """
-    n_intervals = len(grid) - 1
+    grid = jnp.asarray(grid)
+    x = jnp.asarray(x)[..., None]
+    n_intervals = grid.shape[0] - 1
 
-    # Order 0 (step functions)
-    bases = []
-    for i in range(n_intervals):
-        # B_{i,0}(x) = 1 if grid[i] <= x < grid[i+1], else 0
-        # Handle rightmost interval specially to include right endpoint
-        if i == n_intervals - 1:
-            b = jnp.where((x >= grid[i]) & (x <= grid[i + 1]), 1.0, 0.0)
-        else:
-            b = jnp.where((x >= grid[i]) & (x < grid[i + 1]), 1.0, 0.0)
-        bases.append(b)
-
-    bases = jnp.stack(bases, axis=-1)  # (n_samples, n_intervals)
+    # Order 0 (step functions): B_{i,0}(x) = 1 if grid[i] <= x < grid[i+1], else 0.
+    # The rightmost interval also includes its right endpoint.
+    lo, hi = grid[:-1], grid[1:]
+    is_last = jnp.arange(n_intervals) == n_intervals - 1
+    upper_ok = jnp.where(is_last, x <= hi, x < hi)
+    bases = jnp.where((x >= lo) & upper_ok, 1.0, 0.0)  # (..., n_intervals)
 
     # Cox-de Boor recursion for higher orders
     for order in range(1, k + 1):
-        new_bases = []
         n_basis = bases.shape[-1] - 1
-
-        for i in range(n_basis):
-            # Left term: (x - t_i) / (t_{i+order} - t_i) * B_{i,order-1}
-            denom_left = grid[i + order] - grid[i]
-            left = jnp.where(
-                denom_left > 1e-10,
-                (x - grid[i]) / denom_left * bases[..., i],
-                0.0,
-            )
-
-            # Right term: (t_{i+order+1} - x) / (t_{i+order+1} - t_{i+1}) * B_{i+1,order-1}
-            denom_right = grid[i + order + 1] - grid[i + 1]
-            right = jnp.where(
-                denom_right > 1e-10,
-                (grid[i + order + 1] - x) / denom_right * bases[..., i + 1],
-                0.0,
-            )
-
-            new_bases.append(left + right)
-
-        if len(new_bases) > 0:
-            bases = jnp.stack(new_bases, axis=-1)
-        else:
+        if n_basis <= 0:
             break
+        t_i = grid[:n_basis]
+        t_i1 = grid[1 : n_basis + 1]
+        t_io = grid[order : order + n_basis]
+        t_io1 = grid[order + 1 : order + 1 + n_basis]
+
+        # Left term: (x - t_i) / (t_{i+order} - t_i) * B_{i,order-1}
+        denom_left = t_io - t_i
+        left = jnp.where(
+            denom_left > 1e-10,
+            (x - t_i) / jnp.where(denom_left > 1e-10, denom_left, 1.0) * bases[..., :-1],
+            0.0,
+        )
+
+        # Right term: (t_{i+order+1} - x) / (t_{i+order+1} - t_{i+1}) * B_{i+1,order-1}
+        denom_right = t_io1 - t_i1
+        right = jnp.where(
+            denom_right > 1e-10,
+            (t_io1 - x) / jnp.where(denom_right > 1e-10, denom_right, 1.0) * bases[..., 1:],
+            0.0,
+        )
+
+        bases = left + right
 
     return bases
 
@@ -158,8 +156,6 @@ class KANLayer(nn.Module):
         Returns:
             Output tensor, shape (batch_size, out_features).
         """
-        batch_size = x.shape[0]
-
         # Spline coefficients: shape (in_features, out_features, n_basis)
         # Initialize with small random values
         spline_weight = self.param(
@@ -185,30 +181,18 @@ class KANLayer(nn.Module):
         # Normalize input to grid range for stable spline computation
         x_norm = jnp.clip(x, self.grid_range[0], self.grid_range[1])
 
-        # Compute B-spline basis for each input feature
-        # x_norm: (batch_size, in_features)
-        output = jnp.zeros((batch_size, self.out_features))
+        # B-spline basis for all input features at once
+        # basis: (batch_size, in_features, n_basis)
+        basis = b_spline_basis(x_norm, self.grid, k=self.spline_order)
 
-        for i in range(self.in_features):
-            # Get basis functions for this input dimension
-            # basis: (batch_size, n_basis)
-            basis = b_spline_basis(x_norm[:, i], self.grid, k=self.spline_order)
+        # Spline activations on every edge (i -> j), scaled and summed over inputs
+        spline_out = jnp.einsum("bik,ijk,ij->bj", basis, spline_weight, spline_scale)
 
-            for j in range(self.out_features):
-                # Spline activation: weighted sum of basis functions
-                # spline_out: (batch_size,)
-                spline_out = jnp.dot(basis, spline_weight[i, j, :])
+        # Base activation (SiLU for expressiveness, linear for MIP)
+        base_in = nn.silu(x) if self.base_activation == "silu" else x
+        base_out = base_in @ base_weight
 
-                # Base activation (SiLU for expressiveness, linear for MIP)
-                if self.base_activation == "silu":
-                    base_out = nn.silu(x[:, i]) * base_weight[i, j]
-                else:  # linear
-                    base_out = x[:, i] * base_weight[i, j]
-
-                # Combine with learnable scale
-                output = output.at[:, j].add(spline_scale[i, j] * spline_out + base_out)
-
-        return output
+        return spline_out + base_out
 
 
 class _KANN(nn.Module):
