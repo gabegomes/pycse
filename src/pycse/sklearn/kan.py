@@ -52,6 +52,31 @@ from pycse.sklearn.optimizers import run_optimizer
 os.environ["JAX_ENABLE_X64"] = "True"
 jax.config.update("jax_enable_x64", True)
 
+# Plot colors: ink tokens for text and chrome, categorical slots 1-3 for series.
+_INK = "#0b0b0b"
+_INK_2 = "#52514e"
+_MUTED = "#898781"
+_GRID = "#e1e0d9"
+_BASELINE = "#c3c2b7"
+_SURFACE = "#fcfcfb"
+_SERIES = ("#2a78d6", "#eb6834", "#1baf7a")
+_PX = 0.75  # one CSS pixel in points
+
+
+def _style_axes(ax, grid=True):
+    """Hairline, recessive axes: no top/right spines, solid hairline grid."""
+    ax.set_facecolor(_SURFACE)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(_BASELINE)
+        ax.spines[side].set_linewidth(_PX)
+    ax.tick_params(colors=_MUTED, labelcolor=_INK_2, length=0)
+    ax.grid(False)
+    if grid:
+        ax.grid(axis="y", color=_GRID, linewidth=_PX, linestyle="-")
+        ax.set_axisbelow(True)
+
 
 def feature_std(X):
     """Per-feature standard deviation for input scaling, with constant features mapped to 1.
@@ -697,14 +722,17 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
         mp_sorted = mp[sort_idx]
         se_sorted = se[sort_idx]
 
-        # Plot uncertainty band
+        _style_axes(ax)
+
+        # Plot uncertainty band (a wash of the model color)
         if self.n_ensemble > 1:
             ax.fill_between(
                 X_sorted,
                 mp_sorted - 2 * se_sorted,
                 mp_sorted + 2 * se_sorted,
-                alpha=0.3,
-                color="red",
+                alpha=0.12,
+                color=_SERIES[0],
+                linewidth=0,
                 label="±2σ (95% CI)",
                 zorder=1,
             )
@@ -713,19 +741,40 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
         if distribution and self.n_ensemble > 1:
             P = np.asarray(self.predict_ensemble(X))
             P_sorted = P[sort_idx, :]
-            ax.plot(X_sorted, P_sorted, "k-", alpha=0.05, linewidth=0.5, zorder=2)
+            ax.plot(X_sorted, P_sorted, color=_MUTED, alpha=0.1, linewidth=_PX, zorder=2)
 
         # Plot mean prediction
-        ax.plot(X_sorted, mp_sorted, "r-", label="KAN prediction", linewidth=2.5, zorder=3)
+        ax.plot(
+            X_sorted,
+            mp_sorted,
+            color=_SERIES[0],
+            label="KAN prediction",
+            linewidth=2 * _PX,
+            zorder=3,
+        )
 
-        # Plot data
-        ax.plot(X_plot, y, "b.", label="data", alpha=0.7, markersize=8, zorder=4)
+        # Plot data (neutral, so the model carries the color)
+        ax.scatter(
+            X_plot,
+            y,
+            s=(8 * _PX) ** 2,
+            color=_INK_2,
+            edgecolors=_SURFACE,
+            linewidths=_PX,
+            alpha=0.8,
+            label="data",
+            zorder=4,
+        )
 
-        ax.set_xlabel("X")
-        ax.set_ylabel("y")
-        ax.legend()
-        ax.set_title(f"KAN Predictions (grid={self.grid_size}, layers={self.layers})")
-        ax.grid(True, alpha=0.3)
+        ax.set_xlabel("X", color=_INK_2)
+        ax.set_ylabel("y", color=_INK_2)
+        ax.legend(frameon=False, labelcolor=_INK_2)
+        ax.set_title(
+            f"KAN Predictions (grid={self.grid_size}, layers={self.layers})",
+            loc="left",
+            fontweight="bold",
+            color=_INK,
+        )
 
         return plt.gcf()
 
@@ -923,23 +972,24 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
                 combined = spline_scale[i, j] * spline_out + base_out
 
                 # Plot
-                ax.plot(x_plot, combined, "b-", linewidth=2, label="Combined")
+                _style_axes(ax)
+                ax.axhline(y=0, color=_MUTED, linewidth=_PX, zorder=1)
+                ax.axvline(x=0, color=_MUTED, linewidth=_PX, zorder=1)
+                ax.plot(x_plot, combined, color=_SERIES[0], linewidth=2 * _PX, label="Combined")
                 ax.plot(
                     x_plot,
                     spline_scale[i, j] * spline_out,
-                    "r--",
-                    linewidth=1,
-                    alpha=0.7,
+                    color=_SERIES[1],
+                    linewidth=1.5 * _PX,
                     label="Spline",
                 )
-                ax.plot(x_plot, base_out, "g:", linewidth=1, alpha=0.7, label="Base (SiLU)")
-                ax.axhline(y=0, color="k", linewidth=0.5, alpha=0.3)
-                ax.axvline(x=0, color="k", linewidth=0.5, alpha=0.3)
-                ax.set_title(f"Edge ({i}→{j})", fontsize=10)
-                ax.grid(True, alpha=0.3)
+                ax.plot(
+                    x_plot, base_out, color=_SERIES[2], linewidth=1.5 * _PX, label="Base (SiLU)"
+                )
+                ax.set_title(f"Edge ({i}→{j})", fontsize=10, loc="left", color=_INK)
 
                 if plot_idx == 0:
-                    ax.legend(fontsize=8)
+                    ax.legend(fontsize=8, frameon=False, labelcolor=_INK_2)
 
                 plot_idx += 1
 
@@ -947,7 +997,9 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
         for idx in range(plot_idx, len(axes)):
             axes[idx].set_visible(False)
 
-        plt.suptitle(f"Learned Activations - Layer {layer_idx}", fontsize=12)
+        plt.suptitle(
+            f"Learned Activations - Layer {layer_idx}", fontsize=12, fontweight="bold", color=_INK
+        )
         plt.tight_layout()
         return fig
 
@@ -1078,10 +1130,9 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
                 (mid_x - box_width / 2, mid_y - box_height / 2),
                 box_width,
                 box_height,
-                linewidth=0.5,
-                edgecolor="blue",
-                facecolor="white",
-                alpha=0.9,
+                linewidth=_PX,
+                edgecolor=_BASELINE,
+                facecolor=_SURFACE,
                 zorder=5,
             )
             ax.add_patch(box_rect)
@@ -1091,16 +1142,37 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
             plot_x = mid_x - box_width / 2 + t_plot * box_width
             plot_y = mid_y + (activation_norm - 0.5) * box_height * 0.8
 
-            ax.plot(plot_x, plot_y, "b-", linewidth=0.8, alpha=min(alpha + 0.4, 1.0), zorder=6)
+            ax.plot(
+                plot_x,
+                plot_y,
+                color=_SERIES[0],
+                linewidth=_PX,
+                alpha=min(alpha + 0.4, 1.0),
+                zorder=6,
+            )
 
             # Draw edges connecting nodes to box
             box_left_x = mid_x - box_width / 2
             box_right_x = mid_x + box_width / 2
-            ax.plot([x1, box_left_x], [y1, mid_y], "b-", linewidth=0.5, alpha=alpha, zorder=4)
-            ax.plot([box_right_x, x2], [mid_y, y2], "b-", linewidth=0.5, alpha=alpha, zorder=4)
+            ax.plot(
+                [x1, box_left_x],
+                [y1, mid_y],
+                color=_SERIES[0],
+                linewidth=_PX / 2,
+                alpha=alpha,
+                zorder=4,
+            )
+            ax.plot(
+                [box_right_x, x2],
+                [mid_y, y2],
+                color=_SERIES[0],
+                linewidth=_PX / 2,
+                alpha=alpha,
+                zorder=4,
+            )
 
-        # Draw nodes using networkx
-        node_colors = []
+        # Draw nodes using networkx. Layer role is carried by position and the labels
+        # above each column, so every node shares one neutral style.
         node_labels = {}
 
         for node_id in G.nodes():
@@ -1108,11 +1180,9 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
             node_idx = G.nodes[node_id]["node_idx"]
 
             if layer == 0:
-                node_colors.append("lightgreen")
                 if layer_sizes[0] <= 5:
                     node_labels[node_id] = f"$x_{{{node_idx}}}$"
             elif layer == n_layers - 1:
-                node_colors.append("lightcoral")
                 if self.n_ensemble > 1:
                     out_idx = node_idx // self.n_ensemble
                     ens_idx = node_idx % self.n_ensemble
@@ -1121,39 +1191,43 @@ class KAN(MIPExportMixin, BaseEstimator, RegressorMixin):
                 else:
                     if layer_sizes[-1] <= 5:
                         node_labels[node_id] = f"$y_{{{node_idx}}}$"
-            else:
-                node_colors.append("lightblue")
 
         nx.draw_networkx_nodes(
-            G, pos, node_color=node_colors, node_size=500, edgecolors="black", linewidths=1.5, ax=ax
+            G,
+            pos,
+            node_color=_SURFACE,
+            node_size=500,
+            edgecolors=_INK_2,
+            linewidths=1.5 * _PX,
+            ax=ax,
         )
 
-        nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=9, ax=ax)
+        nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=9, font_color=_INK, ax=ax)
 
-        # Add layer labels
+        # Add layer labels above the top node of each column
         for layer_idx, n_nodes in enumerate(layer_sizes):
             x = layer_idx * layer_spacing
-            y = max_nodes * node_spacing / 2 + 0.4
+            y = (max_nodes - 1) * node_spacing + 0.25
             if layer_idx == 0:
-                ax.text(x, y, "Input", ha="center", va="bottom", fontsize=11, fontweight="bold")
+                name = "Input"
             elif layer_idx == n_layers - 1:
-                ax.text(x, y, "Output", ha="center", va="bottom", fontsize=11, fontweight="bold")
+                name = "Output"
             else:
-                ax.text(
-                    x,
-                    y,
-                    f"Hidden {layer_idx}",
-                    ha="center",
-                    va="bottom",
-                    fontsize=11,
-                    fontweight="bold",
-                )
+                name = f"Hidden {layer_idx}"
+            ax.text(
+                x, y, name, ha="center", va="bottom", fontsize=11, fontweight="bold", color=_INK
+            )
 
         # Set axis limits
         ax.set_xlim(-0.3, (n_layers - 1) * layer_spacing + 0.3)
-        ax.set_ylim(-0.3, max_nodes * node_spacing + 0.3)
+        ax.set_ylim(-0.3, (max_nodes - 1) * node_spacing + 0.8)
 
-        plt.title("KAN Network Structure with Learned Activations", fontsize=14)
+        plt.title(
+            "KAN Network Structure with Learned Activations",
+            fontsize=14,
+            fontweight="bold",
+            color=_INK,
+        )
         plt.tight_layout()
         return fig
 
