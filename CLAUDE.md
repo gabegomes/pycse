@@ -130,6 +130,27 @@ lazily exported from `pycse.sklearn` (the `_LAZY` table in `sklearn/__init__.py`
 - `ZENNRegressor`, `ZENNClassifier` - Zentropy-enhanced neural networks
 - `ActiveLearner` - Active learning loop (`active_learning.py`)
 
+### Interpretation pipeline (`src/pycse/sklearn/kan_interpret.py`)
+Shared by the chemistry example notebooks; imported directly (not via the `_LAZY` table,
+which is for estimators).
+- `cv_compare()` - several models on identical repeated folds, scaler refit per fold, with a
+  paired Wilcoxon test of one model against the best of the others
+- `partial_effects()` / `partial_effects_cv()` - one-descriptor response curves in the
+  descriptor's own units, plus the envelope of per-fold refits
+- `classify_shape()` / `shape_table()` - Linear, Step, Saturating, Monotone, U-shaped,
+  Inverted U, Constant or Complex, by template fit against an explicit criterion
+- `threshold_rules()` - best single cut per descriptor, class-balanced, scored by balanced
+  accuracy against the majority baseline
+- `sensitivity()`, `plot_partial_effect()`, `plot_fold_scores()`
+
+### Chemistry example notebooks (`src/pycse/examples/`)
+Seven notebooks share that pipeline, one per dataset, each ending in a written reading:
+`KAN_Chemistry_Yield_Prediction` and `KAN_vs_MLR_Sigman_Descriptors` (the first two),
+`KAN_Known_Truth_Benchmark` (synthetic data with known generating equations),
+`KAN_Ligand_Reactivity_Cliff`, `KAN_Buchwald_DFT_Descriptors`,
+`KAN_Direct_Arylation_Conditions` and `KAN_Deoxyfluorination`. They download their data at
+run time and are not executed in CI.
+
 ### Utilities
 - `hashcache.py` - Disk caching for expensive computations
 - `beginner.py` - Simplified interfaces for teaching
