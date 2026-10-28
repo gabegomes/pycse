@@ -8,6 +8,13 @@ honest pipeline:
 - :func:`partial_effects` and :func:`partial_effects_cv`: one-descriptor response
   curves in the descriptor's own units, and the envelope of those curves over
   per-fold refits (a curve that changes shape between folds is noise).
+- :func:`accumulated_local_effects` and :func:`accumulated_local_effects_cv`: the
+  same curves read the way correlated descriptors require, by moving a descriptor
+  only within reactions whose value is already near the point being evaluated.
+- :func:`prune_collinear`: keep one descriptor from each group of near-duplicates,
+  so an effect is not split arbitrarily between interchangeable columns.
+- :func:`transitions`: where a curve rises to and falls from its maximum, in the
+  descriptor's units (the location of a step or of the edges of a window).
 - :func:`sensitivity`: mean absolute finite-difference gradient per descriptor.
 - :func:`classify_shape`: shape labels with an explicit linearity criterion.
 - :func:`threshold_rules`: single-descriptor cut rules scored by balanced
@@ -204,6 +211,7 @@ class PartialEffect:
     support: np.ndarray  #: the raw values observed in the data
     curves: np.ndarray | None = None  #: per-fold refit curves, shape (n_folds, n_grid)
     extra: dict = field(default_factory=dict)  #: other models' curves, keyed by name
+    method: str = "partial effect"  #: "partial effect" or "accumulated local effect"
 
     @property
     def lo(self):
@@ -363,6 +371,233 @@ def partial_effects_cv(
 
 
 # -----------------------------------------------------------------------------
+# accumulated local effects
+# -----------------------------------------------------------------------------
+def _ale_edges(x, n_bins):
+    """Quantile bin edges of one descriptor; fewer when it takes few values."""
+    return np.unique(np.quantile(x, np.linspace(0.0, 1.0, n_bins + 1)))
+
+
+def _ale_curve(f, X, j, edges):
+    """First-order ALE of column ``j`` at ``edges``, centred on the mean prediction.
+
+    In each bin only the reactions whose value lies in that bin are moved, from
+    the bin's lower edge to its upper edge, so the model is never asked about a
+    combination of descriptors that does not occur in the data.
+    """
+    x = X[:, j]
+    nb = len(edges) - 1
+    bins = np.clip(np.searchsorted(edges, x, side="left") - 1, 0, nb - 1)
+    local = np.zeros(nb)
+    counts = np.zeros(nb)
+    for k in range(nb):
+        m = bins == k
+        counts[k] = m.sum()
+        if not counts[k]:
+            continue
+        lo, hi = X[m].copy(), X[m].copy()
+        lo[:, j], hi[:, j] = edges[k], edges[k + 1]
+        local[k] = np.mean(f(hi) - f(lo))
+    ale = np.concatenate([[0.0], np.cumsum(local)])
+    centre = np.sum(counts * 0.5 * (ale[:-1] + ale[1:])) / max(counts.sum(), 1)
+    return ale - centre + float(np.mean(f(X)))
+
+
+def _as_function(model, scaler, task):
+    if scaler is None:
+        return lambda Z: _predict(model, Z, task)
+    return lambda Z: _predict(model, scaler.transform(Z), task)
+
+
+def accumulated_local_effects(
+    model,
+    X,
+    feature_names,
+    features=None,
+    *,
+    scaler=None,
+    task="regression",
+    n_bins=20,
+    extra_models=None,
+):
+    """Accumulated local effect curves of a fitted model, one per requested feature.
+
+    A partial effect fixes every other descriptor at its mean, which describes a
+    compound that does not exist, and when descriptors are correlated it asks the
+    model about combinations it never saw. The accumulated local effect (Apley and
+    Zhu, JRSS B 2020) only moves a descriptor within the reactions that already
+    sit near each value, and adds the local changes up. It is the reading to use
+    when descriptors are correlated, which in reaction data they almost always are.
+
+    The curve is centred on the model's mean prediction, so it is in the units of
+    the target and comparable with group means.
+
+    Args:
+        model, X, feature_names, features, scaler, task: as in :func:`partial_effects`.
+        n_bins: number of quantile bins (fewer when the descriptor takes fewer values).
+        extra_models: ``{name: fitted model}`` evaluated on the same bins.
+
+    Returns:
+        ``{feature: PartialEffect}`` with ``method == "accumulated local effect"``.
+    """
+    X = np.asarray(X, dtype=float)
+    names = list(feature_names)
+    feats = names if features is None else list(features)
+    mean = scaler.mean_ if scaler is not None else np.zeros(X.shape[1])
+    scale = scaler.scale_ if scaler is not None else np.ones(X.shape[1])
+    f = _as_function(model, scaler, task)
+    out = {}
+    for name in feats:
+        j = names.index(name)
+        edges = _ale_edges(X[:, j], n_bins)
+        pe = PartialEffect(
+            feature=name,
+            x_raw=edges,
+            x_std=(edges - mean[j]) / scale[j],
+            y=_ale_curve(f, X, j, edges),
+            support=X[:, j].copy(),
+            method="accumulated local effect",
+        )
+        for label, m in (extra_models or {}).items():
+            pe.extra[label] = _ale_curve(_as_function(m, scaler, task), X, j, edges)
+        out[name] = pe
+    return out
+
+
+def accumulated_local_effects_cv(
+    make_model,
+    X,
+    y,
+    feature_names,
+    features=None,
+    *,
+    task="regression",
+    n_splits=5,
+    random_state=42,
+    fit_kwargs=None,
+    n_bins=20,
+    effects=None,
+    verbose=True,
+):
+    """Refit on each fold and collect every fold's accumulated local effect curves.
+
+    All folds share the bins of the full data and are evaluated on all reactions,
+    so the curves differ only because the model differs. Arguments as in
+    :func:`partial_effects_cv`; ``effects`` may come from
+    :func:`accumulated_local_effects`.
+    """
+    X = np.asarray(X, dtype=float)
+    y = np.asarray(y)
+    names = list(feature_names)
+    feats = names if features is None else list(features)
+    full = StandardScaler().fit(X)
+    if effects is None:
+        effects = {}
+        for name in feats:
+            j = names.index(name)
+            edges = _ale_edges(X[:, j], n_bins)
+            effects[name] = PartialEffect(
+                feature=name,
+                x_raw=edges,
+                x_std=(edges - full.mean_[j]) / full.scale_[j],
+                y=np.full(len(edges), np.nan),
+                support=X[:, j].copy(),
+                method="accumulated local effect",
+            )
+    if task == "classification":
+        splits = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state).split(
+            X, y
+        )
+    else:
+        splits = KFold(n_splits=n_splits, shuffle=True, random_state=random_state).split(X)
+    curves = {name: [] for name in feats}
+    for k, (tr, _te) in enumerate(splits):
+        scaler = StandardScaler().fit(X[tr])
+        model = _fit(make_model(), scaler.transform(X[tr]), y[tr], task, fit_kwargs)
+        f = _as_function(model, scaler, task)
+        for name in feats:
+            curves[name].append(_ale_curve(f, X, names.index(name), effects[name].x_raw))
+        if verbose:
+            print(f"  refit {k + 1}/{n_splits} done")
+    for name in feats:
+        effects[name].curves = np.array(curves[name])
+    return effects
+
+
+# -----------------------------------------------------------------------------
+# collinearity and transitions
+# -----------------------------------------------------------------------------
+def prune_collinear(X, feature_names, threshold=0.85, keep_first=None):
+    """Keep one descriptor from each group whose absolute correlation exceeds ``threshold``.
+
+    Descriptors are visited in the order ``keep_first`` (for example the one a
+    paper names) followed by the rest in their given order; a descriptor is kept
+    when it is not correlated above the threshold with any descriptor already kept.
+
+    Returns:
+        ``(kept_names, dropped)`` where ``dropped`` maps each removed descriptor
+        to ``(the kept descriptor it duplicates, |r|)``.
+    """
+    df = pd.DataFrame(np.asarray(X, dtype=float), columns=list(feature_names))
+    corr = df.corr().abs().fillna(0.0)
+    order = list(dict.fromkeys(list(keep_first or []) + list(feature_names)))
+    kept, dropped = [], {}
+    for name in order:
+        partner = max(kept, key=lambda k: corr.loc[name, k], default=None)
+        if partner is not None and corr.loc[name, partner] > threshold:
+            dropped[name] = (partner, float(corr.loc[name, partner]))
+        else:
+            kept.append(name)
+    kept = [n for n in feature_names if n in kept]  # original column order
+    return kept, dropped
+
+
+def transitions(x, y, min_change=0.25):
+    """Where a curve rises to its maximum and where it falls from it.
+
+    The rise is where the curve, before its maximum, last crosses halfway between
+    its earlier minimum and the maximum; the fall is where, after the maximum, it
+    first drops through halfway to its later minimum. Both are interpolated
+    linearly between grid points, so a coarse grid (such as accumulated local
+    effect bins) still locates an edge between its points.
+    A side whose change is smaller than ``min_change`` of the curve's range is
+    ``None``. A rising step has only a rise, a falling step only a fall, and a
+    window both.
+
+    Returns:
+        ``{"peak": x at the maximum, "rise": x or None, "fall": x or None}``.
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    span = np.ptp(y)
+    k = int(np.argmax(y))
+    out = {"peak": float(x[k]), "rise": None, "fall": None}
+    if span <= 0:
+        return out
+
+    def cross(i0, i1, level):
+        """x where the straight line between grid points i0 and i1 reaches ``level``."""
+        y0, y1 = y[i0], y[i1]
+        if y1 == y0:
+            return float(x[i1])
+        return float(x[i0] + (level - y0) * (x[i1] - x[i0]) / (y1 - y0))
+
+    if k > 0 and (y[k] - y[:k].min()) >= min_change * span:
+        half = 0.5 * (y[k] + y[:k].min())
+        below = np.nonzero(y[:k] <= half)[0]
+        if len(below):
+            i = int(below[-1])
+            out["rise"] = cross(i, i + 1, half)
+    if k < len(y) - 1 and (y[k] - y[k:].min()) >= min_change * span:
+        half = 0.5 * (y[k] + y[k:].min())
+        below = np.nonzero(y[k:] <= half)[0]
+        if len(below):
+            i = k + int(below[0])
+            out["fall"] = cross(i - 1, i, half)
+    return out
+
+
+# -----------------------------------------------------------------------------
 # sensitivity and shapes
 # -----------------------------------------------------------------------------
 def sensitivity(model, X_std, *, task="regression", eps=0.01):
@@ -394,11 +629,48 @@ def _logistic(x, a, b, c, w):
     return a + b / (1.0 + np.exp(-(x - c) / w))
 
 
+def _window(x, a, b1, c1, w1, b2, c2, w2):
+    """Two logistic edges with a plateau between them; each edge has its own height."""
+    return a + b1 / (1.0 + np.exp(-(x - c1) / w1)) - b2 / (1.0 + np.exp(-(x - c2) / w2))
+
+
+def _fit_window(x, y_norm):
+    """Best two-edge fit as ``(r2, (a, b1, c1, w1, b2, c2, w2))``, or None.
+
+    Started from the curve's own transitions, for a high plateau and a low one.
+    """
+    from scipy.optimize import curve_fit
+
+    lo, hi = x.min(), x.max()
+    span = hi - lo
+    best = None
+    for sign, yy in ((1.0, y_norm), (-1.0, -y_norm)):
+        tr = transitions(x, yy)
+        if tr["rise"] is None or tr["fall"] is None:
+            continue
+        k = int(np.argmax(yy))
+        b1 = (yy[k] - yy[:k].min()) * sign
+        b2 = (yy[k] - yy[k:].min()) * sign
+        p0 = [yy[:k].min() * sign, b1, tr["rise"], 0.05 * span, b2, tr["fall"], 0.05 * span]
+        bounds = (
+            [-np.inf, -np.inf, lo - 0.1 * span, 1e-3 * span, -np.inf, lo - 0.1 * span, 1e-3 * span],
+            [np.inf, np.inf, hi + 0.1 * span, span, np.inf, hi + 0.1 * span, span],
+        )
+        try:
+            popt, _ = curve_fit(_window, x, y_norm, p0=p0, bounds=bounds, maxfev=8000)
+        except (RuntimeError, ValueError):
+            continue
+        r2 = _r2(y_norm, _window(x, *popt))
+        if best is None or r2 > best[0]:
+            best = (r2, popt)
+    return best
+
+
 def classify_shape(x, y, linear_r2=LINEAR_R2, scale=None):
     """Label a response curve by the simplest template that explains it.
 
     Labels: ``Constant``, ``Linear``, ``Step``, ``Saturating``, ``Monotone``,
-    ``U-shaped``, ``Inverted U`` or ``Complex``.
+    ``U-shaped``, ``Inverted U``, ``Window``, ``Gap`` or ``Complex``.
 
     Three templates are fit by least squares: a line, a parabola and a logistic
     step. "Linear" means the line explains at least ``linear_r2`` of the variance
@@ -408,8 +680,15 @@ def classify_shape(x, y, linear_r2=LINEAR_R2, scale=None):
     "Saturating", one that does not is "Monotone"; a step whose width is under
     15 % of the grid is "Step", a wider one that levels off inside the grid is
     "Saturating", else "Monotone". A curve that no template explains is
-    "Monotone" when it never reverses direction and "Complex" otherwise. Spline wiggles on a plateau therefore do not change the label as
-    long as the template still explains 90 % of the curve.
+    "Monotone" when it never reverses direction and "Complex" otherwise. Spline
+    wiggles on a plateau therefore do not change the label as long as the
+    template still explains 90 % of the curve.
+
+    A fourth template has two sharp logistic edges with a plateau between them:
+    "Window" when the curve is high between the edges (active only inside a
+    range) and "Gap" when it is low. It replaces the simpler labels only when it
+    explains at least 5 % more of the variance than both of them, or when they
+    fail the criterion and it passes.
 
     Args:
         x, y: the grid and the curve.
@@ -453,6 +732,23 @@ def classify_shape(x, y, linear_r2=LINEAR_R2, scale=None):
     q = max(2, len(yn) // 4)
     flat_end = abs(yn[-1] - yn[-q]) < 0.1  # levels off over the last quarter of the grid
     net_over_tv = abs(yn[-1] - yn[0]) / (np.sum(np.abs(np.diff(yn))) + 1e-12)
+    win = _fit_window(x, y_norm)
+    if win is not None:
+        r2_win, (_a, b1, c1, w1, b2, c2, w2) = win
+        rng = np.ptp(y_norm)
+        same_sign = np.sign(b1) == np.sign(b2)
+        both_edges = (
+            min(abs(b1), abs(b2)) >= 0.25 * rng
+        )  # each edge moves the curve by a quarter or more
+        sharp = max(w1, w2) <= 0.15 * span and (c2 - c1) >= 0.1 * span
+        inside = lo + 0.05 * span < c1 and c2 < hi - 0.05 * span
+        better = r2_win >= linear_r2 and (
+            max(r2_quad, r2_step) < linear_r2 or r2_win >= max(r2_quad, r2_step) + 0.05
+        )
+        if same_sign and both_edges and sharp and inside and better:
+            if b1 > 0:
+                return "Window", "Active only between two thresholds"
+            return "Gap", "Inactive only between two thresholds"
     if max(r2_quad, r2_step) < linear_r2:
         if net_over_tv >= 0.95:
             return "Monotone", "Curved but one-directional"
@@ -575,7 +871,7 @@ def plot_partial_effect(
             x, yv, color=SERIES[1 + k % 2], linewidth=2 * PX, label=extra_label or name, zorder=3
         )
     if np.all(np.isfinite(pe.y)):
-        ax.plot(x, pe.y, color=color, linewidth=2.5 * PX, label="KAN partial effect", zorder=4)
+        ax.plot(x, pe.y, color=color, linewidth=2.5 * PX, label=f"KAN {pe.method}", zorder=4)
     if show_support:
         vals, counts = np.unique(np.round(pe.support, 6), return_counts=True)
         y0, y1 = ax.get_ylim()
