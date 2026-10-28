@@ -263,3 +263,51 @@ def test_ale_cv_envelope_shares_bins():
     plot_partial_effect(ax, ale, ylabel="y")
     assert "KAN accumulated local effect" in ax.get_legend_handles_labels()[1]
     plt.close(fig)
+
+
+def test_interaction_is_zero_for_an_additive_model_and_recovers_a_product():
+    from pycse.sklearn.kan_interpret import accumulated_local_effects_2d, plot_interaction
+
+    n = 2000
+    Z = rng.uniform(-1, 1, size=(n, 3))
+
+    class Additive:
+        def predict(self, A):
+            return np.sin(2 * A[:, 0]) + A[:, 1] ** 2 + 0.3 * A[:, 2]
+
+    class Product:
+        def predict(self, A):
+            return A[:, 0] * A[:, 1] + A[:, 0]
+
+    add = accumulated_local_effects_2d(Additive(), Z, ["a", "b", "c"], ("a", "b"))
+    assert np.max(np.abs(add.effect)) < 1e-9 and add.strength < 1e-9
+    prod = accumulated_local_effects_2d(Product(), Z, ["a", "b", "c"], ("a", "b"), n_bins=8)
+    g1, g2 = np.meshgrid(prod.x1_edges, prod.x2_edges, indexing="ij")
+    expected = (g1 - g1.mean()) * (g2 - g2.mean())
+    assert np.corrcoef(prod.effect.ravel(), expected.ravel())[0, 1] > 0.98
+    assert prod.counts.sum() == n and prod.strength > 0.1
+    fig, ax = plt.subplots()
+    plot_interaction(ax, prod)
+    plt.close(fig)
+
+
+def test_cv_compare_with_groups_holds_out_whole_groups():
+    from pycse.sklearn.kan_interpret import _cv_splits
+
+    groups = np.repeat(np.arange(12), 10)
+    yb = (y > np.median(y)).astype(int)
+    for task, target in (("regression", y), ("classification", yb)):
+        splits = _cv_splits(X, target, task, 4, 2, 0, groups)
+        assert len(splits) == 8
+        for tr, te in splits:
+            assert not set(groups[tr]) & set(groups[te])
+    res = cv_compare(
+        {"MLR": LinearRegression(), "KAN": LinearRegression()},
+        X,
+        y,
+        n_splits=4,
+        n_repeats=2,
+        groups=groups,
+        verbose=False,
+    )
+    assert len(res.folds) == 16 and res.pairwise["n"] == 8

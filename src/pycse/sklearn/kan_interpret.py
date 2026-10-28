@@ -13,6 +13,8 @@ honest pipeline:
   only within reactions whose value is already near the point being evaluated.
 - :func:`prune_collinear`: keep one descriptor from each group of near-duplicates,
   so an effect is not split arbitrarily between interchangeable columns.
+- :func:`accumulated_local_effects_2d`: the interaction of a descriptor pair alone,
+  zero for any additive model, with :func:`plot_interaction` to draw it.
 - :func:`transitions`: where a curve rises to and falls from its maximum, in the
   descriptor's units (the location of a step or of the edges of a window).
 - :func:`sensitivity`: mean absolute finite-difference gradient per descriptor.
@@ -41,7 +43,14 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
-from sklearn.model_selection import KFold, RepeatedKFold, RepeatedStratifiedKFold, StratifiedKFold
+from sklearn.model_selection import (
+    GroupKFold,
+    KFold,
+    RepeatedKFold,
+    RepeatedStratifiedKFold,
+    StratifiedGroupKFold,
+    StratifiedKFold,
+)
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
@@ -74,6 +83,28 @@ def _fit(model, X, y, task, kwargs):
 # -----------------------------------------------------------------------------
 # repeated cross-validation on identical folds
 # -----------------------------------------------------------------------------
+def _cv_splits(X, y, task, n_splits, n_repeats, random_state, groups=None):
+    """Repeated folds over rows, or over whole groups when ``groups`` is given."""
+    if groups is None:
+        if task == "classification":
+            cv = RepeatedStratifiedKFold(
+                n_splits=n_splits, n_repeats=n_repeats, random_state=random_state
+            )
+            return list(cv.split(X, y))
+        cv = RepeatedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=random_state)
+        return list(cv.split(X))
+    groups = np.asarray(groups)
+    out = []
+    for r in range(n_repeats):
+        seed = None if random_state is None else random_state + r
+        if task == "classification":
+            cv = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+        else:
+            cv = GroupKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+        out.extend(cv.split(X, y, groups))
+    return out
+
+
 @dataclass
 class CVResult:
     """Output of :func:`cv_compare`."""
@@ -112,6 +143,7 @@ def cv_compare(
     random_state=42,
     fit_kwargs=None,
     focus="KAN",
+    groups=None,
     verbose=True,
 ):
     """Score several models on identical repeated folds.
@@ -128,6 +160,10 @@ def cv_compare(
         fit_kwargs: ``{name: kwargs}`` passed to that model's ``fit`` (for
             example ``{"KAN": {"maxiter": 300}}``).
         focus: the model to compare pairwise against the best of the others.
+        groups: optional label per row (for example the ligand or the additive). Each
+            fold then holds out whole groups, so every test reaction uses a molecule the
+            models never saw, which is the question "does it work on a new ligand".
+            Repeats reshuffle the groups (stratified by class for classification).
 
     Returns:
         :class:`CVResult`.
@@ -135,14 +171,7 @@ def cv_compare(
     X = np.asarray(X, dtype=float)
     y = np.asarray(y)
     fit_kwargs = fit_kwargs or {}
-    if task == "classification":
-        cv = RepeatedStratifiedKFold(
-            n_splits=n_splits, n_repeats=n_repeats, random_state=random_state
-        )
-        splits = cv.split(X, y)
-    else:
-        cv = RepeatedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=random_state)
-        splits = cv.split(X)
+    splits = _cv_splits(X, y, task, n_splits, n_repeats, random_state, groups)
 
     rows = []
     for fold, (tr, te) in enumerate(splits):
@@ -522,6 +551,119 @@ def accumulated_local_effects_cv(
     for name in feats:
         effects[name].curves = np.array(curves[name])
     return effects
+
+
+@dataclass
+class Interaction:
+    """Second-order accumulated local effect of one descriptor pair."""
+
+    features: tuple  #: the two descriptor names
+    x1_edges: np.ndarray  #: bin edges of the first descriptor, in its units
+    x2_edges: np.ndarray  #: bin edges of the second descriptor
+    effect: np.ndarray  #: interaction on the edge grid, shape (len(x1_edges), len(x2_edges))
+    counts: np.ndarray  #: reactions per cell, shape (len(x1_edges) - 1, len(x2_edges) - 1)
+    points: np.ndarray  #: the observed (x1, x2) pairs
+
+    @property
+    def strength(self):
+        """Spread of the interaction over the occupied cells (count-weighted sd)."""
+        cell = 0.25 * (
+            self.effect[:-1, :-1]
+            + self.effect[1:, :-1]
+            + self.effect[:-1, 1:]
+            + self.effect[1:, 1:]
+        )
+        w = self.counts / max(self.counts.sum(), 1)
+        mean = np.sum(w * cell)
+        return float(np.sqrt(np.sum(w * (cell - mean) ** 2)))
+
+
+def accumulated_local_effects_2d(
+    model, X, feature_names, pair, *, scaler=None, task="regression", n_bins=10
+):
+    """The interaction between two descriptors, read as a second-order accumulated local effect.
+
+    In each cell of a quantile grid, only the reactions already in that cell are
+    moved to the cell's four corners, and the second difference
+    f(hi, hi) - f(lo, hi) - f(hi, lo) + f(lo, lo) is averaged. That difference is
+    zero for any model that adds a function of one descriptor to a function of
+    the other, so what accumulates is the interaction alone. The accumulated
+    surface is double-centred (its row and column means removed), which leaves no
+    additive part. Cells without reactions contribute no difference; their area is
+    reported in ``counts`` so a plot can grey it out.
+
+    Returns:
+        :class:`Interaction`.
+    """
+    X = np.asarray(X, dtype=float)
+    names = list(feature_names)
+    j, m = names.index(pair[0]), names.index(pair[1])
+    f = _as_function(model, scaler, task)
+    e1, e2 = _ale_edges(X[:, j], n_bins), _ale_edges(X[:, m], n_bins)
+    n1, n2 = len(e1) - 1, len(e2) - 1
+    b1 = np.clip(np.searchsorted(e1, X[:, j], side="left") - 1, 0, n1 - 1)
+    b2 = np.clip(np.searchsorted(e2, X[:, m], side="left") - 1, 0, n2 - 1)
+    second = np.zeros((n1, n2))
+    counts = np.zeros((n1, n2))
+    for a in range(n1):
+        for b in range(n2):
+            mask = (b1 == a) & (b2 == b)
+            counts[a, b] = mask.sum()
+            if not counts[a, b]:
+                continue
+            corners = {}
+            for ka, xa in (("lo", e1[a]), ("hi", e1[a + 1])):
+                for kb, xb in (("lo", e2[b]), ("hi", e2[b + 1])):
+                    Z = X[mask].copy()
+                    Z[:, j], Z[:, m] = xa, xb
+                    corners[ka + kb] = f(Z)
+            second[a, b] = np.mean(
+                corners["hihi"] - corners["lohi"] - corners["hilo"] + corners["lolo"]
+            )
+    acc = np.zeros((n1 + 1, n2 + 1))
+    acc[1:, 1:] = np.cumsum(np.cumsum(second, axis=0), axis=1)
+    acc = acc - acc.mean(axis=1, keepdims=True) - acc.mean(axis=0, keepdims=True) + acc.mean()
+    return Interaction(
+        features=(pair[0], pair[1]),
+        x1_edges=e1,
+        x2_edges=e2,
+        effect=acc,
+        counts=counts,
+        points=X[:, [j, m]].copy(),
+    )
+
+
+def plot_interaction(ax, inter, *, label="interaction", show_points=True):
+    """Heat map of an :class:`Interaction`; cells with no reactions are left blank."""
+    from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
+
+    style_axes(ax, grid=False)
+    cmap = LinearSegmentedColormap.from_list("kan_div", [SERIES[0], "#f0efec", "#e34948"])
+    cell = 0.25 * (
+        inter.effect[:-1, :-1]
+        + inter.effect[1:, :-1]
+        + inter.effect[:-1, 1:]
+        + inter.effect[1:, 1:]
+    )
+    cell = np.where(inter.counts > 0, cell, np.nan)
+    lim = np.nanmax(np.abs(cell)) if np.any(np.isfinite(cell)) else 1.0
+    mesh = ax.pcolormesh(
+        inter.x1_edges,
+        inter.x2_edges,
+        cell.T,
+        cmap=cmap,
+        norm=TwoSlopeNorm(vcenter=0.0, vmin=-lim - 1e-12, vmax=lim + 1e-12),
+        shading="flat",
+    )
+    if show_points:
+        ax.scatter(*inter.points.T, s=4, color=INK_2, alpha=0.35, linewidths=0)
+    cb = ax.figure.colorbar(mesh, ax=ax, fraction=0.046, pad=0.03)
+    cb.set_label(label, fontsize=8, color=INK_2)
+    cb.outline.set_visible(False)
+    finish_axes(
+        ax, f"{inter.features[0]} x {inter.features[1]}", inter.features[0], inter.features[1]
+    )
+    return ax
 
 
 # -----------------------------------------------------------------------------
