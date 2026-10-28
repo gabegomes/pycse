@@ -134,7 +134,8 @@ lazily exported from `pycse.sklearn` (the `_LAZY` table in `sklearn/__init__.py`
 Shared by the chemistry example notebooks; imported directly (not via the `_LAZY` table,
 which is for estimators).
 - `cv_compare()` - several models on identical repeated folds, scaler refit per fold, with a
-  paired Wilcoxon test of one model against the best of the others
+  paired Wilcoxon test of one model against the best of the others; `groups=` holds out whole
+  molecules per fold (does it work on a ligand it never saw?)
 - `prune_collinear()` - keep one descriptor per group correlated above a threshold, so an
   effect is not split between interchangeable columns
 - `accumulated_local_effects()` / `accumulated_local_effects_cv()` - the default curve
@@ -142,6 +143,8 @@ which is for estimators).
   descriptors do not make the model extrapolate; plus the envelope of per-fold refits
 - `partial_effects()` / `partial_effects_cv()` - the older reading (other descriptors at their
   mean), kept for comparison
+- `accumulated_local_effects_2d()` / `plot_interaction()` - the interaction of a descriptor
+  pair alone (second-order ALE, double-centred; exactly zero for an additive model)
 - `transitions()` - where a curve rises to and falls from its maximum, interpolated between
   grid points (the location of a step or of a window's edges)
 - `classify_shape()` / `shape_table()` - Linear, Step, Saturating, Monotone, U-shaped,
@@ -157,7 +160,8 @@ closing section repeats the reading with the current pipeline), `KAN_Known_Truth
 (synthetic data with known generating equations), `KAN_Ligand_Reactivity_Cliff`,
 `KAN_Buchwald_DFT_Descriptors`, `KAN_Direct_Arylation_Conditions` and
 `KAN_Deoxyfluorination`. The five dataset notebooks prune near-duplicate descriptors, fit the
-KAN with L1 and entropy penalties of 1e-3, and read curves as accumulated local effects. They
+KAN with L1 and entropy penalties of 1e-3, read curves as accumulated local effects, and score
+every model a second time on folds that hold out whole molecules. They
 download their data at run time and are not executed in CI.
 
 ### Utilities
