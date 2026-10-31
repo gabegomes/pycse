@@ -597,7 +597,7 @@ def pysr_regressor(**options):
     except ImportError as e:  # pragma: no cover - depends on the environment
         raise ImportError('products=True needs PySR: pip install "pycse[pysr]"') from e
     opts = dict(
-        niterations=80, maxsize=30, binary_operators=["+", "-", "*"], unary_operators=[],
+        niterations=80, maxsize=15, binary_operators=["+", "-", "*"], unary_operators=[],
         model_selection="best", populations=12, population_size=40, random_state=0,
         progress=False, verbosity=0, temp_equation_file=True, delete_tempfiles=True,
     )  # fmt: skip
@@ -605,12 +605,20 @@ def pysr_regressor(**options):
     return PySRRegressor(**opts)
 
 
-def knee(regressor, y_var, tol=0.01):
-    """Index of the smallest equation on a PySR front within ``tol`` of the best explained
-    fraction ``1 - loss / y_var``."""
+def knee(regressor, y_var, share=0.7, min_gain=0.01):
+    """The equation to keep from a PySR front fitted to a residual, or None.
+
+    The gain of an equation is the fraction of ``y_var`` it removes beyond the constant at the
+    top of the front. Products are kept only when the best gain reaches ``min_gain``, and then
+    the smallest equation reaching ``share`` of the best gain is the one used: past it, each
+    extra node buys little and costs readability.
+    """
     eq = regressor.equations_
-    r2 = 1.0 - eq["loss"].to_numpy() / y_var
-    return int(eq.index[r2 >= np.nanmax(r2) - tol][0])
+    loss = eq["loss"].to_numpy()
+    gain = (loss[0] - loss) / y_var
+    if np.nanmax(gain) < min_gain:
+        return None
+    return int(eq.index[gain >= share * np.nanmax(gain)][0])
 
 
 class PieceModel(BaseEstimator, RegressorMixin):
@@ -620,7 +628,8 @@ class PieceModel(BaseEstimator, RegressorMixin):
     into unit pieces (:func:`extract_pieces`), keeps the pieces that earn their place under
     cross-validation (:func:`select_pieces`), and fits their sum by least squares. With
     ``products=True`` the residual of that sum goes to PySR, restricted to +, - and * of the
-    chosen pieces, and the smallest equation within ``products_tol`` of the best is added.
+    chosen pieces, and the smallest equation that captures most of the gain is added (or none,
+    when products add little; see :func:`knee`).
 
     Args:
         feature_names: names for the equation (default ``x0, x1, ...``).
@@ -632,7 +641,8 @@ class PieceModel(BaseEstimator, RegressorMixin):
         max_pieces, min_gain: the selection.
         products: hand the residual to PySR.
         pysr_options: overrides for :func:`pysr_regressor`.
-        products_tol: the knee tolerance (see :func:`knee`).
+        products_share, products_min_gain: which product equation is kept, if any (see
+            :func:`knee`).
 
     Attributes:
         kan_, pieces_ (all pieces), chosen_ (indices into ``pieces_``), linear_ (the sum),
@@ -642,7 +652,7 @@ class PieceModel(BaseEstimator, RegressorMixin):
     def __init__(self, feature_names=None, grid_size=5, reg=1e-3, maxiter=300, seed=19,
                  forms=None, per_feature=None, min_r2=0.97, min_side=3, select_on="random",
                  max_pieces=12, min_gain=0.005, products=False, pysr_options=None,
-                 products_tol=0.01):  # fmt: skip
+                 products_share=0.7, products_min_gain=0.01):  # fmt: skip
         self.feature_names = feature_names
         self.grid_size = grid_size
         self.reg = reg
@@ -657,7 +667,8 @@ class PieceModel(BaseEstimator, RegressorMixin):
         self.min_gain = min_gain
         self.products = products
         self.pysr_options = pysr_options
-        self.products_tol = products_tol
+        self.products_share = products_share
+        self.products_min_gain = products_min_gain
 
     def _names(self, d):
         return (
@@ -703,7 +714,11 @@ class PieceModel(BaseEstimator, RegressorMixin):
             self.products_ = pysr_regressor(**(self.pysr_options or {})).fit(
                 Pc, r, variable_names=[f"p{k}" for k in range(len(self.chosen_))]
             )
-            self.products_index_ = knee(self.products_, np.var(y), self.products_tol)
+            self.products_index_ = knee(
+                self.products_, np.var(y), self.products_share, self.products_min_gain
+            )
+            if self.products_index_ is None:  # nothing worth a product term
+                self.products_ = None
         return self
 
     def _P(self, X):
