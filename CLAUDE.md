@@ -153,6 +153,26 @@ which is for estimators).
   accuracy against the majority baseline
 - `sensitivity()`, `plot_partial_effect()`, `plot_fold_scores()`
 
+### Readable equations and the transfer ledger (`src/pycse/sklearn/kan_symbolic.py`)
+Imported directly. An additive KAN (`layers=(d, 1)`) is one curve per descriptor; each curve is
+matched to the simplest form that reproduces it (line, 1/x, log, exponential, quadratic, V,
+step, window), and a step or window edge needs `min_side` (3) distinct values on each side, or it
+is a lookup of a few molecules.
+- `snap()` - a `Formula` with every coefficient refit to the data (recovers slopes, step
+  positions, volcano optima; `per_feature={"T_K": ["inverse"]}` gives an Arrhenius barrier)
+- `extract_pieces()` / `select_pieces()` - unit shapes of one descriptor, clipped to their fit
+  range; forward selection by CV, on random folds or (`groups=`) on held-out molecules
+- `PieceModel` - estimator: sum of selected pieces; `select_on="groups"` keeps only pieces that
+  help new molecules; `products=True` hands the residual to PySR with `+ - *` only (optional
+  `pysr` extra, installs Julia on first use); `equation()` writes it out
+- `transfer_ledger()` - every rung (mean, pieces, pieces chosen on new molecules, products,
+  additive KAN, then any `models=`) scored on random folds and on grouped folds; per-descriptor
+  drop-one ledger with verdicts (transfers, memorizes, ...); error per held-out molecule against
+  its distance to the nearest training molecule; `memorized` = random-fold score lost when
+  pieces must help new molecules
+Tests in `test_sklearn_kan_symbolic.py` use an exactly additive stand-in model (fast); the KAN
+and PySR end-to-end tests are marked slow (the PySR one skips without `pysr`).
+
 ### Chemistry example notebooks (`src/pycse/examples/`)
 Seven notebooks share that pipeline, one per dataset, each ending in a written reading:
 `KAN_Chemistry_Yield_Prediction` and `KAN_vs_MLR_Sigman_Descriptors` (the first two; their
@@ -161,8 +181,10 @@ closing section repeats the reading with the current pipeline), `KAN_Known_Truth
 `KAN_Buchwald_DFT_Descriptors`, `KAN_Direct_Arylation_Conditions` and
 `KAN_Deoxyfluorination`. The five dataset notebooks prune near-duplicate descriptors, fit the
 KAN with L1 and entropy penalties of 1e-3, read curves as accumulated local effects, and score
-every model a second time on folds that hold out whole molecules. They
-download their data at run time and are not executed in CI.
+every model a second time on folds that hold out whole molecules. `KAN_Transfer_Ledger` runs
+`kan_symbolic` on a calibration set with a known interaction and on the five datasets (each
+loaded as in its own notebook): equations, ladder, descriptor verdicts, error against distance.
+All of them download their data at run time and are not executed in CI.
 
 ### Utilities
 - `hashcache.py` - Disk caching for expensive computations

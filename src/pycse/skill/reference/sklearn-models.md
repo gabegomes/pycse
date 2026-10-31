@@ -72,6 +72,14 @@ These models train one network, then estimate uncertainty from the last-layer fe
   Kolmogorov-Arnold network. Set `n_ensemble > 1` with `loss_type="crps"` for uncertainty.
   `plot_activations()` shows the learned functions. With `spline_order=1` and
   `base_activation="linear"`, `to_pyomo(input_bounds=...)` exports a MILP model (see MIP export).
+- **`PieceModel(feature_names=None, select_on="random", products=False, ...)`** (from
+  `pycse.sklearn.kan_symbolic`): fits an additive KAN, matches each descriptor's curve to a named
+  form (line, 1/x, step, window, quadratic, ...) and sums the pieces that earn their place;
+  `equation()` prints it. `select_on="groups"` with `fit(X, y, groups=...)` keeps only pieces that
+  predict held-out molecules; `products=True` asks PySR for products of pieces (needs
+  `pip install "pycse[pysr]"`). `snap(kan, X, y, names)` gives a formula with every coefficient
+  refit, and `transfer_ledger(X, y, groups, names, models=...)` scores each model on random folds
+  and on held-out molecules.
 - **`SISSO(operators=None, n_expansion=2, n_term=2, k=20)`**: symbolic regression; the formula is
   in `model.equation_`. Needs `pip install "pycse[sisso]"`.
 - **`SISSOEnsemble(n_models=5, n_terms_range=(1, 3), loss_type="crps", ...)`**: an ensemble of

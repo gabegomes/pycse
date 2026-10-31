@@ -97,6 +97,9 @@ plotting = [
 sisso = [
   "TorchSisso>=0.1.8",  # SISSO symbolic regression
 ]
+pysr = [
+  "pysr>=2.0",  # assembles KAN pieces into equations (kan_symbolic); installs Julia on first use
+]
 
 [tool.ruff]
 line-length = 100
