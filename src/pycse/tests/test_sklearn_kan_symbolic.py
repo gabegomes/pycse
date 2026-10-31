@@ -170,3 +170,19 @@ def test_pysr_products_recover_a_switching_slope():
     )
     pred = sr.predict(np.column_stack([s, step]))
     assert np.corrcoef(pred, r)[0, 1] > 0.99
+
+
+def test_a_diverged_model_falls_back_to_the_mean():
+    from pycse.sklearn.kan_symbolic import PieceModel
+
+    class Diverged:
+        layers = (2, 1)
+
+        def predict(self, X):
+            return np.full(len(X), np.nan)
+
+    X, y = np.random.default_rng(6).normal(size=(50, 2)), np.arange(50.0)
+    with pytest.warns(UserWarning, match="not finite"):
+        pm = PieceModel().fit_pieces(Diverged(), X, y)
+    assert pm.chosen_ == []
+    assert np.allclose(pm.predict(X), y.mean())

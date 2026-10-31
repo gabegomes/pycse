@@ -27,6 +27,7 @@ A descriptor that adds on random folds and not on new molecules is acting as a m
 a model rung whose gain is all on random folds is memorizing the molecules it was trained on.
 """
 
+import warnings
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -107,14 +108,22 @@ def _eval(form, z, p, m, s):
     return fn(z, p, m, s) if form in _RAW else fn(z, p)
 
 
+def _polyfit(z, f, deg):
+    """A polynomial start; zeros when the least squares fails (a degenerate curve)."""
+    try:
+        return np.polyfit(z, f, deg)
+    except (np.linalg.LinAlgError, ValueError):
+        return np.zeros(deg + 1)
+
+
 def _starts(form, z, f):
     """A few starting points per form; the fit keeps the best."""
     rng = np.ptp(f) or 1.0
     q = np.quantile(z, [0.2, 0.35, 0.5, 0.65, 0.8])
     if form in ("linear", "inverse", "log"):
-        return [[np.polyfit(z, f, 1)[0]]]
+        return [[_polyfit(z, f, 1)[0]]]
     if form == "quadratic":
-        c = np.polyfit(z, f, 2)
+        c = _polyfit(z, f, 2)
         return [[c[1], c[0]]]
     if form == "exponential":
         return [[a * rng * 0.3, b] for a in (1, -1) for b in (1.0, -1.0)]
@@ -404,11 +413,15 @@ def _match_all(model, X, feature_names, *, forms, per_feature, min_r2, min_side,
     X = np.asarray(X, float)
     _check_additive(model)
     curves = additive_curves(model, X)
-    spread = curves.std(axis=1)
+    finite = np.isfinite(curves).all(axis=1)
+    spread = np.where(finite, np.nan_to_num(curves).std(axis=1), 0.0)
     share = spread / (spread.sum() or 1.0)
     per_feature = per_feature or {}
     terms = []
     for i, name in enumerate(feature_names):
+        if not np.all(np.isfinite(curves[i])):
+            warnings.warn(f"the model's curve for {name} is not finite (a diverged fit); skipped")
+            continue
         if share[i] < min_share or spread[i] == 0:
             continue
         terms.append(
@@ -530,6 +543,8 @@ def extract_pieces(model, X, feature_names, *, forms=None, per_feature=None, min
 def piece_matrix(pieces, X, feature_names):
     """Columns of unit shapes, one per piece."""
     X = np.asarray(X, float)
+    if not pieces:
+        return np.zeros((len(X), 0))
     return np.column_stack([p.unit(X[:, list(feature_names).index(p.feature)]) for p in pieces])
 
 
@@ -550,6 +565,8 @@ def select_pieces(P, y, *, groups=None, max_pieces=12, min_gain=0.005, random_st
         cv = KFold(5, shuffle=True, random_state=random_state)
     else:
         cv = list(GroupKFold(5, shuffle=True, random_state=random_state).split(P, y, groups))
+    if P.shape[1] == 0:
+        return [], []
     score = cross_val_score(DummyRegressor(), P[:, :1], y, cv=cv, scoring="r2").mean()
     chosen, path = [], []
     while len(chosen) < min(max_pieces, P.shape[1]):
@@ -676,7 +693,9 @@ class PieceModel(BaseEstimator, RegressorMixin):
         )
         Pc = P[:, self.chosen_]
         self.linear_ = (
-            LinearRegression().fit(Pc, y) if self.chosen_ else DummyRegressor().fit(P[:, :1], y)
+            LinearRegression().fit(Pc, y)
+            if self.chosen_
+            else DummyRegressor().fit(np.zeros((len(y), 1)), y)
         )
         self.products_, self.products_index_ = None, None
         if self.products and self.chosen_:
@@ -860,6 +879,9 @@ def transfer_ledger(X, y, groups, feature_names, *, task="regression", models=No
             for name, proto in models.items():
                 m = _fit(clone(proto), X[tr], y[tr], task, fit_kwargs.get(name))
                 preds[name] = _predict(m, X[te], task)
+            # a diverged fit predicts NaN; score it as the training mean rather than crash
+            for r in preds:
+                preds[r] = np.where(np.isfinite(preds[r]), preds[r], y[tr].mean())
             for r in rungs:
                 fold_rows.append(
                     {"scheme": scheme, "fold": k, "rung": r, "score": _score(task, y[te], preds[r])}
