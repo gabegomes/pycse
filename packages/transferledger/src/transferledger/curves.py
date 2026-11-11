@@ -221,8 +221,8 @@ class SplineAdditive(BaseEstimator):
         eye = np.eye(B.shape[1])
         scale = float(np.trace(B.T @ (B * w[:, None]))) / max(B.shape[1], 1) / n
 
-        def fit_rows(rows, lam, rho):
-            """Penalized fit on ``rows``; returns the coefficients, intercept and edf."""
+        def fit_rows(rows, lam, rho, want_edf=False):
+            """Penalized fit on ``rows``; returns the coefficients, intercept, edf and scores."""
             Br, yr, wr = B[rows], y[rows], w[rows]
             eta = fam.start(yr, wr)
             for _ in range(1 if fam.name == "gaussian" else 25):
@@ -240,14 +240,15 @@ class SplineAdditive(BaseEstimator):
                 eta = new
                 if done:
                     break
-            edf = float(np.trace(np.linalg.solve(M, A))) + 1.0
+            # the effective degrees of freedom cost a full solve, so only on request
+            edf = float(np.trace(np.linalg.solve(M, A))) + 1.0 if want_edf else np.nan
             return beta, b0, edf, eta
 
         every = np.arange(n)
         best = None
         for lam, rho in [(a, b) for a in lambdas for b in shrink]:
             if cv is None:
-                beta, b0, edf, eta = fit_rows(every, lam, rho)
+                beta, b0, edf, eta = fit_rows(every, lam, rho, want_edf=True)
                 dev = float(np.sum(w * fam.loss(y, fam.mean(eta))))
                 n_eff = float(w.sum() ** 2 / np.sum(w**2))
                 crit = n_eff * dev / max(n_eff - edf, 1e-9) ** 2
@@ -260,7 +261,9 @@ class SplineAdditive(BaseEstimator):
             if best is None or crit < best[0] * (1 - 1e-9):
                 best = (crit, lam, rho)
         _, self.lambda_, self.shrinkage_ = best
-        self.coef_, self.intercept_, self.edf_, _ = fit_rows(every, self.lambda_, self.shrinkage_)
+        self.coef_, self.intercept_, self.edf_, _ = fit_rows(
+            every, self.lambda_, self.shrinkage_, want_edf=True
+        )
         # centre each variable's curve on the training rows; the intercept absorbs the shift
         self.centers_ = np.array([
             np.average(B[:, s] @ self.coef_[s], weights=w) if s.stop > s.start else 0.0

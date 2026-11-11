@@ -21,6 +21,8 @@ import copy
 
 import numpy as np
 import pandas as pd
+from scipy.stats import norm
+from scipy.stats import t as student_t
 from sklearn.base import BaseEstimator, RegressorMixin
 
 from ._data import Design
@@ -81,6 +83,11 @@ def greedy(
     chosen, pool = list(start), [c for c in candidates if c not in start]
     _, unit_idx = np.unique(np.asarray(units), return_inverse=True)
     n_units = int(unit_idx.max()) + 1
+    # the same confidence as ``min_evidence`` normal standard errors, with as many degrees of
+    # freedom as there are units to spare: four groups have to agree much more than forty
+    need = 0.0
+    if min_evidence > 0:
+        need = float(student_t.ppf(norm.cdf(min_evidence), max(n_units - 1, 1)))
     base = float(loss_rows([]).sum())
     current = loss_rows(chosen)
     added, path = [], []
@@ -94,7 +101,7 @@ def greedy(
             if min_evidence > 0 and n_units > 1:
                 du = np.bincount(unit_idx, weights=d, minlength=n_units)
                 se = np.sqrt(n_units) * du.std(ddof=1)
-                if se > 0 and du.sum() / se < min_evidence:
+                if se > 0 and du.sum() / se < need:
                     continue
             best = (c, gain)
         if best is None:
@@ -186,13 +193,18 @@ class PieceModel(RegressorMixin, BaseEstimator):
             errors above zero, the standard error taken over the shift's units (groups, when
             groups are held out). With few groups a chance association is real within the
             sample, and only its uncertainty gives it away. 0 turns the rule off.
-        products: also admit products of two chosen variables' leading pieces, by the same rule.
+        products: also admit products of two chosen variables' leading pieces, by the same rule
+            (a product is one variable changing the effect of another).
         max_products: at most this many.
         tune_source: let the curve source tune its strengths on the same splits (a spline source
             does; it matters when the splits hold out whole groups).
         refit_shapes: fit the shapes inside each selection fold on that fold's training rows
             (the honest choice, and the default). False reuses the all-row shapes, which is
             faster and lets a shape that has seen the held-out cases vouch for itself.
+        limit: predictions are kept within the range of the training target, widened on each
+            side by this fraction of the range. An equation makes no claim far outside anything
+            it was fitted to, and near-duplicate variables can otherwise send a new case to an
+            absurd value. None removes the limit; it does not apply to a 0/1 target.
         feature_names: column names when ``X`` is an array.
         random_state: seed of the selection folds.
 
@@ -206,9 +218,9 @@ class PieceModel(RegressorMixin, BaseEstimator):
 
     def __init__(self, source="spline", family="gaussian", forms=None, min_r2=0.97, min_side=3,
                  select_on=None, n_splits=5, max_variables=12, min_gain=0.005, min_evidence=1.645,
-                 products=False,
-                 max_products=3, tune_source=True, refit_shapes=True, feature_names=None,
-                 random_state=0):  # fmt: skip
+                 products=True,
+                 max_products=3, tune_source=True, refit_shapes=True, limit=0.5,
+                 feature_names=None, random_state=0):  # fmt: skip
         self.source = source
         self.family = family
         self.forms = forms
@@ -223,6 +235,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
         self.max_products = max_products
         self.tune_source = tune_source
         self.refit_shapes = refit_shapes
+        self.limit = limit
         self.feature_names = feature_names
         self.random_state = random_state
 
@@ -341,6 +354,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
             self._mu, self._sd = Xn[:, self._used].mean(axis=0), Xn[:, self._used].std(axis=0)
             self._sd = np.where(self._sd > 0, self._sd, 1.0)
             self._train = (Xn[:, self._used] - self._mu) / self._sd
+        self.target_range_ = (float(y.min()), float(y.max()))
         self.n_features_in_ = self.design_.n_features_in_
         self.feature_names_in_ = np.asarray(self.design_.feature_names_in_, dtype=object)
         return self
@@ -362,7 +376,12 @@ class PieceModel(RegressorMixin, BaseEstimator):
         return self.intercept_ + self._columns(Xn) @ self.coef_
 
     def predict(self, X):
-        return get_family(self.family).mean(self.decision_function(X))
+        mu = get_family(self.family).mean(self.decision_function(X))
+        if self.limit is not None and self.family != "binomial":
+            lo, hi = self.target_range_
+            pad = self.limit * (hi - lo)
+            mu = np.clip(mu, max(lo - pad, 0.0) if self.family == "poisson" else lo - pad, hi + pad)
+        return mu
 
     def components(self, X):
         """Each term's contribution to the equation's value at the rows of ``X``."""
@@ -403,6 +422,11 @@ class PieceModel(RegressorMixin, BaseEstimator):
         names = [f"p{k}" for k in range(len(self.chosen_))]
         index = {j: k for k, j in enumerate(self.chosen_)}
         return names + [f"p{index[a]}*p{index[b]}" for a, b in self.products_]
+
+    def _term_variables(self):
+        """For each column of the equation, the input columns it involves."""
+        owners = [{self.pieces_[j].group} for j in self.chosen_]
+        return owners + [{self.pieces_[a].group, self.pieces_[b].group} for a, b in self.products_]
 
     @property
     def variables_(self):

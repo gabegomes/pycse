@@ -293,7 +293,9 @@ def _win_grid(u, sc):
 
 def _win_valid(th, u, sc, min_side):
     a, b, w = th
-    if not (a < b and _width_ok(w, u)):
+    # the edges must be far enough apart, for their width, that the window reaches its plateau;
+    # otherwise it is a small bump with a huge weight, and its edges mean nothing
+    if not (b - a >= 4.0 * w and _width_ok(w, u)):
         return False
     inside = int(((u > a) & (u < b)).sum())
     return inside >= min_side and int((u < a).sum()) + int((u > b).sum()) >= min_side

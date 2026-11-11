@@ -58,7 +58,7 @@ def test_table_input_text_columns_and_weights():
     m = PieceModel().fit(X, y, sample_weight=np.ones(len(y)))
     assert "site" in m.variables_
     assert list(m.feature_names_in_) == list(X.columns) and m.n_features_in_ == 6
-    assert np.allclose(m.predict(X), m.intercept_ + m.components(X).sum(axis=1))
+    assert np.allclose(m.decision_function(X), m.intercept_ + m.components(X).sum(axis=1))
     new = X.head(4).assign(site="west")
     assert m.support(new).unseen_level.all()
 
@@ -71,7 +71,7 @@ def test_missing_values_are_an_error_that_names_the_column():
 
 
 def test_binary_target_gives_probabilities():
-    X, y, _ = calibration(n=800, noise=0.0)
+    X, y, _ = calibration(n=400, noise=0.0)
     yb = (np.random.default_rng(1).uniform(size=len(y)) < sigmoid(2.0 * (y - np.median(y)))).astype(
         float
     )
@@ -115,3 +115,12 @@ def test_refits_are_identical_and_clone_works():
     a = PieceModel(products=True).fit(X, y)
     b = clone(a).fit(X, y)
     assert a.equation() == b.equation()
+
+
+def test_predictions_stay_near_the_range_of_the_training_target():
+    X, y, _ = calibration(n=300)
+    m = PieceModel().fit(X, y)
+    m.intercept_ += 1e6  # an absurd equation
+    lo, hi = y.min(), y.max()
+    assert m.predict(X).max() <= hi + 0.5 * (hi - lo) + 1e-9
+    assert PieceModel(limit=None).fit(X, y).limit is None
