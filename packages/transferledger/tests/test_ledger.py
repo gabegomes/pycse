@@ -109,8 +109,8 @@ def test_preflight_reports_group_properties_few_groups_and_duplicates():
     X, y, g = grouped_data(n_groups=5, per=20)
     X["x_copy"] = 2.0 * X.x + 1e-3
     pre = preflight(X, y, NewGroups(g, "new group"))
-    assert pre.variables.loc["z", "values across groups"] == 5
-    assert pd.isna(pre.variables.loc["x", "values across groups"])
+    assert pre.variables.loc["z", "values across groups (new group)"] == 5
+    assert pd.isna(pre.variables.loc["x", "values across groups (new group)"])
     assert pre.shifts.loc["new group", "design"] == "each group left out once"
     assert len(pre.duplicates) == 1
     text = "\n".join(pre.warnings)

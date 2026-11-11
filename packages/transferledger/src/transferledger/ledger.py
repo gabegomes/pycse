@@ -78,7 +78,8 @@ def _fold(X, y, w, tr, te, proto, variants, extra, fam, blocks):
     def without(names):
         keep = [k for k, s in enumerate(owners) if not (s & names)]
         coef = fit_weights(C_tr[:, keep], ytr, wtr, fam)
-        return _loss(fam, yte, fam.mean(linear_score(C_te[:, keep], coef)), wte) - full
+        mu = m._limited(fam.mean(linear_score(C_te[:, keep], coef)))
+        return _loss(fam, yte, mu, wte) - full
 
     for v in m.variables_:
         out["drop"][v] = without({v})

@@ -32,14 +32,21 @@ from transferledger import PieceModel, NewGroups, transfer_ledger
 
 rng = np.random.default_rng(0)
 site = np.repeat(np.arange(30), 20)
-df = pd.DataFrame({
-    "dose": rng.uniform(0, 10, 600),
-    "temperature": rng.uniform(15, 35, 600),
-    "altitude": rng.uniform(0, 2000, 30)[site],
-    "operator": rng.choice(["ana", "ben"], 600),
-})
-y = (2.0 / (1 + np.exp(-(df.dose - 6.0) / 0.4)) - 0.08 * df.temperature
-     + 0.5 * (df.operator == "ben") + 0.6 * rng.normal(size=30)[site] + 0.2 * rng.normal(size=600))
+df = pd.DataFrame(
+    {
+        "dose": rng.uniform(0, 10, 600),
+        "temperature": rng.uniform(15, 35, 600),
+        "altitude": rng.uniform(0, 2000, 30)[site],
+        "operator": rng.choice(["ana", "ben"], 600),
+    }
+)
+y = (
+    2.0 / (1 + np.exp(-(df.dose - 6.0) / 0.4))
+    - 0.08 * df.temperature
+    + 0.5 * (df.operator == "ben")
+    + 0.6 * rng.normal(size=30)[site]
+    + 0.2 * rng.normal(size=600)
+)
 
 model = PieceModel().fit(df, y)
 print(model.equation())
@@ -150,6 +157,7 @@ place under the shift: what it knew only by having seen the cases.
 
 ```python
 from transferledger import preflight
+
 print(preflight(df, y, NewGroups(site, "new site")))
 ```
 

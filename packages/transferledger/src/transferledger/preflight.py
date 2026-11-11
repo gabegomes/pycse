@@ -100,7 +100,7 @@ def preflight(X, y, shifts=None, *, duplicate_r=0.9, few=8, n_splits=5):
             else:
                 level.append(np.nan)
         for c, k in zip(frame.columns, level):
-            rows[str(c)][f"values across {name.removeprefix('new ')}s"] = k
+            rows[str(c)][f"values across groups ({name})"] = k
     variables = pd.DataFrame.from_dict(rows, orient="index")
     variables.index.name = "variable"
     for c in variables.columns[2:]:

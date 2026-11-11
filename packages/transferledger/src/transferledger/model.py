@@ -395,13 +395,16 @@ class PieceModel(RegressorMixin, BaseEstimator):
         Xn = self.design_.transform(X)
         return self.intercept_ + self._columns(Xn) @ self.coef_
 
+    def _limited(self, mu):
+        """Keep predictions within the training target's range, widened by ``limit``."""
+        if self.limit is None or self.family == "binomial":
+            return mu
+        lo, hi = self.target_range_
+        pad = self.limit * (hi - lo)
+        return np.clip(mu, max(lo - pad, 0.0) if self.family == "poisson" else lo - pad, hi + pad)
+
     def predict(self, X):
-        mu = get_family(self.family).mean(self.decision_function(X))
-        if self.limit is not None and self.family != "binomial":
-            lo, hi = self.target_range_
-            pad = self.limit * (hi - lo)
-            mu = np.clip(mu, max(lo - pad, 0.0) if self.family == "poisson" else lo - pad, hi + pad)
-        return mu
+        return self._limited(get_family(self.family).mean(self.decision_function(X)))
 
     def components(self, X):
         """Each term's contribution to the equation's value at the rows of ``X``."""
