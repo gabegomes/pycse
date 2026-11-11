@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "transferledger"
+version = "0.1.0"
+description = "Readable equations from tabular data, and an account of which parts of a model still hold under a named shift"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "scikit-learn>=1.3",
+  "joblib>=1.2",
+]
+
+[project.optional-dependencies]
+kan = ["pycse"]      # KAN curve source and KAN rungs (JAX)
+pysr = ["pysr>=2.0"] # symbolic search over pieces (installs Julia on first use)
+plot = ["matplotlib>=3.7"]
+test = ["pytest>=7.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/transferledger"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501"]

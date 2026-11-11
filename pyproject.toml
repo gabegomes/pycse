@@ -122,9 +122,9 @@ ignore = ["E501"]  # Ignore line-too-long
 
 [tool.pytest.ini_options]
 # add src/ to PYTHONPATH
-pythonpath = ["src"]
+pythonpath = ["src", "packages/transferledger/src"]
 # where your tests live
-testpaths  = ["src/pycse/tests", "src/pycse/sklearn/tests"]
+testpaths  = ["src/pycse/tests", "src/pycse/sklearn/tests", "packages/transferledger/tests"]
 # custom markers
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
