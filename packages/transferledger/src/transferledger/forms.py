@@ -92,8 +92,10 @@ def _g(v, digits=3):
     return f"{v:.{digits}g}"
 
 
-def _minus(name, v):
-    """``name - v`` without a double sign."""
+def _minus(name, v, sd=1.0):
+    """``name - v`` without a double sign, and without subtracting a zero."""
+    if abs(v) < 1e-9 * sd:
+        return f"{name}"
     return f"{name} - {_g(v)}" if v >= 0 else f"{name} + {_g(-v)}"
 
 
@@ -114,7 +116,7 @@ LINEAR = Form(
     shape=lambda z, th, sc: np.asarray(z, float),
     grid=lambda u, sc: _NONE,
     valid=_always,
-    text=lambda n, th, sc: f"({_minus(n, sc.mean)}) / {_g(sc.sd)}",
+    text=lambda n, th, sc: f"({_minus(n, sc.mean, sc.sd)}) / {_g(sc.sd)}",
 )
 INVERSE = Form(
     "inverse",
@@ -155,7 +157,7 @@ QUADRATIC = Form(
     grid=_quad_grid,
     valid=_quad_valid,
     text=lambda n, th, sc: (
-        f"(({_minus(n, sc.x(th[0]))}) / {_g(sc.sd)})^2   [turns at {_g(sc.x(th[0]))}]"
+        f"(({_minus(n, sc.x(th[0]), sc.sd)}) / {_g(sc.sd)})^2   [turns at {_g(sc.x(th[0]))}]"
     ),
     location=lambda th, sc: float(sc.x(th[0])),
     n_theta=1,
@@ -191,7 +193,9 @@ EXPONENTIAL = Form(
     shape=_exp_shape,
     grid=_exp_grid,
     valid=_exp_valid,
-    text=lambda n, th, sc: f"exp({_g(th[0] / sc.sd)} * ({_minus(n, sc.x(_exp_ref(th, sc)))}))",
+    text=lambda n, th, sc: (
+        f"exp({_g(th[0] / sc.sd)} * ({_minus(n, sc.x(_exp_ref(th, sc)), sc.sd)}))"
+    ),
     n_theta=1,
 )
 
@@ -241,7 +245,7 @@ VEE = Form(
     shape=lambda z, th, sc: np.abs(np.asarray(z, float) - th[0]),
     grid=lambda u, sc: _edge_candidates(u, 60)[:, None],
     valid=lambda th, u, sc, min_side: min(_sides(u, th[0])) >= min_side,
-    text=lambda n, th, sc: f"|{_minus(n, sc.x(th[0]))}| / {_g(sc.sd)}",
+    text=lambda n, th, sc: f"|{_minus(n, sc.x(th[0]), sc.sd)}| / {_g(sc.sd)}",
     location=lambda th, sc: float(sc.x(th[0])),
     n_theta=1,
     companion_line=True,
@@ -272,7 +276,7 @@ STEP = Form(
     grid=_step_grid,
     valid=_step_valid,
     text=lambda n, th, sc: (
-        f"S(({_minus(n, sc.x(th[0]))}) / {_g(sc.sd * th[1])})   [0 below {_g(sc.x(th[0]))}, 1 above]"
+        f"S(({_minus(n, sc.x(th[0]), sc.sd)}) / {_g(sc.sd * th[1])})   [0 below {_g(sc.x(th[0]))}, 1 above]"
     ),
     location=lambda th, sc: float(sc.x(th[0])),
     n_theta=2,
@@ -427,6 +431,7 @@ class Piece:
     r2: float = float("nan")
     companion_of: str | None = None
     column: int | None = None  # index of the variable in the design matrix
+    group: str | None = None  # the input column the variable came from
     extrapolate: bool = field(default=False)
 
     def unit(self, x):

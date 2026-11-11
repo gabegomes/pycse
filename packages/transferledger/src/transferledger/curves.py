@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import numpy as np
 from scipy.interpolate import BSpline
+from sklearn.base import BaseEstimator
 
 __all__ = ["SplineAdditive", "KANAdditive", "ModelCurves", "FAMILIES"]
 
@@ -151,7 +152,7 @@ class _Block:
         return np.zeros((self.width, self.width))
 
 
-class SplineAdditive:
+class SplineAdditive(BaseEstimator):
     """Additive model of penalized splines, one smooth curve per variable.
 
     ``y`` (or its link) is modelled as ``b + sum_j f_j(x_j)``. Each ``f_j`` is a cubic B-spline
@@ -314,7 +315,7 @@ class ModelCurves:
         return np.asarray(self.model.predict(np.asarray(X, float)), float).ravel()
 
 
-class KANAdditive:
+class KANAdditive(BaseEstimator):
     """A Kolmogorov-Arnold network with no hidden layer (``layers=(d, 1)``) as a curve source.
 
     Needs the ``kan`` extra (``pycse``, which brings JAX). The model is the same family of curves
