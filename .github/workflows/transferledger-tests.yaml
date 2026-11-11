@@ -1,0 +1,51 @@
+name: transferledger tests
+
+# The standalone package in packages/transferledger, installed on its own (without pycse or
+# JAX), so the tests also prove its core has no hidden dependency.
+on:
+  push:
+    paths:
+      - "packages/transferledger/**"
+      - ".github/workflows/transferledger-tests.yaml"
+  pull_request:
+    paths:
+      - "packages/transferledger/**"
+      - ".github/workflows/transferledger-tests.yaml"
+
+jobs:
+  test:
+    name: transferledger - Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    defaults:
+      run:
+        working-directory: packages/transferledger
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
+
+      - name: Install the package alone
+        run: |
+          uv venv --python ${{ matrix.python-version }}
+          uv pip install -e ".[test]" ruff==0.16.7
+
+      - name: Lint and format check
+        run: |
+          uv run --no-sync ruff check .
+          uv run --no-sync ruff format --check .
+
+      - name: Tests
+        run: uv run --no-sync pytest -q

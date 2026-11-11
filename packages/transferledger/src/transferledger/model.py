@@ -153,6 +153,19 @@ def piece_matrix(pieces, X):
     return np.column_stack([p.unit(X[:, p.column]) for p in pieces])
 
 
+def _unit_level(Xn, units):
+    """Which columns are constant within every unit (properties of the group, not the row)."""
+    _, idx = np.unique(np.asarray(units), return_inverse=True)
+    if idx.max() + 1 >= len(idx):  # every row is its own unit
+        return np.zeros(Xn.shape[1], bool)
+    order = np.argsort(idx, kind="stable")
+    starts = np.flatnonzero(np.r_[True, np.diff(idx[order]) > 0])
+    Xs = Xn[order]
+    spread = np.maximum.reduceat(Xs, starts, axis=0) - np.minimum.reduceat(Xs, starts, axis=0)
+    tol = 1e-12 * (1.0 + np.abs(Xn).max(axis=0))
+    return (spread.max(axis=0) <= tol) & (np.ptp(Xn, axis=0) > 0)
+
+
 def _make_source(source, family):
     if isinstance(source, str):
         if source == "spline":
@@ -196,8 +209,9 @@ class PieceModel(RegressorMixin, BaseEstimator):
         products: also admit products of two chosen variables' leading pieces, by the same rule
             (a product is one variable changing the effect of another).
         max_products: at most this many.
-        tune_source: let the curve source tune its strengths on the same splits (a spline source
-            does; it matters when the splits hold out whole groups).
+        tune_source: let a spline source tune the strengths of variables that are properties of
+            the shift's units (constant within each group) on the held-out splits. Row-wise
+            tuning cannot see that such a variable has only as many values as there are groups.
         refit_shapes: fit the shapes inside each selection fold on that fold's training rows
             (the honest choice, and the default). False reuses the all-row shapes, which is
             faster and lets a shape that has seen the held-out cases vouch for itself.
@@ -280,13 +294,19 @@ class PieceModel(RegressorMixin, BaseEstimator):
         splits = shift.splits(self.n_splits, self.random_state)
         every = np.arange(len(y))
 
-        # the curve source on all rows; a spline source tunes its two strengths on the splits
+        # the curve source on all rows. A spline source tunes the strengths of variables that
+        # are constant within the shift's units (properties of the group) on the held-out
+        # splits, and those of the other variables on rows; refits then reuse the strengths
         self.source_ = _make_source(self.source, self.family)
-        if isinstance(self.source_, SplineAdditive) and self.tune_source:
-            self.source_.fit(Xn, y, sample_weight=w, cv=splits)
-            self.source_.set_params(
-                lambdas=[self.source_.lambda_], shrinkage=[self.source_.shrinkage_]
-            )
+        if isinstance(self.source_, SplineAdditive) and self.source_.fixed is None:
+            level = np.zeros(Xn.shape[1], bool)
+            if self.tune_source:
+                level = _unit_level(Xn, shift.units())
+            if level.any():
+                self.source_.fit(Xn, y, sample_weight=w, cv=splits, cv_features=level)
+            else:
+                self.source_.fit(Xn, y, sample_weight=w)
+            self.source_.set_params(fixed=self.source_.strengths_)
         self.pieces_ = self._pieces_on(self.source_, Xn, y, w, every)
         P = piece_matrix(self.pieces_, Xn)
 

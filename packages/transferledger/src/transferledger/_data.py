@@ -10,7 +10,8 @@ class Design:
     """Column bookkeeping for a table or array.
 
     Numeric and boolean columns pass through. A text or categorical column becomes one 0/1
-    column per level, named ``column=level``. Missing values are an error that names the
+    column per level except its most frequent one (the reference level, against which the
+    others are read), named ``column=level``. Missing values are an error that names the
     columns: an imputed value would enter the equation as if it had been measured.
 
     Attributes:
@@ -53,6 +54,7 @@ class Design:
         self._check_missing(df)
         self.feature_names_in_ = [str(c) for c in df.columns]
         self.levels_ = {}
+        self.reference_ = {}
         self.names_, self.source_ = [], []
         for c in df.columns:
             col = df[c]
@@ -60,9 +62,11 @@ class Design:
                 self.names_.append(str(c))
                 self.source_.append(str(c))
             else:
-                levels = [v for v in pd.unique(col.astype(str))]
-                self.levels_[str(c)] = sorted(levels)
-                for v in self.levels_[str(c)]:
+                counts = col.astype(str).value_counts()
+                levels = sorted(counts.index, key=lambda v: (-counts[v], v))
+                self.levels_[str(c)] = levels
+                self.reference_[str(c)] = levels[0]
+                for v in levels[1:]:
                     self.names_.append(f"{c}={v}")
                     self.source_.append(str(c))
         self.n_features_in_ = len(self.feature_names_in_)
@@ -82,7 +86,7 @@ class Design:
             if c in self.levels_:
                 s = col.astype(str).to_numpy()
                 unseen |= ~np.isin(s, self.levels_[c])
-                for v in self.levels_[c]:
+                for v in self.levels_[c][1:]:
                     cols.append((s == v).astype(float))
             else:
                 cols.append(col.to_numpy(dtype=float))

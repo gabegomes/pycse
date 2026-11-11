@@ -170,36 +170,44 @@ class SplineAdditive(BaseEstimator):
         family: ``"gaussian"``, ``"binomial"`` (0/1 target, log-odds scale) or ``"poisson"``.
         lambdas: smoothing strengths to choose from.
         shrinkage: shrinkage strengths to choose from, relative to the scale of the design.
+        fixed: the ``strengths_`` of an earlier fit, to reuse them without tuning.
 
     Attributes:
-        intercept_, lambda_, edf_ (effective degrees of freedom of the chosen fit).
+        intercept_, edf_ (effective degrees of freedom of the chosen fit), lambda_ and
+        shrinkage_ (the strengths of the variables tuned on rows), strengths_ (all four
+        strengths and which variables were tuned on held-out units).
     """
 
     def __init__(
-        self, n_knots=12, degree=3, max_levels=6, family="gaussian", lambdas=None, shrinkage=None
-    ):
+        self, n_knots=12, degree=3, max_levels=6, family="gaussian", lambdas=None, shrinkage=None,
+        fixed=None,
+    ):  # fmt: skip
         self.n_knots = n_knots
         self.degree = degree
         self.max_levels = max_levels
         self.family = family
         self.lambdas = lambdas
         self.shrinkage = shrinkage
+        self.fixed = fixed
 
     def _design(self, X):
         cols = [b.design(X[:, j]) for j, b in enumerate(self.blocks_)]
         return np.hstack(cols) if cols else np.zeros((len(X), 0))
 
-    def fit(self, X, y, sample_weight=None, cv=None):
+    def fit(self, X, y, sample_weight=None, cv=None, cv_features=None):
         """Fit the curves.
 
         Args:
             X, y: numeric design and target.
             sample_weight: optional weight per row.
-            cv: optional list of ``(train, test)`` row-index pairs. The two strengths are then
-                chosen by the held-out loss on those splits instead of by generalized
-                cross-validation, which matters when the splits hold out whole groups: row-wise
-                criteria cannot see that a variable constant within groups has only as many
-                independent values as there are groups.
+            cv: optional list of ``(train, test)`` row-index pairs that hold out whole units
+                (groups). Variables marked in ``cv_features`` then get strengths of their own,
+                chosen by the held-out loss on those splits; the others keep the row-wise
+                criterion. A row-wise criterion cannot see that a variable constant within
+                groups has only as many independent values as there are groups, and a held-out
+                criterion applied to every variable would smooth away the shape of a variable
+                that the rows pin down well.
+            cv_features: boolean mask over the columns; default, with ``cv``, all of them.
         """
         X, y = np.asarray(X, float), np.asarray(y, float)
         n, d = X.shape
@@ -213,16 +221,27 @@ class SplineAdditive(BaseEstimator):
         for b in self.blocks_:
             self.slices_.append(slice(i, i + b.width))
             i += b.width
-        P = np.zeros((B.shape[1], B.shape[1]))
-        for b, s in zip(self.blocks_, self.slices_):
-            P[s, s] = b.penalty()
+        if self.fixed is not None:
+            held = np.asarray(self.fixed["held_out"], bool)
+        elif cv is None:
+            held = np.zeros(d, bool)
+        else:
+            held = np.ones(d, bool) if cv_features is None else np.asarray(cv_features, bool)
+        # penalties for the two classes of variable: tuned on rows, tuned on held-out units
+        p_all = B.shape[1]
+        P = [np.zeros((p_all, p_all)), np.zeros((p_all, p_all))]
+        Id = [np.zeros((p_all, p_all)), np.zeros((p_all, p_all))]
+        for j, (b, s) in enumerate(zip(self.blocks_, self.slices_)):
+            k = int(held[j])
+            P[k][s, s] = b.penalty()
+            Id[k][s, s] = np.eye(b.width)
         lambdas = np.logspace(-2, 4, 7) if self.lambdas is None else np.asarray(self.lambdas)
         shrink = [1e-6, 1e-3, 1e-2, 1e-1, 1.0, 10.0] if self.shrinkage is None else self.shrinkage
-        eye = np.eye(B.shape[1])
-        scale = float(np.trace(B.T @ (B * w[:, None]))) / max(B.shape[1], 1) / n
+        scale = float(np.trace(B.T @ (B * w[:, None]))) / max(p_all, 1) / n
 
-        def fit_rows(rows, lam, rho, want_edf=False):
+        def fit_rows(rows, pen, want_edf=False):
             """Penalized fit on ``rows``; returns the coefficients, intercept, edf and scores."""
+            lam0, rho0, lam1, rho1 = pen
             Br, yr, wr = B[rows], y[rows], w[rows]
             eta = fam.start(yr, wr)
             for _ in range(1 if fam.name == "gaussian" else 25):
@@ -232,7 +251,7 @@ class SplineAdditive(BaseEstimator):
                 mu_B = sw @ Br
                 Bc = Br - mu_B
                 A = Bc.T @ (Bc * ww[:, None])
-                M = A + lam * P + rho * scale * ww.sum() * eye
+                M = A + lam0 * P[0] + lam1 * P[1] + scale * ww.sum() * (rho0 * Id[0] + rho1 * Id[1])
                 beta = np.linalg.solve(M, Bc.T @ (ww * (z - sw @ z)))
                 b0 = float(sw @ z - mu_B @ beta)
                 new = b0 + Br @ beta
@@ -245,25 +264,36 @@ class SplineAdditive(BaseEstimator):
             return beta, b0, edf, eta
 
         every = np.arange(n)
-        best = None
-        for lam, rho in [(a, b) for a in lambdas for b in shrink]:
-            if cv is None:
-                beta, b0, edf, eta = fit_rows(every, lam, rho, want_edf=True)
-                dev = float(np.sum(w * fam.loss(y, fam.mean(eta))))
-                n_eff = float(w.sum() ** 2 / np.sum(w**2))
-                crit = n_eff * dev / max(n_eff - edf, 1e-9) ** 2
-            else:
-                crit = 0.0
-                for tr, te in cv:
-                    beta, b0, _, _ = fit_rows(np.asarray(tr), lam, rho)
-                    mu = fam.mean(b0 + B[te] @ beta)
-                    crit += float(np.sum(w[te] * fam.loss(y[te], mu)))
-            if best is None or crit < best[0] * (1 - 1e-9):
-                best = (crit, lam, rho)
-        _, self.lambda_, self.shrinkage_ = best
-        self.coef_, self.intercept_, self.edf_, _ = fit_rows(
-            every, self.lambda_, self.shrinkage_, want_edf=True
-        )
+        grid = [(a, b) for a in lambdas for b in shrink]
+        if self.fixed is not None:
+            pen = tuple(self.fixed["strengths"])
+        else:
+            # rows first (generalized cross-validation), with the held-out class at a moderate
+            # setting; then the held-out class on the splits, with the row class fixed
+            best, rows_pen = None, (1.0, 0.1)
+            n_eff = float(w.sum() ** 2 / np.sum(w**2))
+            if not held.all():
+                for lam, rho in grid:
+                    _, _, edf, eta = fit_rows(every, (lam, rho, 1.0, 0.1), want_edf=True)
+                    dev = float(np.sum(w * fam.loss(y, fam.mean(eta))))
+                    crit = n_eff * dev / max(n_eff - edf, 1e-9) ** 2
+                    if best is None or crit < best[0] * (1 - 1e-9):
+                        best, rows_pen = (crit,), (lam, rho)
+            held_pen = (1.0, 0.1)
+            if held.any():
+                best = None
+                for lam, rho in grid:
+                    crit = 0.0
+                    for tr, te in cv:
+                        beta, b0, _, _ = fit_rows(np.asarray(tr), (*rows_pen, lam, rho))
+                        mu = fam.mean(b0 + B[te] @ beta)
+                        crit += float(np.sum(w[te] * fam.loss(y[te], mu)))
+                    if best is None or crit < best[0] * (1 - 1e-9):
+                        best, held_pen = (crit,), (lam, rho)
+            pen = (*rows_pen, *held_pen)
+        self.strengths_ = {"strengths": tuple(float(v) for v in pen), "held_out": held.tolist()}
+        self.lambda_, self.shrinkage_ = pen[0], pen[1]
+        self.coef_, self.intercept_, self.edf_, _ = fit_rows(every, pen, want_edf=True)
         # centre each variable's curve on the training rows; the intercept absorbs the shift
         self.centers_ = np.array([
             np.average(B[:, s] @ self.coef_[s], weights=w) if s.stop > s.start else 0.0
