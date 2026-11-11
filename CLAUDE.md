@@ -173,6 +173,26 @@ is a lookup of a few molecules.
 Tests in `test_sklearn_kan_symbolic.py` use an exactly additive stand-in model (fast); the KAN
 and PySR end-to-end tests are marked slow (the PySR one skips without `pysr`).
 
+### transferledger (`packages/transferledger/`)
+A standalone, field-neutral package (own `pyproject.toml`, README and tests; core depends only on
+numpy, scipy, pandas, scikit-learn; no import of pycse except the optional KAN curve source). It
+supersedes `kan_symbolic`, which stays only until `KAN_Transfer_Ledger` is ported to it.
+- `PieceModel` - the equation of named pieces. Curve source `"spline"` (default: penalized
+  additive splines, exact and repeatable), `"kan"`, or any object with `fit`/`curves`. Families
+  gaussian, binomial, poisson. Tables in, text columns, sample weights; missing values are an
+  error. `select_on=<Shift>` chooses variables under that shift; shapes are refit inside each
+  selection fold and a variable needs `min_evidence` standard errors over the shift's units.
+  `equation()`, `terms_`, `components(X)`, `support(X)`
+- shifts (`shifts.py`): `NewGroups` (leave-one-out when few; `.from_clusters`), `ForwardInTime`,
+  `BeyondRange`, `Splitter`, and `Reference` (random folds)
+- `transfer_ledger(X, y, shifts, ...)` - repeated folds; skill = share of the baseline's loss
+  removed; delete-one-unit jackknife intervals; per-variable and per-block verdicts (transfers,
+  does not transfer, undetermined, ...); memorized share; several shifts at once
+- `preflight()` - distinct values, group-level variables, variance between groups, duplicates
+- `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve
+Tests: `packages/transferledger/tests` (in the repo's `testpaths`; also run by
+`.github/workflows/transferledger-tests.yaml` with the package installed alone).
+
 ### Chemistry example notebooks (`src/pycse/examples/`)
 Seven notebooks share that pipeline, one per dataset, each ending in a written reading:
 `KAN_Chemistry_Yield_Prediction` and `KAN_vs_MLR_Sigman_Descriptors` (the first two; their
