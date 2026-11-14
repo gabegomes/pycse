@@ -158,9 +158,11 @@ class SplineAdditive(BaseEstimator):
     ``y`` (or its link) is modelled as ``b + sum_j f_j(x_j)``. Each ``f_j`` is a cubic B-spline
     with knots at quantiles and a second-difference penalty (a P-spline); a variable with two
     values gets an indicator and one with at most ``max_levels`` values a free mean per value.
-    Two strengths are chosen together by generalized cross-validation: one for wiggliness and
-    one that shrinks whole curves toward zero, so that near-duplicate variables do not trade
-    large opposite effects. The fit is a linear solve (iterated for non-Gaussian families), so
+    Two strengths are chosen together, one for wiggliness and one that shrinks whole curves
+    toward zero, so that near-duplicate variables do not trade large opposite effects. The
+    criterion is generalized cross-validation for a Gaussian target and held-out deviance on
+    random row folds for a 0/1 or count target, where an in-sample criterion would reward the
+    overconfident probabilities of a nearly separable fit. The fit is a linear solve (iterated for non-Gaussian families), so
     the same data always give the same curves.
 
     Args:
@@ -239,11 +241,14 @@ class SplineAdditive(BaseEstimator):
         shrink = [1e-6, 1e-3, 1e-2, 1e-1, 1.0, 10.0] if self.shrinkage is None else self.shrinkage
         scale = float(np.trace(B.T @ (B * w[:, None]))) / max(p_all, 1) / n
 
-        def fit_rows(rows, pen, want_edf=False):
-            """Penalized fit on ``rows``; returns the coefficients, intercept, edf and scores."""
+        warm = {}
+
+        def fit_rows(rows, pen, want_edf=False, key=None):
+            """Penalized fit on ``rows``; returns the coefficients, intercept, edf and scores.
+            ``key`` names the row set, so an iterated fit starts from the last one on it."""
             lam0, rho0, lam1, rho1 = pen
             Br, yr, wr = B[rows], y[rows], w[rows]
-            eta = fam.start(yr, wr)
+            eta = warm.get(key) if key in warm else fam.start(yr, wr)
             for _ in range(1 if fam.name == "gaussian" else 25):
                 z, v = fam.working(yr, eta)
                 ww = wr * v
@@ -259,6 +264,8 @@ class SplineAdditive(BaseEstimator):
                 eta = new
                 if done:
                     break
+            if key is not None and fam.name != "gaussian":
+                warm[key] = eta
             # the effective degrees of freedom cost a full solve, so only on request
             edf = float(np.trace(np.linalg.solve(M, A))) + 1.0 if want_edf else np.nan
             return beta, b0, edf, eta
@@ -273,10 +280,26 @@ class SplineAdditive(BaseEstimator):
             best, rows_pen = None, (1.0, 0.1)
             n_eff = float(w.sum() ** 2 / np.sum(w**2))
             if not held.all():
+                # a Gaussian target: generalized cross-validation, one fit per setting. Other
+                # families: held-out deviance on random row folds, because an in-sample
+                # criterion rewards the overconfident probabilities of a nearly separable fit
+                row_folds = []
+                if fam.name != "gaussian":
+                    perm = np.random.default_rng(0).permutation(n)
+                    row_folds = [
+                        (np.setdiff1d(every, part), part) for part in np.array_split(perm, 5)
+                    ]
                 for lam, rho in grid:
-                    _, _, edf, eta = fit_rows(every, (lam, rho, 1.0, 0.1), want_edf=True)
-                    dev = float(np.sum(w * fam.loss(y, fam.mean(eta))))
-                    crit = n_eff * dev / max(n_eff - edf, 1e-9) ** 2
+                    if fam.name == "gaussian":
+                        _, _, edf, eta = fit_rows(every, (lam, rho, 1.0, 0.1), want_edf=True)
+                        dev = float(np.sum(w * fam.loss(y, fam.mean(eta))))
+                        crit = n_eff * dev / max(n_eff - edf, 1e-9) ** 2
+                    else:
+                        crit = 0.0
+                        for k, (tr, te) in enumerate(row_folds):
+                            beta, b0, _, _ = fit_rows(tr, (lam, rho, 1.0, 0.1), key=("row", k))
+                            mu = fam.mean(b0 + B[te] @ beta)
+                            crit += float(np.sum(w[te] * fam.loss(y[te], mu)))
                     if best is None or crit < best[0] * (1 - 1e-9):
                         best, rows_pen = (crit,), (lam, rho)
             held_pen = (1.0, 0.1)
@@ -284,8 +307,8 @@ class SplineAdditive(BaseEstimator):
                 best = None
                 for lam, rho in grid:
                     crit = 0.0
-                    for tr, te in cv:
-                        beta, b0, _, _ = fit_rows(np.asarray(tr), (*rows_pen, lam, rho))
+                    for k, (tr, te) in enumerate(cv):
+                        beta, b0, _, _ = fit_rows(np.asarray(tr), (*rows_pen, lam, rho), key=k)
                         mu = fam.mean(b0 + B[te] @ beta)
                         crit += float(np.sum(w[te] * fam.loss(y[te], mu)))
                     if best is None or crit < best[0] * (1 - 1e-9):

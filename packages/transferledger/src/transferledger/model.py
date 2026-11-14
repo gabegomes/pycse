@@ -36,25 +36,40 @@ __all__ = ["PieceModel", "fit_weights", "linear_score", "greedy", "make_pieces",
 # -----------------------------------------------------------------------------
 # the linear stage, shared with the ledger
 # -----------------------------------------------------------------------------
-def fit_weights(P, y, w, fam, ridge=1e-8):
+def fit_weights(P, y, w, fam, ridge=0.0):
     """Intercept and weights of ``y ~ 1 + P`` for a family; returns ``coef`` with the intercept
-    first. Gaussian is weighted least squares; other families iterate it."""
+    first.
+
+    ``ridge`` shrinks the weights toward zero. It is scale-free: each column is penalized in
+    proportion to its own variance, so ``ridge=1`` roughly halves the weight of a column that is
+    unrelated to the others, whatever its units. Gaussian with ``ridge=0`` is weighted least
+    squares; other families iterate a weighted least-squares fit.
+    """
     A = np.column_stack([np.ones(len(y)), P])
-    if fam.name == "gaussian":
+    if fam.name == "gaussian" and ridge == 0:
         sw = np.sqrt(w)
         return np.linalg.lstsq(A * sw[:, None], y * sw, rcond=None)[0]
-    pen = np.eye(A.shape[1])
-    pen[0, 0] = 0.0
+    k = A.shape[1]
+    var = np.zeros(k)
+    if k > 1:
+        mean = np.average(P, axis=0, weights=w)
+        var[1:] = np.average((P - mean) ** 2, axis=0, weights=w)
+    if fam.name == "gaussian":
+        M = A.T @ (A * w[:, None])
+        return np.linalg.solve(
+            M + ridge * w.sum() * np.diag(var) + 1e-12 * np.eye(k), A.T @ (w * y)
+        )
     eta = fam.start(y, w)
-    coef = np.zeros(A.shape[1])
-    for _ in range(50):
+    coef = np.zeros(k)
+    for _ in range(30):
         z, v = fam.working(y, eta)
         ww = w * v
         M = A.T @ (A * ww[:, None])
-        # a small ridge keeps the weights finite when a piece separates the classes
-        coef = np.linalg.solve(M + max(ridge, 1e-6) * np.trace(M) / len(M) * pen, A.T @ (ww * z))
+        # a trace of ridge keeps the weights finite when a piece separates the classes
+        pen = max(ridge, 1e-6) * ww.sum() * np.diag(var)
+        coef = np.linalg.solve(M + pen + 1e-12 * np.eye(k), A.T @ (ww * z))
         new = np.clip(A @ coef, -30, 30)
-        if np.max(np.abs(new - eta)) < 1e-7 * (1 + np.max(np.abs(new))):
+        if np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new))):
             eta = new
             break
         eta = new
@@ -209,6 +224,10 @@ class PieceModel(RegressorMixin, BaseEstimator):
         products: also admit products of two chosen variables' leading pieces, by the same rule
             (a product is one variable changing the effect of another).
         max_products: at most this many.
+        shrink: shrinkage of the equation's weights toward zero: a number (0 is none; scale-free,
+            see :func:`fit_weights`) or ``"auto"`` to take the strength with the lowest held-out
+            loss on the selection splits. On the datasets this package was developed on it made
+            no measurable difference once variables are chosen with the evidence rule.
         tune_source: let a spline source tune the strengths of variables that are properties of
             the shift's units (constant within each group) on the held-out splits. Row-wise
             tuning cannot see that such a variable has only as many values as there are groups.
@@ -233,8 +252,8 @@ class PieceModel(RegressorMixin, BaseEstimator):
     def __init__(self, source="spline", family="gaussian", forms=None, min_r2=0.97, min_side=3,
                  select_on=None, n_splits=5, max_variables=12, min_gain=0.005, min_evidence=1.645,
                  products=True,
-                 max_products=3, tune_source=True, refit_shapes=True, limit=0.5,
-                 feature_names=None, random_state=0):  # fmt: skip
+                 max_products=3, shrink=0.0, tune_source=True,
+                 refit_shapes=True, limit=0.5, feature_names=None, random_state=0):  # fmt: skip
         self.source = source
         self.family = family
         self.forms = forms
@@ -247,6 +266,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
         self.min_evidence = min_evidence
         self.products = products
         self.max_products = max_products
+        self.shrink = shrink
         self.tune_source = tune_source
         self.refit_shapes = refit_shapes
         self.limit = limit
@@ -336,10 +356,10 @@ class PieceModel(RegressorMixin, BaseEstimator):
                     cols.extend(Pm[:, c] for c in fold["by_var"].get(item, []))
             return np.column_stack(cols) if cols else np.zeros((len(Pm), 0))
 
-        def loss_rows(selection):
+        def loss_rows(selection, ridge=0.0):
             out = []
             for f in folds:
-                coef = fit_weights(columns(f, "Ptr", selection), y[f["tr"]], w[f["tr"]], fam)
+                coef = fit_weights(columns(f, "Ptr", selection), y[f["tr"]], w[f["tr"]], fam, ridge)
                 mu = fam.mean(linear_score(columns(f, "Pte", selection), coef))
                 out.append(w[f["te"]] * fam.loss(y[f["te"]], mu))
             return np.concatenate(out)
@@ -358,6 +378,16 @@ class PieceModel(RegressorMixin, BaseEstimator):
             )
             self.path_ = self.path_ + path
         self.skill_ = self.path_[-1] if self.path_ else 0.0
+        # how much to shrink the weights: the strength with the lowest held-out loss
+        self.shrink_ = 0.0
+        if self.shrink == "auto" and chosen:
+            grid = [0.0, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0]
+            losses = [float(loss_rows(chosen + pairs, r).sum()) for r in grid]
+            self.shrink_ = grid[int(np.argmin(losses))]
+            base = float(loss_rows([]).sum())
+            self.skill_ = 1.0 - min(losses) / base if base > 0 else 0.0
+        elif self.shrink != "auto":
+            self.shrink_ = float(self.shrink or 0.0)
 
         # the equation: all-row shapes of the chosen variables, weights fitted to all rows
         lead = {}
@@ -366,7 +396,8 @@ class PieceModel(RegressorMixin, BaseEstimator):
         self.chosen_ = [c for v in chosen for c, p in enumerate(self.pieces_) if p.group == v]
         self.products_ = [(lead[a], lead[b]) for a, b in pairs]
         cols = [P[:, c] for c in self.chosen_] + [P[:, a] * P[:, b] for a, b in self.products_]
-        coef = fit_weights(np.column_stack(cols) if cols else np.zeros((len(y), 0)), y, w, fam)
+        C = np.column_stack(cols) if cols else np.zeros((len(y), 0))
+        coef = fit_weights(C, y, w, fam, self.shrink_)
         self.intercept_, self.coef_ = float(coef[0]), np.asarray(coef[1:], float)
         # for support(): the chosen variables' training values, standardized
         self._used = sorted({self.pieces_[j].column for j in self.chosen_})
