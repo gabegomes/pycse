@@ -91,7 +91,8 @@ def _whiskers(labels, series, lo_clip, hi_clip, xlabel, zero=True, label_width=2
         out.append(
             f'<line x1="{x(t):.1f}" x2="{x(t):.1f}" y1="6" y2="{height - 34}" stroke="var(--rule)"/>'
         )
-        out.append(f'<text x="{x(t):.1f}" y="{height - 18}" text-anchor="middle">{t:.2f}</text>')
+        label = f"{t:.2f}".replace("-0.00", "0.00")
+        out.append(f'<text x="{x(t):.1f}" y="{height - 18}" text-anchor="middle">{label}</text>')
     if zero and lo_clip < 0 < hi_clip:
         out.append(
             f'<line x1="{x(0):.1f}" x2="{x(0):.1f}" y1="6" y2="{height - 34}" stroke="var(--mute)" stroke-dasharray="3 3"/>'

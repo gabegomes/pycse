@@ -115,3 +115,33 @@ def test_preflight_reports_group_properties_few_groups_and_duplicates():
     assert len(pre.duplicates) == 1
     text = "\n".join(pre.warnings)
     assert "only 5 groups" in text and "rests on 5 points" in text and "near-duplicate" in text
+
+
+def test_report_and_json(ledger, tmp_path):
+    page = ledger.report(tmp_path / "ledger.html", title="Test ledger")
+    assert page.startswith("<!doctype html>") and "<script" not in page
+    for needle in [
+        "Test ledger",
+        "Models under each shift",
+        "What was memorized",
+        "transfers",
+        "<svg",
+    ]:
+        assert needle in page
+    assert (tmp_path / "ledger.html").read_text(encoding="utf-8") == page
+    ledger.to_json(tmp_path / "ledger.json")
+    import json
+
+    d = json.loads((tmp_path / "ledger.json").read_text())
+    assert d["schemes"] == ["reference", "new group"] and "equation" in d["equations"]
+    assert d["meta"]["units"]["new group"] == 40
+
+
+def test_extra_models_can_use_fewer_repeats():
+    from sklearn.linear_model import LinearRegression
+
+    X, y, g = grouped_data(n_groups=12, per=10, seed=1)
+    L = transfer_ledger(X, y, NewGroups(g, "new group"), models={"linear": LinearRegression()},
+                        n_repeats=2, model_repeats=1)  # fmt: skip
+    row = L.skill.set_index(["rung", "scheme"]).loc[("linear", "new group")]
+    assert np.isfinite(row.skill) and row.lo <= row.skill <= row.hi

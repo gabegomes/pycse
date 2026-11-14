@@ -27,6 +27,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 
 from ._data import Design
 from .curves import KANAdditive, SplineAdditive, get_family
+from .assemble import evaluate
 from .forms import DEFAULT_ORDER, match_curve
 from .shifts import Reference, Shift
 
@@ -221,8 +222,12 @@ class PieceModel(RegressorMixin, BaseEstimator):
             errors above zero, the standard error taken over the shift's units (groups, when
             groups are held out). With few groups a chance association is real within the
             sample, and only its uncertainty gives it away. 0 turns the rule off.
-        products: also admit products of two chosen variables' leading pieces, by the same rule
-            (a product is one variable changing the effect of another).
+        products: True admits products of two chosen variables' leading pieces, by the same
+            rule (a product is one variable changing the effect of another). ``"pysr"`` instead
+            asks PySR for an expression of the chosen pieces (``+ - *`` only) for what their sum
+            leaves over; the search runs inside every selection fold, so it takes minutes, and
+            needs ``pip install "transferledger[pysr]"``. False admits neither.
+        pysr_options: overrides for the PySR search (for example ``{"niterations": 100}``).
         max_products: at most this many.
         shrink: shrinkage of the equation's weights toward zero: a number (0 is none; scale-free,
             see :func:`fit_weights`) or ``"auto"`` to take the strength with the lowest held-out
@@ -252,7 +257,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
     def __init__(self, source="spline", family="gaussian", forms=None, min_r2=0.97, min_side=3,
                  select_on=None, n_splits=5, max_variables=12, min_gain=0.005, min_evidence=1.645,
                  products=True,
-                 max_products=3, shrink=0.0, tune_source=True,
+                 max_products=3, pysr_options=None, shrink=0.0, tune_source=True,
                  refit_shapes=True, limit=0.5, feature_names=None, random_state=0):  # fmt: skip
         self.source = source
         self.family = family
@@ -266,6 +271,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
         self.min_evidence = min_evidence
         self.products = products
         self.max_products = max_products
+        self.pysr_options = pysr_options
         self.shrink = shrink
         self.tune_source = tune_source
         self.refit_shapes = refit_shapes
@@ -371,7 +377,11 @@ class PieceModel(RegressorMixin, BaseEstimator):
             variables, loss_rows, units, max_terms=self.max_variables, **rule
         )
         pairs = []
-        if self.products and len(chosen) > 1:
+        self.expression_ = None
+        if self.products == "pysr":
+            if len(chosen) > 1:
+                self.expression_ = self._assemble(folds, columns, chosen, P, y, w, fam, units)
+        elif self.products and len(chosen) > 1:
             cand = [(a, b) for i, a in enumerate(chosen) for b in chosen[i + 1 :]]
             pairs, path = greedy(
                 cand, loss_rows, units, start=chosen, max_terms=self.max_products, **rule
@@ -396,6 +406,9 @@ class PieceModel(RegressorMixin, BaseEstimator):
         self.chosen_ = [c for v in chosen for c, p in enumerate(self.pieces_) if p.group == v]
         self.products_ = [(lead[a], lead[b]) for a, b in pairs]
         cols = [P[:, c] for c in self.chosen_] + [P[:, a] * P[:, b] for a, b in self.products_]
+        if self.expression_ is not None:
+            named = {f"p{k}": P[:, c] for k, c in enumerate(self.chosen_)}
+            cols.append(evaluate(self.expression_, named) * np.ones(len(y)))
         C = np.column_stack(cols) if cols else np.zeros((len(y), 0))
         coef = fit_weights(C, y, w, fam, self.shrink_)
         self.intercept_, self.coef_ = float(coef[0]), np.asarray(coef[1:], float)
@@ -418,6 +431,9 @@ class PieceModel(RegressorMixin, BaseEstimator):
                 self.pieces_[a].unit(Xn[:, self.pieces_[a].column])
                 * self.pieces_[b].unit(Xn[:, self.pieces_[b].column])
             )
+        if getattr(self, "expression_", None) is not None:
+            named = {f"p{k}": c for k, c in enumerate(cols[: len(self.chosen_)])}
+            cols.append(evaluate(self.expression_, named) * np.ones(len(Xn)))
         return np.column_stack(cols) if cols else np.zeros((len(Xn), 0))
 
     def decision_function(self, X):
@@ -458,7 +474,9 @@ class PieceModel(RegressorMixin, BaseEstimator):
             p = next(self.pieces_[j] for j in self.chosen_ if self.pieces_[j].column == c)
             for i in np.flatnonzero(p.outside(Xn[:, c])):
                 out_names[i].append(self.design_.names_[c])
-        if self._used:
+        if self._used and getattr(self, "_train", None) is None:
+            dist = np.full(len(Xn), np.nan)  # an equation loaded from a file has no training rows
+        elif self._used:
             from sklearn.neighbors import NearestNeighbors
 
             Z = (Xn[:, self._used] - self._mu) / self._sd
@@ -475,12 +493,18 @@ class PieceModel(RegressorMixin, BaseEstimator):
     def _term_names(self):
         names = [f"p{k}" for k in range(len(self.chosen_))]
         index = {j: k for k, j in enumerate(self.chosen_)}
-        return names + [f"p{index[a]}*p{index[b]}" for a, b in self.products_]
+        names = names + [f"p{index[a]}*p{index[b]}" for a, b in self.products_]
+        return names + (["g"] if getattr(self, "expression_", None) is not None else [])
 
     def _term_variables(self):
         """For each column of the equation, the input columns it involves."""
         owners = [{self.pieces_[j].group} for j in self.chosen_]
-        return owners + [{self.pieces_[a].group, self.pieces_[b].group} for a, b in self.products_]
+        owners = owners + [
+            {self.pieces_[a].group, self.pieces_[b].group} for a, b in self.products_
+        ]
+        if getattr(self, "expression_", None) is not None:  # the expression may use any piece
+            owners.append({self.pieces_[j].group for j in self.chosen_})
+        return owners
 
     @property
     def variables_(self):
@@ -498,6 +522,9 @@ class PieceModel(RegressorMixin, BaseEstimator):
         for (a, b), name, c in zip(self.products_, self._term_names()[len(self.chosen_):], self.coef_[len(self.chosen_):]):  # fmt: skip
             rows.append({"term": name, "variable": f"{self.pieces_[a].group} x {self.pieces_[b].group}",
                          "form": "product", "location": None, "weight": c, "shape": name})  # fmt: skip
+        if getattr(self, "expression_", None) is not None:
+            rows.append({"term": "g", "variable": "expression of pieces", "form": "expression",
+                         "location": None, "weight": self.coef_[-1], "shape": self.expression_})  # fmt: skip
         return pd.DataFrame(
             rows, columns=["term", "variable", "form", "location", "weight", "shape"]
         )
@@ -511,9 +538,110 @@ class PieceModel(RegressorMixin, BaseEstimator):
         lines.append(
             f"{_LINK_TEXT[get_family(self.family).name]} = {self.intercept_:.4g} {terms}".rstrip()
         )
+        if getattr(self, "expression_", None) is not None:
+            lines.append(f"  g = {self.expression_}")
         notes = list(
             dict.fromkeys(self.pieces_[j].note for j in self.chosen_ if self.pieces_[j].note)
         )
         if notes:
             lines.append("  where " + "; ".join(notes))
         return "\n".join(lines)
+
+    # ---- taking the equation elsewhere --------------------------------------------------------
+    def to_dict(self):
+        """Everything needed to predict, as a JSON-serializable dictionary."""
+        from . import export
+
+        return export.to_dict(self)
+
+    @classmethod
+    def from_dict(cls, d):
+        """A predicting model rebuilt from :meth:`to_dict` (it cannot be refitted)."""
+        from . import export
+
+        return export.from_dict(d)
+
+    def save(self, path):
+        """Write the equation to a JSON file; :meth:`load` reads it back."""
+        from . import export
+
+        export.save(self, path)
+
+    @classmethod
+    def load(cls, path):
+        from . import export
+
+        return export.load(path)
+
+    def to_latex(self):
+        """The equation as LaTeX."""
+        from . import export
+
+        return export.to_latex(self)
+
+    def to_sympy(self):
+        """``(expression, symbols)`` in SymPy (needs SymPy)."""
+        from . import export
+
+        return export.to_sympy(self)
+
+    def to_python(self, name="predict"):
+        """Source of a numpy-only function that reproduces :meth:`predict`."""
+        from . import export
+
+        return export.to_python(self, name)
+
+    # ---- symbolic assembly --------------------------------------------------------------------
+    def _assemble(self, folds, columns, chosen, P, y, w, fam, units):
+        """An expression of the chosen pieces for what their sum leaves over, found by PySR and
+        admitted by the same rule as a variable. The search is repeated inside each selection
+        fold on that fold's training rows, so its held-out gain is honest."""
+        from .assemble import knee, pysr_regressor
+
+        if fam.name != "gaussian":
+            raise ValueError('products="pysr" is available for family="gaussian"')
+        opts = dict(self.pysr_options or {})
+        with_g, without = [], []
+        for f in folds:
+            Ctr, Cte = columns(f, "Ptr", chosen), columns(f, "Pte", chosen)
+            ytr, wtr, yte, wte = y[f["tr"]], w[f["tr"]], y[f["te"]], w[f["te"]]
+            coef = fit_weights(Ctr, ytr, wtr, fam)
+            without.append(wte * fam.loss(yte, linear_score(Cte, coef)))
+            names = [f"p{k}" for k in range(Ctr.shape[1])]
+            sr = pysr_regressor(**opts).fit(
+                Ctr, ytr - linear_score(Ctr, coef), variable_names=names
+            )
+            idx = knee(sr, np.var(ytr))
+            if idx is None:
+                with_g.append(without[-1])
+                continue
+            gtr = np.asarray(sr.predict(Ctr, index=idx), float)
+            gte = np.asarray(sr.predict(Cte, index=idx), float)
+            coef = fit_weights(np.column_stack([Ctr, gtr]), ytr, wtr, fam)
+            with_g.append(wte * fam.loss(yte, linear_score(np.column_stack([Cte, gte]), coef)))
+        d = np.concatenate(without) - np.concatenate(with_g)
+        base = float(sum(np.sum(w[f["te"]] * (y[f["te"]] - np.average(y[f["tr"]], weights=w[f["tr"]])) ** 2)
+                         for f in folds))  # fmt: skip
+        gain = float(d.sum()) / base if base > 0 else 0.0
+        _, unit_idx = np.unique(np.asarray(units), return_inverse=True)
+        g = int(unit_idx.max()) + 1
+        du = np.bincount(unit_idx, weights=d, minlength=g)
+        se = np.sqrt(g) * du.std(ddof=1)
+        need = (
+            float(student_t.ppf(norm.cdf(self.min_evidence), max(g - 1, 1)))
+            if self.min_evidence > 0
+            else 0.0
+        )
+        if gain < self.min_gain or (se > 0 and du.sum() / se < need):
+            return None
+        C = np.column_stack(
+            [P[:, c] for v in chosen for c, p in enumerate(self.pieces_) if p.group == v]
+        )
+        coef = fit_weights(C, y, w, fam)
+        names = [f"p{k}" for k in range(C.shape[1])]
+        sr = pysr_regressor(**opts).fit(C, y - linear_score(C, coef), variable_names=names)
+        idx = knee(sr, np.var(y))
+        if idx is None:
+            return None
+        self.path_ = self.path_ + [self.path_[-1] + gain if self.path_ else gain]
+        return str(sr.sympy(idx))

@@ -13,6 +13,7 @@ is thin is reported as undetermined rather than assigned a side.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -26,6 +27,7 @@ from sklearn.neighbors import NearestNeighbors
 from ._data import Design
 from .curves import get_family
 from .model import PieceModel, fit_weights, linear_score
+from .preflight import preflight
 from .shifts import Reference, Shift
 
 __all__ = ["transfer_ledger", "Ledger"]
@@ -136,8 +138,13 @@ def _intervals(unit_idx, columns, base, level):
     return point, point - half, point + half, (Q > 0).mean(axis=0)
 
 
-def _side(lo, hi):
-    return "helps" if lo > 0 else "hurts" if hi < 0 else "unclear"
+def _side(point, lo, hi, tol):
+    """helps or hurts only when the interval excludes zero *and* the effect is at least ``tol``."""
+    if lo > 0 and point >= tol:
+        return "helps"
+    if hi < 0 and point <= -tol:
+        return "hurts"
+    return "unclear"
 
 
 def _verdict(ref, shifted):
@@ -174,7 +181,8 @@ class Ledger:
         distance_trend: per shift and rung, the rank correlation of loss with distance.
         models: the equations fitted to all rows, per way of choosing.
         predictions: per scheme, the held-out prediction of every row by every rung.
-        family, level, n_splits, n_repeats, schemes.
+        preflight: the pre-check of the data (see :func:`~transferledger.preflight.preflight`).
+        family, level, n_splits, n_repeats, schemes, meta (rows, columns, units per scheme).
     """
 
     skill: pd.DataFrame
@@ -193,6 +201,8 @@ class Ledger:
     n_splits: int
     n_repeats: int
     schemes: list = field(default_factory=list)
+    preflight: object = None
+    meta: dict = field(default_factory=dict)
 
     @property
     def ladder(self):
@@ -257,10 +267,45 @@ class Ledger:
     def __str__(self):
         return self.summary()
 
+    def report(self, path=None, title="Transfer ledger"):
+        """The ledger as one self-contained HTML page (charts, tables, verdicts, equations).
+
+        Returns the HTML; with ``path`` also writes it there.
+        """
+        from .report import render
+
+        page = render(self, title=title, preflight=self.preflight)
+        if path is not None:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(page)
+        return page
+
+    def to_dict(self):
+        """Every table and equation as plain Python data, ready for JSON."""
+
+        def records(frame):
+            return json.loads(frame.reset_index().to_json(orient="records", double_precision=6))
+
+        return {
+            "family": self.family, "level": self.level, "n_splits": self.n_splits,
+            "n_repeats": self.n_repeats, "schemes": list(self.schemes), "meta": self.meta,
+            "skill": records(self.skill), "contributions": records(self.contributions),
+            "verdicts": records(self.verdicts), "blocks": records(self.blocks),
+            "block_verdicts": records(self.block_verdicts), "memorized": records(self.memorized),
+            "selection": records(self.selection),
+            "distance_trend": records(self.distance_trend),
+            "equations": {name: m.to_dict() for name, m in self.models.items()},
+            "notes": list(self.preflight.warnings) if self.preflight is not None else [],
+        }  # fmt: skip
+
+    def to_json(self, path):
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.to_dict(), f, indent=1)
+
 
 def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian", sample_weight=None,
-                    blocks=None, reference=None, n_splits=5, n_repeats=5, level=0.95,
-                    random_state=0, n_jobs=None, verbose=False):  # fmt: skip
+                    blocks=None, reference=None, n_splits=5, n_repeats=5, model_repeats=None,
+                    level=0.95, tol=0.005, random_state=0, n_jobs=None, verbose=False):  # fmt: skip
     """Account for what an equation, and each variable in it, is worth under each shift.
 
     Args:
@@ -282,7 +327,11 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
             a new sample of groups instead.
         n_splits: folds per scheme. A group shift with fewer groups leaves one out at a time.
         n_repeats: repeats of schemes whose splits depend on a seed.
+        model_repeats: score the extra ``models`` on this many repeats only (default: all).
+            Set it to 1 when they are slow to fit; the equation rungs still use every repeat.
         level: coverage of the intervals.
+        tol: the smallest skill change that counts. A variable "helps" (or "hurts") only when
+            its interval excludes zero and the change is at least this large.
         random_state: seed for the folds.
         n_jobs: parallel workers over folds (joblib).
 
@@ -323,14 +372,17 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
     for sname, s in schemes.items():
         for r in range(n_repeats if s.repeatable else 1):
             for tr, te in s.splits(n_splits, random_state + r):
-                tasks.append((sname, tr, te))
+                tasks.append((sname, tr, te, r))
+    slow = n_repeats if model_repeats is None else model_repeats
     run = Parallel(n_jobs=n_jobs, verbose=10 if verbose else 0)
     results = run(
-        delayed(_fold)(frame, y, w, tr, te, proto, variants_for(tr), extra, fam, blocks)
-        for _, tr, te in tasks
+        delayed(_fold)(
+            frame, y, w, tr, te, proto, variants_for(tr), extra if r < slow else {}, fam, blocks
+        )
+        for _, tr, te, r in tasks
     )
 
-    found = list(results[0]["loss"])
+    found = list(dict.fromkeys(k for r in results for k in r["loss"]))
     rungs = (
         [BASELINE]
         + [k for k in found if k.startswith(EQUATION)]
@@ -342,9 +394,11 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
     block_rows, block_sides = [], {}
     reference_boot = None
     for sname, s in schemes.items():
-        mine = [r for (name, _, _), r in zip(tasks, results) if name == sname]
+        mine = [r for (name, _, _, _), r in zip(tasks, results) if name == sname]
         count = np.zeros(n)
         L = {k: np.zeros(n) for k in rungs}
+        cnt = {k: np.zeros(n) for k in rungs}  # a rung scored on fewer repeats has its own count
+        Lb = {k: np.zeros(n) for k in rungs}  # and its own baseline, from the same folds
         Dv = {v: np.zeros(n) for v in variables}
         Db = {b: np.zeros(n) for b in blocks}
         dist = np.zeros(n)
@@ -354,8 +408,11 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
             count[rows] += 1
             dist[rows] += r["dist"]
             for k in rungs:
-                L[k][rows] += r["loss"][k]
-                pred[k][rows] += r["pred"][k]
+                if k in r["loss"]:
+                    L[k][rows] += r["loss"][k]
+                    pred[k][rows] += r["pred"][k]
+                    cnt[k][rows] += 1
+                    Lb[k][rows] += r["loss"][BASELINE]
             for v, d in r["drop"].items():
                 Dv[v][rows] += d
             for b, d in r["drop_block"].items():
@@ -364,24 +421,25 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
         c = count[seen]
         _, unit_idx = np.unique(np.asarray(s.units())[seen], return_inverse=True)
         base = L[BASELINE][seen] / c
+        for k in rungs:  # skill = 1 - loss / base, so the interval flips
+            ck = cnt[k][seen]
+            pk, lok, hik, _ = _intervals(
+                unit_idx,
+                (L[k][seen] / np.maximum(ck, 1))[:, None],
+                Lb[k][seen] / np.maximum(ck, 1),
+                level,
+            )
+            skill_rows.append(
+                {"rung": k, "scheme": sname, "skill": 1 - pk[0], "lo": 1 - hik[0], "hi": 1 - lok[0]}
+            )
         cols = np.column_stack(
-            [L[k][seen] / c for k in rungs]
+            [L[k][seen] / c for k in rungs[:1]]
             + [Dv[v][seen] / c for v in variables]
             + [Db[b][seen] / c for b in blocks]
         )
         point, lo, hi, share = _intervals(unit_idx, cols, base, level)
-        for i, k in enumerate(rungs):  # skill = 1 - loss / base, so the interval flips
-            skill_rows.append(
-                {
-                    "rung": k,
-                    "scheme": sname,
-                    "skill": 1 - point[i],
-                    "lo": 1 - hi[i],
-                    "hi": 1 - lo[i],
-                }
-            )
         for j, v in enumerate(variables):
-            i = len(rungs) + j
+            i = 1 + j
             contrib_rows.append(
                 {
                     "variable": v,
@@ -392,9 +450,9 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
                     "units helped": share[i],
                 }  # fmt: skip
             )
-            sides[(v, sname)] = _side(lo[i], hi[i])
+            sides[(v, sname)] = _side(point[i], lo[i], hi[i], tol)
         for j, b in enumerate(blocks):
-            i = len(rungs) + len(variables) + j
+            i = 1 + len(variables) + j
             block_rows.append(
                 {
                     "block": b,
@@ -405,15 +463,15 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
                     "units helped": share[i],
                 }  # fmt: skip
             )
-            block_sides[(b, sname)] = _side(lo[i], hi[i])
+            block_sides[(b, sname)] = _side(point[i], lo[i], hi[i], tol)
         if sname == "reference":
             reference_boot = (unit_idx, {k: L[k][seen] / c for k in rungs}, base)
         predictions[sname] = pd.DataFrame(
-            {k: np.where(seen, pred[k] / np.maximum(count, 1), np.nan) for k in rungs}
+            {k: np.where(cnt[k] > 0, pred[k] / np.maximum(cnt[k], 1), np.nan) for k in rungs}
         )
         # loss against distance to the training rows, per unit
         per_unit = pd.DataFrame({"unit": np.asarray(s.units())[seen], "distance": dist[seen] / c,
-                                 **{k: L[k][seen] / c for k in rungs}})  # fmt: skip
+                                 **{k: L[k][seen] / np.maximum(cnt[k][seen], 1) for k in rungs}})  # fmt: skip
         per_unit = per_unit.groupby("unit").mean()
         distance[sname] = per_unit
         if len(per_unit) > 3 and per_unit["distance"].std() > 0:
@@ -489,5 +547,7 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
         selection=selection, distance=distance,
         distance_trend=pd.DataFrame(trend_rows, columns=["scheme", "rung", "rank correlation"]),
         models=final, predictions=predictions, family=fam.name, level=level, n_splits=n_splits,
-        n_repeats=n_repeats, schemes=list(schemes),
+        n_repeats=n_repeats, schemes=list(schemes), preflight=preflight(frame, y, shifts),
+        meta={"rows": n, "columns": frame.shape[1],
+              "units": {name: int(len(np.unique(s.units()))) for name, s in schemes.items()}},
     )  # fmt: skip

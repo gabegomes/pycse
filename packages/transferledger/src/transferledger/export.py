@@ -44,6 +44,7 @@ def to_dict(model):
         "weights": [float(c) for c in model.coef_],
         "pieces": [_piece_dict(model.pieces_[j]) for j in model.chosen_],
         "products": [[index[a], index[b]] for a, b in model.products_],
+        "expression": getattr(model, "expression_", None),
         "limit": model.limit,
         "target_range": list(model.target_range_),
         "design": {
@@ -77,6 +78,7 @@ def from_dict(d):
     design.names_, design.source_ = list(dd["names"]), list(dd["source"])
     design.levels_, design.reference_ = dict(dd["levels"]), dict(dd["reference"])
     design.n_features_in_ = len(design.feature_names_in_)
+    design.feature_names = list(design.feature_names_in_)
     m.design_ = design
     m.pieces_ = [
         Piece(p["variable"], p["form"], np.asarray(p["theta"], float), Scale(**p["scale"]),
@@ -85,6 +87,7 @@ def from_dict(d):
     ]  # fmt: skip
     m.chosen_ = list(range(len(m.pieces_)))
     m.products_ = [tuple(pair) for pair in d["products"]]
+    m.expression_ = d.get("expression")
     m.intercept_, m.coef_ = float(d["intercept"]), np.asarray(d["weights"], float)
     m.target_range_ = tuple(d["target_range"])
     m._used = sorted({p.column for p in m.pieces_})
@@ -170,6 +173,13 @@ def to_latex(model):
     lines = [f"p_{{{k}}} &= {_piece_latex(p)} \\\\" for k, p in enumerate(chosen)]
     terms = [f"p_{{{k}}}" for k in range(len(chosen))] + [f"p_{{{a}}}\\,p_{{{b}}}" for a, b in
              (tuple(model.chosen_.index(i) for i in pair) for pair in model.products_)]  # fmt: skip
+    expression = getattr(model, "expression_", None)
+    if expression is not None:
+        terms.append("g")
+        tex = expression.replace("**", "^").replace("*", "\\,")
+        for k in reversed(range(len(chosen))):
+            tex = tex.replace(f"p{k}", f"p_{{{k}}}")
+        lines.append(f"g &= {tex} \\\\")
     rhs = _g(model.intercept_, 4)
     for c, t in zip(model.coef_, terms):
         rhs += f" {'+' if c >= 0 else '-'} {_g(abs(c), 4)}\\,{t}"
@@ -231,6 +241,9 @@ def to_sympy(model):
     exprs = [piece(model.pieces_[j]) for j in model.chosen_]
     index = {j: k for k, j in enumerate(model.chosen_)}
     cols = exprs + [exprs[index[a]] * exprs[index[b]] for a, b in model.products_]
+    if getattr(model, "expression_", None) is not None:
+        local = {f"p{k}": e for k, e in enumerate(exprs)}
+        cols.append(sp.sympify(model.expression_, locals=local))
     expr = sp.Float(model.intercept_) + sum(float(c) * e for c, e in zip(model.coef_, cols))
     return expr, syms
 
@@ -305,6 +318,9 @@ def to_python(model, name="predict"):
     terms = [f"p{k}" for k in range(len(model.chosen_))] + [
         f"p{index[a]} * p{index[b]}" for a, b in model.products_
     ]
+    if getattr(model, "expression_", None) is not None:
+        lines.append(f"    g = {model.expression_}")
+        terms.append("g")
     expr = repr(float(model.intercept_))
     for c, t in zip(model.coef_, terms):
         expr += f" + {float(c)!r} * {t}"
