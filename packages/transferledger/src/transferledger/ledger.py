@@ -483,11 +483,12 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
     skill = pd.DataFrame(skill_rows)
     contributions = pd.DataFrame(contrib_rows)
     # selection frequencies per way of choosing
-    sel = {}
+    sel, names = {}, {}
     for r in results:
         for rung, chosen in r["selected"].items():
             sel.setdefault(rung, []).append(set(chosen))
-    names = list(dict.fromkeys(v for sets in sel.values() for s in sets for v in s))
+            names.update(dict.fromkeys(chosen))  # in the order chosen: the same on every run
+    names = list(names)
     selection = pd.DataFrame({rung: [np.mean([v in s for s in sets]) for v in names] for rung, sets in sel.items()},
                              index=pd.Index(names, name="variable"))  # fmt: skip
     if len(contributions):
