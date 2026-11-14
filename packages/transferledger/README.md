@@ -105,7 +105,8 @@ new site.
 **Pieces.** A curve source (by default penalized additive splines, an exact and repeatable fit)
 gives one curve per variable. Each curve is matched to the simplest named form that reproduces
 it. A form's edge must have at least three distinct values on each side; otherwise it would be a
-lookup of one or two cases, not a shape. A form also has to earn its place over a simpler one:
+lookup of one or two cases, not a shape. Values closer than 2 % of the variable's range count
+as one: nine molecules that differ in the fourth decimal are one value. A form also has to earn its place over a simpler one:
 for each variable in the equation the simpler forms are tried, and the simplest is taken that
 costs less held-out skill than a variable must add. A noisy curve may be reproduced best by a
 window; if a line predicts as well, the equation says a line. Text columns become 0/1

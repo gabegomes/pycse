@@ -81,3 +81,16 @@ def test_a_registered_form_is_used():
         assert piece.form == "hill2" and piece.location == pytest.approx(3.0, abs=0.05)
     finally:
         FORMS.pop("hill2")
+
+
+def test_values_that_differ_in_the_fourth_decimal_are_one_value():
+    """Nine values within 0.003 of each other and five spread out: a kink among the nine would
+    have three values on each side by count, and be a lookup of them."""
+    rng = np.random.default_rng(0)
+    levels = np.r_[-0.694 + 0.0003 * np.arange(9), 0.94, 1.07, 1.47, 1.63, 1.83]
+    x = np.repeat(levels, 20)
+    f = np.where(x < -0.6935, 3.0, 0.0) + 0.5 * x + 0.01 * rng.normal(size=len(x))
+    pieces = match_curve("x", x, f)
+    for p in pieces:
+        for edge in np.atleast_1d(p.location if p.location is not None else []):
+            assert not (-0.6945 < edge < -0.6915), p.text()

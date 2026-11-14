@@ -229,7 +229,8 @@ class PieceModel(RegressorMixin, BaseEstimator):
             dict ``{variable: [forms]}`` for a relationship the field already names, such as
             ``{"T_K": ["inverse"]}`` for an Arrhenius term.
         min_r2: share of a curve's variance a form must reproduce to be accepted.
-        min_side: distinct values required on each side of an edge.
+        min_side: distinct values required on each side of an edge, counted at a resolution
+            of 2 % of the variable's range.
         select_on: a :class:`~transferledger.shifts.Shift` over the training rows. Variables are
             admitted while they improve the held-out loss under it. None means random folds.
         n_splits: folds used for that.

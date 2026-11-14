@@ -99,8 +99,26 @@ def _minus(name, v, sd=1.0):
     return f"{name} - {_g(v)}" if v >= 0 else f"{name} + {_g(-v)}"
 
 
+#: Values closer than this share of a variable's range count as one value in the support rule.
+RESOLUTION = 0.02
+
+
+def _count(v, u):
+    """How many distinct values ``v`` holds, at a resolution of 2 % of the range of ``u``.
+
+    Nine molecules whose descriptor differs in the fourth decimal are one value: a kink placed
+    among them would have "three values on each side" and still be a lookup of those molecules.
+    """
+    if len(v) == 0:
+        return 0
+    r = u[-1] - u[0]
+    if r <= 0:
+        return 1
+    return len(np.unique(np.floor((v - u[0]) / (RESOLUTION * r))))
+
+
 def _sides(u, c):
-    return int((u < c).sum()), int((u > c).sum())
+    return _count(u[u < c], u), _count(u[u > c], u)
 
 
 _NONE = np.zeros((1, 0))
@@ -185,7 +203,7 @@ def _exp_valid(th, u, sc, min_side):
         return False
     v = _exp_shape(u, th, sc)
     mid = 0.5 * (v.min() + v.max())
-    return int((v < mid).sum()) >= min_side and int((v > mid).sum()) >= min_side
+    return _count(u[v < mid], u) >= min_side and _count(u[v > mid], u) >= min_side
 
 
 EXPONENTIAL = Form(
@@ -216,7 +234,7 @@ def _sat_valid(th, u, sc, min_side):
         return False
     v = _sat_shape(u, th, sc)
     mid = 0.5 * (v.min() + v.max())
-    return int((v < mid).sum()) >= min_side and int((v > mid).sum()) >= min_side
+    return _count(u[v < mid], u) >= min_side and _count(u[v > mid], u) >= min_side
 
 
 SATURATION = Form(
@@ -297,8 +315,8 @@ def _win_valid(th, u, sc, min_side):
     # otherwise it is a small bump with a huge weight, and its edges mean nothing
     if not (b - a >= 4.0 * w and _width_ok(w, u)):
         return False
-    inside = int(((u > a) & (u < b)).sum())
-    return inside >= min_side and int((u < a).sum()) + int((u > b).sum()) >= min_side
+    inside = _count(u[(u > a) & (u < b)], u)
+    return inside >= min_side and _count(u[u < a], u) + _count(u[u > b], u) >= min_side
 
 
 WINDOW = Form(
@@ -530,7 +548,8 @@ def match_curve(name, x, f, *, weights=None, se=None, forms=None, min_r2=0.97, m
             not whether its shape predicts.
         forms: names of the forms to try, in order.
         min_r2: fraction of the curve's variance a form must reproduce to be accepted.
-        min_side: distinct values required on each side of an edge.
+        min_side: distinct values required on each side of an edge, counted at a resolution
+            of 2 % of the variable's range (values closer than that are one value).
         max_points: the curve is binned to at most this many points before matching.
         column: the variable's column index, stored on the pieces.
 
@@ -554,12 +573,13 @@ def match_curve(name, x, f, *, weights=None, se=None, forms=None, min_r2=0.97, m
     if len(xu) == 2:
         return [Piece(name, "flag", np.zeros(0), scale, 1.0, column=column)]
     u = (xu - scale.mean) / scale.sd
+    resolved = _count(u, u)  # distinct values at the support rule's resolution
     best = None
     for fname in forms or DEFAULT_ORDER:
         form = FORMS[fname]
         if form.positive_only and scale.lo <= 0:
             continue
-        if form.n_theta and len(xu) < form.n_theta + int(form.companion_line) + 3:
+        if form.n_theta and resolved < form.n_theta + int(form.companion_line) + 3:
             continue
         theta, r2 = fit_form(form, u, fu, cnt, scale, min_side=min_side)
         if not np.isfinite(r2):
