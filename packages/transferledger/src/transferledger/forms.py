@@ -467,12 +467,22 @@ class Piece:
         return FORMS[self.form].text(self.feature, self.theta, self.scale)
 
 
-def _collapse(x, f, weights, max_points):
-    """The curve at distinct x (weighted), binned by quantile when there are very many."""
+def _collapse(x, f, weights, max_points, se=None):
+    """The curve at distinct x (weighted), binned by quantile when there are very many.
+    With ``se`` (the curve's standard error per row) also returns it at those points."""
     w = np.ones_like(x) if weights is None else np.asarray(weights, float)
     xu, inv = np.unique(x, return_inverse=True)
     cnt = np.bincount(inv, weights=w)
     fu = np.bincount(inv, weights=w * f) / cnt
+    if se is not None:
+        su = np.bincount(inv, weights=w * np.asarray(se, float)) / cnt
+        if len(xu) > max_points:
+            edges = np.quantile(xu, np.linspace(0, 1, max_points + 1))
+            b = np.clip(np.searchsorted(edges, xu, side="right") - 1, 0, max_points - 1)
+            keep = np.bincount(b, minlength=max_points) > 0
+            wb = np.bincount(b, weights=cnt, minlength=max_points)[keep]
+            su = np.bincount(b, weights=cnt * su, minlength=max_points)[keep] / wb
+        return (*_collapse(x, f, weights, max_points), su)
     if len(xu) > max_points:
         edges = np.quantile(xu, np.linspace(0, 1, max_points + 1))
         b = np.clip(np.searchsorted(edges, xu, side="right") - 1, 0, max_points - 1)
@@ -484,19 +494,25 @@ def _collapse(x, f, weights, max_points):
     return xu, fu, cnt
 
 
-def match_curve(name, x, f, *, weights=None, forms=None, min_r2=0.97, min_side=3,
-                max_points=256, column=None):  # fmt: skip
+def match_curve(name, x, f, *, weights=None, se=None, forms=None, min_r2=0.97, min_side=3,
+                max_points=256, column=None, band=1.5):  # fmt: skip
     """Match the curve ``f(x)`` of one variable to the first form that reproduces it.
 
-    Forms are tried in the order given (default :data:`DEFAULT_ORDER`, simplest first) and the
-    first whose admissible fit explains ``min_r2`` of the curve's variance is taken; when none
-    does, the best admissible fit is. A variable with two values is a flag. A form with shape
+    Forms are tried in the order given (default :data:`DEFAULT_ORDER`, simplest first). A form
+    is accepted when its admissible fit explains ``min_r2`` of the curve's variance, or, when
+    the curve's standard error ``se`` is given, when the fit stays within ``band`` standard
+    errors of the curve on average: a weak, noisy curve does not earn a complicated form. When no form is
+    accepted, the best admissible fit is taken. A variable with two values is a flag. A form with shape
     parameters needs more distinct values than it has parameters, plus two.
 
     Args:
         name: the variable's name.
         x, f: its observed values and the curve there.
         weights: optional observation weights.
+        se: optional standard error of the curve at each observation.
+        band: how many standard errors a form may sit from the curve, on average, and still be
+            accepted. In simulation a true form sits within about 1.3 and a wrong simpler form
+            beyond 1.9, hence 1.5.
         forms: names of the forms to try, in order.
         min_r2: fraction of the curve's variance a form must reproduce to be accepted.
         min_side: distinct values required on each side of an edge.
@@ -508,7 +524,15 @@ def match_curve(name, x, f, *, weights=None, forms=None, min_r2=0.97, min_side=3
     """
     x, f = np.asarray(x, float), np.asarray(f, float)
     scale = Scale(float(x.mean()), float(x.std() or 1.0), float(x.min()), float(x.max()))
-    xu, fu, cnt = _collapse(x, f, weights, max_points)
+    if se is None:
+        xu, fu, cnt = _collapse(x, f, weights, max_points)
+        var_band = None
+    else:
+        xu, fu, cnt, su = _collapse(x, f, weights, max_points, se)
+        # the average squared standard error, as a share of the curve's variance
+        fm = np.average(fu, weights=cnt)
+        spread = float(np.average((fu - fm) ** 2, weights=cnt))
+        var_band = float(np.average(su**2, weights=cnt)) / spread if spread > 0 else None
     if len(xu) < 2:
         return []
     if len(xu) == 2:
@@ -526,7 +550,7 @@ def match_curve(name, x, f, *, weights=None, forms=None, min_r2=0.97, min_side=3
             continue
         if best is None or r2 > best[2] + 1e-9:
             best = (form, theta, r2)
-        if r2 >= min_r2:
+        if r2 >= min_r2 or (var_band is not None and 1.0 - r2 <= band**2 * var_band):
             best = (form, theta, r2)
             break
     if best is None:  # nothing admissible among the requested forms: a line always is

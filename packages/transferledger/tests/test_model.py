@@ -124,3 +124,25 @@ def test_predictions_stay_near_the_range_of_the_training_target():
     lo, hi = y.min(), y.max()
     assert m.predict(X).max() <= hi + 0.5 * (hi - lo) + 1e-9
     assert PieceModel(limit=None).fit(X, y).limit is None
+
+
+def test_a_variable_that_acts_through_another_enters_with_the_product():
+    """``s`` has a slope of +2 below a step in ``v`` and -0.5 above it. Its own curve is weak
+    and noisy, so it enters with the product; with the product in, ``v`` is read as a step."""
+    rng = np.random.default_rng(1)
+    n = 500
+    X = pd.DataFrame({"s": rng.normal(size=n), "v": rng.uniform(22, 50, n)})
+    step = sigmoid(X.v - 32.0)
+    y = (2.0 - 2.5 * step) * X.s - 1.5 * step + 0.1 * rng.normal(size=n)
+    m = PieceModel().fit(X, y)
+    t = m.terms_.set_index("variable")
+    assert set(m.variables_) == {"s", "v"} and len(m.products_) == 1
+    assert t.loc["v", "form"] == "step" and abs(t.loc["v", "location"] - 32.0) < 0.5
+    sd = X.s.std(ddof=0)
+    below = t.loc["s", "weight"] / sd
+    above = (t.loc["s", "weight"] + t.loc["v x s", "weight"]) / sd
+    assert abs(below - 2.0) < 0.2 and abs(above + 0.5) < 0.2
+    assert m.skill_ > 0.95
+    # without the second look at the forms, the step passes for a bend
+    plain = PieceModel(rematch=False).fit(X, y)
+    assert plain.skill_ < m.skill_ - 0.05

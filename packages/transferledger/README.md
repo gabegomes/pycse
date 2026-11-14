@@ -104,9 +104,16 @@ new site.
 **Pieces.** A curve source (by default penalized additive splines, an exact and repeatable fit)
 gives one curve per variable. Each curve is matched to the simplest named form that reproduces
 it. A form's edge must have at least three distinct values on each side; otherwise it would be a
-lookup of one or two cases, not a shape. Text columns become 0/1 indicators. Products of two
-pieces are admitted when the evidence supports them: a product is one variable changing the
-effect of another.
+lookup of one or two cases, not a shape. When the curve's own uncertainty is known, a weak and
+noisy curve does not earn a complicated form. Text columns become 0/1 indicators.
+
+**Products.** A product of two pieces is one variable changing the effect of another, and is
+admitted by the same rule as a variable. One of the two must already be in the equation; the
+other may enter with the product, so a variable that acts mostly through another is not lost
+for having a weak curve of its own. With a product in, the forms of its two variables are
+chosen again by the held-out loss of the whole equation: an interaction that a sum of curves
+cannot express blurs exactly those two curves, and a step can pass for a bend until the product
+carries it. `products="pysr"` also asks PySR for an expression of the chosen pieces.
 
 **Shifts.** "Does this transfer?" has no answer until one says to what.
 
@@ -147,8 +154,9 @@ the chosen shift. Two details matter. Inside each selection fold the shapes are 
 fold's training rows only, because a shape fitted on all rows has already seen the held-out
 cases. And a variable is admitted only when its gain is clear of its own uncertainty over the
 shift's units: with twelve groups, a chance association is real within the sample, and only
-its uncertainty gives it away. In simulation that rule cuts the admission of pure-noise group
-properties from 50 % of runs to 3 %, while a real one is still found 97 % of the time.
+its uncertainty gives it away. In simulation (twelve groups, three group properties, 60 runs)
+that rule cuts the admission of a pure-noise property from 68 % of runs to 8 % when none is
+real, and from 55 % to 3 % when one is, while the real one is still found 92 % of the time.
 
 **Memorized share.** The reference skill an equation gives up when its variables must earn their
 place under the shift: what it knew only by having seen the cases.
@@ -176,6 +184,54 @@ are held at the edge value), which ones, whether a text value was never seen, an
 the nearest training row. Predictions are also kept within the range of the training target,
 widened by half on each side (`limit=None` removes this).
 
+## Taking the result elsewhere
+
+```python
+model.save("equation.json")  # and PieceModel.load("equation.json")
+print(model.to_latex())  # for a paper
+open("equation.py", "w").write(model.to_python())  # numpy only, no transferledger needed
+model.to_sympy()  # needs the sympy extra
+
+ledger.report("ledger.html", title="Yield across sites")  # one self-contained page
+ledger.to_json("ledger.json")  # every table
+```
+
+The report is a single HTML file with no scripts and no external resources: the pre-check, the
+ladder with intervals, each variable under each shift with its verdict, and the equations.
+
+## Command line
+
+```
+transferledger preflight data.csv --target yield --group site
+transferledger fit       data.csv --target yield --select-on group:site --save equation.json
+transferledger ledger    data.csv --target yield --group site --time date --report ledger.html
+transferledger predict   equation.json new_rows.csv --out predictions.csv
+transferledger truth
+```
+
+`--group`, `--time` and `--beyond COL[:high|low|both]` each add a shift and may be repeated;
+`--clusters K` holds out regions of the numeric columns when there are no labels. A column that
+defines a shift is not used as a predictor unless named with `--keep`. `predict` adds, per row,
+which variables lie outside the fitted range. CSV, TSV and Parquet files are read.
+
+## Known answers
+
+`transferledger truth` (or `transferledger.scorecard()`) runs seven problems drawn from stated
+generators and reports how often each fact a correct analysis must recover was recovered:
+
+| Problem | Facts |
+|---|---|
+| rate law with an interaction | step at 32, optimum at -15, a barrier of 15, the slope on each side of the step, an unrelated variable left out |
+| the same without the interaction | no product invented |
+| group properties that are noise | none admitted |
+| one real group property | found, and the noise ones left out |
+| yes/no outcome with a threshold | threshold at 6, probabilities returned |
+| counts with a log-linear rate | the rate per unit |
+| a cycle over time | the time variable left out when chosen for later runs |
+
+Over 20 seeds all 18 facts are recovered in at least 85 % of runs. The package's slow tests
+hold each above a stated floor, so a change that makes the method quietly worse fails.
+
 ## Reference
 
 | Object | Purpose |
@@ -183,12 +239,15 @@ widened by half on each side (`limit=None` removes this).
 | `PieceModel(source, family, forms, select_on, products, ...)` | the equation; scikit-learn estimator with `fit`, `predict`, `equation()`, `terms_`, `components(X)`, `support(X)` |
 | `transfer_ledger(X, y, shifts, model, models, blocks, ...)` | the ledger: `.ladder`, `.skill`, `.contributions`, `.verdicts`, `.blocks`, `.memorized`, `.selection`, `.distance`, `.models`, `.predictions` |
 | `preflight(X, y, shifts)` | what the data can support |
+| `ledger.report(path)`, `ledger.to_json(path)` | the HTML report; every table as JSON |
+| `model.save`, `PieceModel.load`, `to_latex`, `to_python`, `to_sympy` | the equation as a file, LaTeX, numpy source, SymPy |
+| `scorecard(seeds)` | the known-answer problems |
 | `SplineAdditive`, `KANAdditive`, `ModelCurves` | curve sources (the KAN needs `pip install "transferledger[kan]"`) |
 | `register_form(Form(...))` | add a form of your own (a Hill curve, a power law) |
 | `forms={"T": ["inverse"]}` | restrict a variable to forms the field already names (an Arrhenius term) |
 
 ## Status
 
-Version 0.1. Not yet built: shrunken (rather than selected) equation weights, export of equations
-to LaTeX and SymPy, an HTML report, a command line, and a suite of known-answer problems run in
-continuous integration.
+Version 0.1. The equation's shape parameters (where a step sits, how wide it is) come from the
+curve and are not refined against the data afterwards. Missing values are an error, not
+handled. Families beyond gaussian, binomial and poisson are not built.

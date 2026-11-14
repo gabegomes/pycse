@@ -7,10 +7,11 @@ from .ledger import Ledger, transfer_ledger
 from .model import PieceModel
 from .preflight import Preflight, preflight
 from .shifts import BeyondRange, ForwardInTime, NewGroups, Reference, Shift, Splitter
+from .truth import scorecard
 
 __version__ = "0.1.0"
 __all__ = [
     "transfer_ledger", "Ledger", "preflight", "Preflight", "PieceModel", "SplineAdditive", "KANAdditive", "ModelCurves", "Form", "Piece", "FORMS",
     "register_form", "match_curve", "Shift", "Reference", "NewGroups", "ForwardInTime",
-    "BeyondRange", "Splitter",
+    "BeyondRange", "Splitter", "scorecard",
 ]  # fmt: skip

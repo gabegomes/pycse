@@ -241,7 +241,7 @@ class SplineAdditive(BaseEstimator):
         shrink = [1e-6, 1e-3, 1e-2, 1e-1, 1.0, 10.0] if self.shrinkage is None else self.shrinkage
         scale = float(np.trace(B.T @ (B * w[:, None]))) / max(p_all, 1) / n
 
-        warm = {}
+        warm, last = {}, {}
 
         def fit_rows(rows, pen, want_edf=False, key=None):
             """Penalized fit on ``rows``; returns the coefficients, intercept, edf and scores.
@@ -268,6 +268,7 @@ class SplineAdditive(BaseEstimator):
                 warm[key] = eta
             # the effective degrees of freedom cost a full solve, so only on request
             edf = float(np.trace(np.linalg.solve(M, A))) + 1.0 if want_edf else np.nan
+            last["M"] = M
             return beta, b0, edf, eta
 
         every = np.arange(n)
@@ -316,7 +317,16 @@ class SplineAdditive(BaseEstimator):
             pen = (*rows_pen, *held_pen)
         self.strengths_ = {"strengths": tuple(float(v) for v in pen), "held_out": held.tolist()}
         self.lambda_, self.shrinkage_ = pen[0], pen[1]
-        self.coef_, self.intercept_, self.edf_, _ = fit_rows(every, pen, want_edf=True)
+        self.coef_, self.intercept_, self.edf_, eta = fit_rows(every, pen, want_edf=True)
+        # uncertainty of the curves: the covariance of the coefficients given the penalties
+        n_eff = float(w.sum() ** 2 / np.sum(w**2))
+        scale2 = 1.0
+        if fam.name == "gaussian":
+            scale2 = (
+                float(np.sum(w * (y - eta) ** 2)) / max(n_eff - self.edf_, 1.0) * n_eff / w.sum()
+            )
+        self.cov_ = scale2 * np.linalg.inv(last["M"])
+        self.basis_means_ = np.average(B, axis=0, weights=w)
         # centre each variable's curve on the training rows; the intercept absorbs the shift
         self.centers_ = np.array([
             np.average(B[:, s] @ self.coef_[s], weights=w) if s.stop > s.start else 0.0
@@ -333,6 +343,17 @@ class SplineAdditive(BaseEstimator):
         for j, (b, s) in enumerate(zip(self.blocks_, self.slices_)):
             if b.width:
                 out[j] = b.design(X[:, j]) @ self.coef_[s] - self.centers_[j]
+        return out
+
+    def curve_se(self, X):
+        """``(d, n)``: the standard error of each variable's curve at the rows of X, given the
+        chosen strengths. A form that stays within it cannot be told apart from the curve."""
+        X = np.asarray(X, float)
+        out = np.zeros((X.shape[1], len(X)))
+        for j, (b, s) in enumerate(zip(self.blocks_, self.slices_)):
+            if b.width:
+                D = b.design(X[:, j]) - self.basis_means_[s]
+                out[j] = np.sqrt(np.maximum(np.einsum("ij,jk,ik->i", D, self.cov_[s, s], D), 0.0))
         return out
 
     def decision_function(self, X):

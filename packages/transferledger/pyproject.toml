@@ -20,8 +20,12 @@ dependencies = [
 [project.optional-dependencies]
 kan = ["pycse"]      # KAN curve source and KAN rungs (JAX)
 pysr = ["pysr>=2.0"] # symbolic search over pieces (installs Julia on first use)
+sympy = ["sympy>=1.12"] # to_sympy()
 plot = ["matplotlib>=3.7"]
 test = ["pytest>=7.0"]
+
+[project.scripts]
+transferledger = "transferledger.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/transferledger"]

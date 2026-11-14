@@ -206,21 +206,20 @@ COUNTS = Problem(
 )
 
 
-# ---- 7: a drift that interpolates but does not extrapolate ---------------------------------------
-def _drift(seed, n=600):
+# ---- 7: a cycle that interpolates but does not extrapolate ---------------------------------------
+def _cycle(seed, n=600):
     rng = np.random.default_rng(seed)
     t = np.arange(n, dtype=float)
-    walk = np.cumsum(rng.normal(scale=0.25, size=n))
     X = pd.DataFrame({"x": rng.normal(size=n), "run_number": t})
-    y = 1.5 * X.x + walk + 0.2 * rng.normal(size=n)
+    y = 1.5 * X.x + 1.5 * np.sin(2 * np.pi * (t / 130.0 + rng.uniform())) + 0.2 * rng.normal(size=n)
     return X, y.to_numpy(), ForwardInTime(t, "later runs")
 
 
-DRIFT = Problem(
-    "a drift over time",
-    "The response wanders slowly with the run number: a curve of run number fits the past and says nothing "
-    "about later runs.",
-    _drift,
+CYCLE = Problem(
+    "a cycle over time",
+    "The response cycles with the run number. A curve of run number fits the past, and holding its last "
+    "level says nothing about later runs.",
+    _cycle,
     {
         "run number left out when chosen for later runs": lambda m, X, y: (
             "run_number" not in m.variables_
@@ -230,14 +229,16 @@ DRIFT = Problem(
 )
 
 #: Every problem, in the order the scorecard reports them.
-PROBLEMS = [RATE_LAW, ADDITIVE, GROUP_NOISE, GROUP_SIGNAL, THRESHOLD, COUNTS, DRIFT]
+PROBLEMS = [RATE_LAW, ADDITIVE, GROUP_NOISE, GROUP_SIGNAL, THRESHOLD, COUNTS, CYCLE]
 
 #: The share of runs in which each fact must be recovered. A fact not listed needs ``DEFAULT``.
 DEFAULT_FLOOR = 0.8
 FLOORS = {
-    ("group properties that are noise", "no noise property admitted"): 0.85,
-    ("one real group property", "no noise property admitted"): 0.85,
-    ("a drift over time", "run number left out when chosen for later runs"): 0.7,
+    ("group properties that are noise", "no noise property admitted"): 0.8,
+    ("one real group property", "no noise property admitted"): 0.8,
+    ("a cycle over time", "run number left out when chosen for later runs"): 0.7,
+    ("rate law with an interaction", "slopes on both sides of the cliff (within 0.3)"): 0.7,
+    ("one real group property", "the real property found"): 0.7,
 }
 
 

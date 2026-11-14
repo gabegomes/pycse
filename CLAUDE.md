@@ -182,14 +182,23 @@ supersedes `kan_symbolic`, which stays only until `KAN_Transfer_Ledger` is porte
   gaussian, binomial, poisson. Tables in, text columns, sample weights; missing values are an
   error. `select_on=<Shift>` chooses variables under that shift; shapes are refit inside each
   selection fold and a variable needs `min_evidence` standard errors over the shift's units.
-  `equation()`, `terms_`, `components(X)`, `support(X)`
+  A product may bring in its second variable; with a product in, its two variables' forms are
+  chosen again by held-out loss (`rematch`). `products="pysr"` adds a PySR expression of the
+  pieces. `equation()`, `terms_`, `components(X)`, `support(X)`; `save`/`load`, `to_latex`,
+  `to_python` (numpy-only source), `to_sympy`
 - shifts (`shifts.py`): `NewGroups` (leave-one-out when few; `.from_clusters`), `ForwardInTime`,
   `BeyondRange`, `Splitter`, and `Reference` (random folds)
 - `transfer_ledger(X, y, shifts, ...)` - repeated folds; skill = share of the baseline's loss
   removed; delete-one-unit jackknife intervals; per-variable and per-block verdicts (transfers,
   does not transfer, undetermined, ...); memorized share; several shifts at once
+  `ledger.report(path)` writes a self-contained HTML page; `to_json` every table
 - `preflight()` - distinct values, group-level variables, variance between groups, duplicates
-- `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve
+- `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve;
+  with the curve's standard error (`SplineAdditive.curve_se`) a form within 1.5 SE is accepted
+- `cli.py`: `transferledger preflight|fit|ledger|predict|truth` on CSV/TSV/Parquet files
+- `truth.py`: seven known-answer problems; `scorecard(seeds)` gives the share of runs in which
+  each fact is recovered, and the slow test holds each above its floor in `FLOORS`. Rerun
+  `transferledger truth --seeds 20` after any change to forms, selection or curve sources
 Tests: `packages/transferledger/tests` (in the repo's `testpaths`; also run by
 `.github/workflows/transferledger-tests.yaml` with the package installed alone).
 

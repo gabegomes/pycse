@@ -81,6 +81,20 @@ def linear_score(P, coef):
     return coef[0] + P @ coef[1:]
 
 
+def _evident(d, unit_idx, min_evidence):
+    """Is the summed gain ``d`` at least ``min_evidence`` standard errors above zero, the
+    standard error taken over units? The bar is the same confidence as ``min_evidence`` normal
+    standard errors with as many degrees of freedom as there are units to spare: four groups
+    have to agree much more than forty."""
+    n_units = int(unit_idx.max()) + 1
+    if min_evidence <= 0 or n_units < 2:
+        return True
+    need = float(student_t.ppf(norm.cdf(min_evidence), n_units - 1))
+    du = np.bincount(unit_idx, weights=d, minlength=n_units)
+    se = np.sqrt(n_units) * du.std(ddof=1)
+    return not (se > 0 and du.sum() / se < need)
+
+
 def greedy(
     candidates, loss_rows, units, *, start=(), max_terms=12, min_gain=0.005, min_evidence=0.0
 ):
@@ -98,12 +112,6 @@ def greedy(
     """
     chosen, pool = list(start), [c for c in candidates if c not in start]
     _, unit_idx = np.unique(np.asarray(units), return_inverse=True)
-    n_units = int(unit_idx.max()) + 1
-    # the same confidence as ``min_evidence`` normal standard errors, with as many degrees of
-    # freedom as there are units to spare: four groups have to agree much more than forty
-    need = 0.0
-    if min_evidence > 0:
-        need = float(student_t.ppf(norm.cdf(min_evidence), max(n_units - 1, 1)))
     base = float(loss_rows([]).sum())
     current = loss_rows(chosen)
     added, path = [], []
@@ -114,11 +122,8 @@ def greedy(
             gain = float(d.sum()) / base if base > 0 else 0.0
             if gain < min_gain or (best is not None and gain <= best[1]):
                 continue
-            if min_evidence > 0 and n_units > 1:
-                du = np.bincount(unit_idx, weights=d, minlength=n_units)
-                se = np.sqrt(n_units) * du.std(ddof=1)
-                if se > 0 and du.sum() / se < need:
-                    continue
+            if not _evident(d, unit_idx, min_evidence):
+                continue
             best = (c, gain)
         if best is None:
             break
@@ -130,6 +135,15 @@ def greedy(
     return added, path
 
 
+def _split(selection):
+    """A selection of variables and pairs -> (variables, pairs); a pair brings its variables."""
+    variables = [s for s in selection if not isinstance(s, tuple)]
+    pairs = [s for s in selection if isinstance(s, tuple)]
+    for pair in pairs:
+        variables += [v for v in pair if v not in variables]
+    return variables, pairs
+
+
 def _forms_for(forms, name, source_name):
     if forms is None:
         return DEFAULT_ORDER
@@ -138,11 +152,13 @@ def _forms_for(forms, name, source_name):
     return list(forms)
 
 
-def make_pieces(curves, X, names, sources, *, weights=None, forms=None, min_r2=0.97, min_side=3):
+def make_pieces(curves, X, names, sources, *, weights=None, se=None, forms=None, min_r2=0.97,
+                min_side=3):  # fmt: skip
     """Match every variable's curve to a form; returns the list of pieces.
 
     Args:
         curves: ``(d, n)`` curves from a curve source.
+        se: optional ``(d, n)`` standard errors of those curves.
         X: the ``(n, d)`` numeric design.
         names, sources: design column names, and the input column each came from.
         forms: None (default order), a list for every variable, or ``{name: list}``.
@@ -157,7 +173,8 @@ def make_pieces(curves, X, names, sources, *, weights=None, forms=None, min_r2=0
         if np.ptp(curves[j]) < 1e-12 * (1.0 + np.abs(curves).max()):
             continue
         for p in match_curve(name, X[:, j], curves[j], weights=weights, column=j, min_r2=min_r2,
-                             min_side=min_side, forms=_forms_for(forms, name, sources[j])):  # fmt: skip
+                             se=None if se is None else se[j], min_side=min_side,
+                             forms=_forms_for(forms, name, sources[j])):  # fmt: skip
             p.group = sources[j]
             pieces.append(p)
     return pieces
@@ -222,11 +239,19 @@ class PieceModel(RegressorMixin, BaseEstimator):
             errors above zero, the standard error taken over the shift's units (groups, when
             groups are held out). With few groups a chance association is real within the
             sample, and only its uncertainty gives it away. 0 turns the rule off.
-        products: True admits products of two chosen variables' leading pieces, by the same
-            rule (a product is one variable changing the effect of another). ``"pysr"`` instead
-            asks PySR for an expression of the chosen pieces (``+ - *`` only) for what their sum
-            leaves over; the search runs inside every selection fold, so it takes minutes, and
+        products: True admits products of two variables' leading pieces, by the same rule (a
+            product is one variable changing the effect of another). One of the two must
+            already be in the equation; the other may enter with the product, so a variable
+            that acts mostly through another is not lost for having a weak curve of its own.
+            ``"pysr"`` also asks PySR for an expression of the chosen pieces (``+ - *`` only)
+            for what their sum leaves over, and keeps it when it does as well as the built-in
+            products; the search runs inside every selection fold, so it takes minutes, and
             needs ``pip install "transferledger[pysr]"``. False admits neither.
+        rematch: with a product in, choose the forms of its two variables again, by the
+            held-out loss of the whole equation and the same rule. An interaction that the sum
+            of curves cannot express is left in its residual and blurs exactly those two
+            curves (a step can pass for a bend); once the product carries it, the data can tell
+            the forms apart. The shape parameters still come from the curve.
         pysr_options: overrides for the PySR search (for example ``{"niterations": 100}``).
         max_products: at most this many.
         shrink: shrinkage of the equation's weights toward zero: a number (0 is none; scale-free,
@@ -256,7 +281,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
 
     def __init__(self, source="spline", family="gaussian", forms=None, min_r2=0.97, min_side=3,
                  select_on=None, n_splits=5, max_variables=12, min_gain=0.005, min_evidence=1.645,
-                 products=True,
+                 products=True, rematch=True,
                  max_products=3, pysr_options=None, shrink=0.0, tune_source=True,
                  refit_shapes=True, limit=0.5, feature_names=None, random_state=0):  # fmt: skip
         self.source = source
@@ -271,6 +296,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
         self.min_evidence = min_evidence
         self.products = products
         self.max_products = max_products
+        self.rematch = rematch
         self.pysr_options = pysr_options
         self.shrink = shrink
         self.tune_source = tune_source
@@ -291,16 +317,40 @@ class PieceModel(RegressorMixin, BaseEstimator):
         return shift
 
     def _pieces_on(self, source, Xn, y, w, rows):
-        """Fit ``source`` on ``rows`` and match its curves there: the pieces those rows support."""
+        """Fit ``source`` on ``rows`` and match its curves there: the pieces those rows support,
+        and the curves they were matched to."""
         weighted = np.ptp(w) > 0
         if isinstance(source, SplineAdditive):
             source.fit(Xn[rows], y[rows], sample_weight=w[rows])
         else:
             source.fit(Xn[rows], y[rows], sample_weight=w[rows] if weighted else None)
-        return make_pieces(
-            source.curves(Xn[rows]), Xn[rows], self.design_.names_, self.design_.source_,
-            weights=w[rows], forms=self.forms, min_r2=self.min_r2, min_side=self.min_side,
+        ctx = {
+            "rows": rows,
+            "curves": source.curves(Xn[rows]),
+            "se": source.curve_se(Xn[rows]) if hasattr(source, "curve_se") else None,
+        }
+        pieces = make_pieces(
+            ctx["curves"], Xn[rows], self.design_.names_, self.design_.source_, weights=w[rows],
+            se=ctx["se"], forms=self.forms, min_r2=self.min_r2, min_side=self.min_side,
         )  # fmt: skip
+        return pieces, ctx
+
+    def _with_form(self, pcs, ctx, Xn, w, variable, form):
+        """``pcs`` with ``variable`` matched to ``form`` on the curve in ``ctx``, or None."""
+        cols = [j for j, src in enumerate(self.design_.source_) if src == variable]
+        at = [c for c, p in enumerate(pcs) if p.group == variable]
+        if len(cols) != 1 or not at:
+            return None
+        j, rows = cols[0], ctx["rows"]
+        new = match_curve(
+            self.design_.names_[j], Xn[rows, j], ctx["curves"][j], weights=w[rows], forms=[form],
+            min_r2=np.inf, min_side=self.min_side, column=j,
+        )  # fmt: skip
+        if not new or new[0].form != form:
+            return None
+        for piece in new:
+            piece.group = variable
+        return pcs[: at[0]] + new + [q for q in pcs[at[0] :] if q.group != variable]
 
     def fit(self, X, y, sample_weight=None):
         self.design_ = Design(self.feature_names).fit(X)
@@ -333,38 +383,44 @@ class PieceModel(RegressorMixin, BaseEstimator):
             else:
                 self.source_.fit(Xn, y, sample_weight=w)
             self.source_.set_params(fixed=self.source_.strengths_)
-        self.pieces_ = self._pieces_on(self.source_, Xn, y, w, every)
-        P = piece_matrix(self.pieces_, Xn)
+        self.pieces_, ctx_all = self._pieces_on(self.source_, Xn, y, w, every)
 
         # per selection fold: shapes fitted on that fold's training rows only
-        folds = []
-        for tr, te in splits:
-            pcs = self.pieces_ if not self.refit_shapes else self._pieces_on(
-                copy.deepcopy(self.source_), Xn, y, w, tr
-            )  # fmt: skip
+        def fold_of(pcs, ctx, tr, te):
             by_var = {}
             for c, p in enumerate(pcs):
                 by_var.setdefault(p.group, []).append(c)
-            folds.append({
-                "tr": tr, "te": te, "by_var": by_var, "Ptr": piece_matrix(pcs, Xn[tr]),
-                "Pte": piece_matrix(pcs, Xn[te]),
-            })  # fmt: skip
+            return {"tr": tr, "te": te, "by_var": by_var, "pcs": pcs, "ctx": ctx,
+                    "Ptr": piece_matrix(pcs, Xn[tr]), "Pte": piece_matrix(pcs, Xn[te])}  # fmt: skip
 
-        def columns(fold, which, selection):
+        state = {"folds": []}
+        for tr, te in splits:
+            pcs, ctx = self.pieces_, ctx_all
+            if self.refit_shapes:
+                pcs, ctx = self._pieces_on(copy.deepcopy(self.source_), Xn, y, w, tr)
+            state["folds"].append(fold_of(pcs, ctx, tr, te))
+
+        def mains(fold, which, variables):
             Pm = fold[which]
-            cols = []
-            for item in selection:
-                if isinstance(item, tuple):  # a product of two variables' leading pieces
-                    a, b = (fold["by_var"].get(v) for v in item)
-                    if a and b:
-                        cols.append(Pm[:, a[0]] * Pm[:, b[0]])
-                else:
-                    cols.extend(Pm[:, c] for c in fold["by_var"].get(item, []))
+            cols = [Pm[:, c] for v in variables for c in fold["by_var"].get(v, [])]
             return np.column_stack(cols) if cols else np.zeros((len(Pm), 0))
 
-        def loss_rows(selection, ridge=0.0):
+        def prods(fold, which, pairs):
+            Pm = fold[which]
+            cols = []
+            for item in pairs:  # a product of two variables' leading pieces
+                a, b = (fold["by_var"].get(v) for v in item)
+                if a and b:
+                    cols.append(Pm[:, a[0]] * Pm[:, b[0]])
+            return np.column_stack(cols) if cols else np.zeros((len(Pm), 0))
+
+        def columns(fold, which, selection):
+            variables, pairs = _split(selection)
+            return np.hstack([mains(fold, which, variables), prods(fold, which, pairs)])
+
+        def loss_rows(selection, ridge=0.0, folds=None):
             out = []
-            for f in folds:
+            for f in state["folds"] if folds is None else folds:
                 coef = fit_weights(columns(f, "Ptr", selection), y[f["tr"]], w[f["tr"]], fam, ridge)
                 mu = fam.mean(linear_score(columns(f, "Pte", selection), coef))
                 out.append(w[f["te"]] * fam.loss(y[f["te"]], mu))
@@ -373,28 +429,68 @@ class PieceModel(RegressorMixin, BaseEstimator):
         units = np.concatenate([shift.units()[te] for _, te in splits])
         variables = list(dict.fromkeys(p.group for p in self.pieces_))
         rule = dict(min_gain=self.min_gain, min_evidence=self.min_evidence)
+        base = float(loss_rows([]).sum())
         chosen, self.path_ = greedy(
             variables, loss_rows, units, max_terms=self.max_variables, **rule
         )
         pairs = []
         self.expression_ = None
-        if self.products == "pysr":
-            if len(chosen) > 1:
-                self.expression_ = self._assemble(folds, columns, chosen, P, y, w, fam, units)
-        elif self.products and len(chosen) > 1:
+        if self.products and chosen:
+            # a product needs one variable already in the equation; the other may come with it
+            rest = [v for v in variables if v not in chosen]
             cand = [(a, b) for i, a in enumerate(chosen) for b in chosen[i + 1 :]]
+            cand += [(a, b) for a in chosen for b in rest]
             pairs, path = greedy(
                 cand, loss_rows, units, start=chosen, max_terms=self.max_products, **rule
             )
+            chosen = _split(chosen + pairs)[0]
             self.path_ = self.path_ + path
         self.skill_ = self.path_[-1] if self.path_ else 0.0
+
+        # with a product in, its two variables' forms are chosen again by the whole equation
+        if self.rematch and pairs:
+            sel = chosen + pairs
+            _, unit_idx = np.unique(np.asarray(units), return_inverse=True)
+            for v in dict.fromkeys(x for pair in pairs for x in pair):
+                current, best = loss_rows(sel), None
+                now = next(p.form for p in self.pieces_ if p.group == v)
+                for form in _forms_for(self.forms, v, v):
+                    if form == now:
+                        continue
+                    alt = self._with_form(self.pieces_, ctx_all, Xn, w, v, form)
+                    folds = [
+                        self._with_form(f["pcs"], f["ctx"], Xn, w, v, form) for f in state["folds"]
+                    ]
+                    if alt is None or any(f is None for f in folds):
+                        continue
+                    folds = [
+                        fold_of(pcs, f["ctx"], f["tr"], f["te"])
+                        for pcs, f in zip(folds, state["folds"])
+                    ]
+                    d = current - loss_rows(sel, folds=folds)
+                    gain = float(d.sum()) / base if base > 0 else 0.0
+                    if gain < self.min_gain or (best is not None and gain <= best[0]):
+                        continue
+                    if not _evident(d, unit_idx, self.min_evidence):
+                        continue
+                    best = (gain, alt, folds)
+                if best is not None:
+                    self.pieces_, state["folds"] = best[1], best[2]
+                    self.skill_ += best[0]
+        P = piece_matrix(self.pieces_, Xn)
+
+        if self.products == "pysr" and len(chosen) > 1:
+            # PySR on the same pieces; kept when it does as well as the built-in products
+            expression, gain = self._assemble(state["folds"], mains, chosen, P, y, w, fam, units)
+            alone = 1.0 - float(loss_rows(chosen).sum()) / base if base > 0 else 0.0
+            if expression is not None and alone + gain >= self.skill_ - self.min_gain:
+                self.expression_, pairs, self.skill_ = expression, [], alone + gain
         # how much to shrink the weights: the strength with the lowest held-out loss
         self.shrink_ = 0.0
         if self.shrink == "auto" and chosen:
             grid = [0.0, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0]
             losses = [float(loss_rows(chosen + pairs, r).sum()) for r in grid]
             self.shrink_ = grid[int(np.argmin(losses))]
-            base = float(loss_rows([]).sum())
             self.skill_ = 1.0 - min(losses) / base if base > 0 else 0.0
         elif self.shrink != "auto":
             self.shrink_ = float(self.shrink or 0.0)
@@ -633,7 +729,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
             else 0.0
         )
         if gain < self.min_gain or (se > 0 and du.sum() / se < need):
-            return None
+            return None, 0.0
         C = np.column_stack(
             [P[:, c] for v in chosen for c, p in enumerate(self.pieces_) if p.group == v]
         )
@@ -642,6 +738,5 @@ class PieceModel(RegressorMixin, BaseEstimator):
         sr = pysr_regressor(**opts).fit(C, y - linear_score(C, coef), variable_names=names)
         idx = knee(sr, np.var(y))
         if idx is None:
-            return None
-        self.path_ = self.path_ + [self.path_[-1] + gain if self.path_ else gain]
-        return str(sr.sympy(idx))
+            return None, 0.0
+        return str(sr.sympy(idx)), gain
