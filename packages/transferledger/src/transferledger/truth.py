@@ -177,6 +177,42 @@ THRESHOLD = Problem(
 )
 
 
+# ---- 5b: a yes/no outcome with a window --------------------------------------------------------
+def _window(seed, n=800):
+    rng = np.random.default_rng(seed)
+    X = pd.DataFrame(
+        {
+            "size": rng.uniform(0, 10, n),
+            "age": rng.uniform(20, 80, n),
+            "unrelated": rng.normal(size=n),
+        }
+    )
+    inside = sigmoid((X["size"] - 4.0) / 0.3) - sigmoid((X["size"] - 7.0) / 0.3)
+    y = (rng.uniform(size=n) < sigmoid(-2.0 + 4.0 * inside + 0.03 * (X.age - 50))).astype(float)
+    return X, y, None
+
+
+def _edges(model, X, y):
+    row = _term(model, "size")
+    if row is None or row["form"] != "window":
+        return False
+    lo, hi = row["location"]
+    return abs(lo - 4.0) <= 0.5 and abs(hi - 7.0) <= 0.5
+
+
+WINDOW = Problem(
+    "yes/no outcome with a window",
+    "The odds are high only between 4 and 7. The curve of a yes/no outcome is noisy; a V or a "
+    "line must not stand in for the window.",
+    _window,
+    {
+        "window found from 4 to 7 (within 0.5)": _edges,
+        "unrelated variable left out": lambda m, X, y: "unrelated" not in m.variables_,
+    },
+    {"family": "binomial"},
+)
+
+
 # ---- 6: counts ----------------------------------------------------------------------------------
 def _counts(seed, n=600):
     rng = np.random.default_rng(seed)
@@ -229,7 +265,7 @@ CYCLE = Problem(
 )
 
 #: Every problem, in the order the scorecard reports them.
-PROBLEMS = [RATE_LAW, ADDITIVE, GROUP_NOISE, GROUP_SIGNAL, THRESHOLD, COUNTS, CYCLE]
+PROBLEMS = [RATE_LAW, ADDITIVE, GROUP_NOISE, GROUP_SIGNAL, THRESHOLD, WINDOW, COUNTS, CYCLE]
 
 #: The share of runs in which each fact must be recovered. A fact not listed needs ``DEFAULT``.
 DEFAULT_FLOOR = 0.8

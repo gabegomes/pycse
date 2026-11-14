@@ -59,12 +59,13 @@ pieces:
   p0 = S((dose - 6.04) / 0.446)   [0 below 6.04, 1 above]
   p1 = (temperature - 25) / 5.72
   p2 = [operator=ana]  (0 or 1)
-  p3 = W(altitude; 686, 1.77e+03, 21.2)   [1 inside 686 to 1.77e+03]
-y = -1.752 +1.948*p0 -0.4392*p1 -0.5182*p2 +0.4216*p3
+  p3 = |altitude - 1.63e+03| / 492
+  p4 = (altitude - 946) / 492
+y = -0.4663 +1.959*p0 -0.4337*p1 -0.522*p2 -0.7286*p3 -0.5371*p4
 ```
 
 The step is found at 6.04 with the right height. But `altitude` is in the equation too: on
-rows from sites it has seen, a window of altitudes stands in for those sites' offsets. The
+rows from sites it has seen, a bend in altitude stands in for those sites' offsets. The
 ledger shows that this does not carry to a new site:
 
 ```python
@@ -104,8 +105,11 @@ new site.
 **Pieces.** A curve source (by default penalized additive splines, an exact and repeatable fit)
 gives one curve per variable. Each curve is matched to the simplest named form that reproduces
 it. A form's edge must have at least three distinct values on each side; otherwise it would be a
-lookup of one or two cases, not a shape. When the curve's own uncertainty is known, a weak and
-noisy curve does not earn a complicated form. Text columns become 0/1 indicators.
+lookup of one or two cases, not a shape. A form also has to earn its place over a simpler one:
+for each variable in the equation the simpler forms are tried, and the simplest is taken that
+costs less held-out skill than a variable must add. A noisy curve may be reproduced best by a
+window; if a line predicts as well, the equation says a line. Text columns become 0/1
+indicators.
 
 **Products.** A product of two pieces is one variable changing the effect of another, and is
 admitted by the same rule as a variable. One of the two must already be in the equation; the
@@ -155,8 +159,8 @@ fold's training rows only, because a shape fitted on all rows has already seen t
 cases. And a variable is admitted only when its gain is clear of its own uncertainty over the
 shift's units: with twelve groups, a chance association is real within the sample, and only
 its uncertainty gives it away. In simulation (twelve groups, three group properties, 60 runs)
-that rule cuts the admission of a pure-noise property from 68 % of runs to 8 % when none is
-real, and from 55 % to 3 % when one is, while the real one is still found 92 % of the time.
+that rule cuts the admission of a pure-noise property from 68 % of runs to 10 % when none is
+real, and from 53 % to 3 % when one is, while the real one is still found 92 % of the time.
 
 **Memorized share.** The reference skill an equation gives up when its variables must earn their
 place under the shift: what it knew only by having seen the cases.
@@ -216,7 +220,7 @@ which variables lie outside the fitted range. CSV, TSV and Parquet files are rea
 
 ## Known answers
 
-`transferledger truth` (or `transferledger.scorecard()`) runs seven problems drawn from stated
+`transferledger truth` (or `transferledger.scorecard()`) runs eight problems drawn from stated
 generators and reports how often each fact a correct analysis must recover was recovered:
 
 | Problem | Facts |
@@ -226,10 +230,11 @@ generators and reports how often each fact a correct analysis must recover was r
 | group properties that are noise | none admitted |
 | one real group property | found, and the noise ones left out |
 | yes/no outcome with a threshold | threshold at 6, probabilities returned |
+| yes/no outcome with a window | both edges of the window |
 | counts with a log-linear rate | the rate per unit |
 | a cycle over time | the time variable left out when chosen for later runs |
 
-Over 20 seeds all 18 facts are recovered in at least 85 % of runs. The package's slow tests
+Over 20 seeds all 20 facts are recovered in at least 85 % of runs. The package's slow tests
 hold each above a stated floor, so a change that makes the method quietly worse fails.
 
 ## Reference

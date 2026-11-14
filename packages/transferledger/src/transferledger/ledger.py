@@ -430,8 +430,9 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
                 level,
             )
             skill_rows.append(
-                {"rung": k, "scheme": sname, "skill": 1 - pk[0], "lo": 1 - hik[0], "hi": 1 - lok[0]}
-            )
+                {"rung": k, "scheme": sname, "skill": 1 - pk[0], "lo": 1 - hik[0],
+                 "hi": min(1.0, 1 - lok[0])}  # a loss cannot be negative, so skill stops at 1
+            )  # fmt: skip
         cols = np.column_stack(
             [L[k][seen] / c for k in rungs[:1]]
             + [Dv[v][seen] / c for v in variables]

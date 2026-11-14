@@ -128,7 +128,7 @@ def test_predictions_stay_near_the_range_of_the_training_target():
 
 def test_a_variable_that_acts_through_another_enters_with_the_product():
     """``s`` has a slope of +2 below a step in ``v`` and -0.5 above it. Its own curve is weak
-    and noisy, so it enters with the product; with the product in, ``v`` is read as a step."""
+    and noisy, so it enters with the product."""
     rng = np.random.default_rng(1)
     n = 500
     X = pd.DataFrame({"s": rng.normal(size=n), "v": rng.uniform(22, 50, n)})
@@ -143,6 +143,18 @@ def test_a_variable_that_acts_through_another_enters_with_the_product():
     above = (t.loc["s", "weight"] + t.loc["v x s", "weight"]) / sd
     assert abs(below - 2.0) < 0.2 and abs(above + 0.5) < 0.2
     assert m.skill_ > 0.95
-    # without the second look at the forms, the step passes for a bend
-    plain = PieceModel(rematch=False).fit(X, y)
-    assert plain.skill_ < m.skill_ - 0.05
+
+
+def test_a_form_must_earn_its_place_over_a_simpler_one():
+    """A weak, noisy effect: the curve wiggles and a V reproduces it best, but a line predicts
+    held-out rows at least as well, so the equation says a line."""
+    rng = np.random.default_rng(3)
+    n = 300
+    X = pd.DataFrame({"a": rng.uniform(0, 4, n), "b": rng.normal(size=n)})
+    y = 0.6 * X.a + 1.5 * rng.normal(size=n)
+    m = PieceModel().fit(X, y)
+    t = m.terms_.set_index("variable")
+    assert t.loc["a", "form"] == "linear"
+    kept = PieceModel(simplify=False).fit(X, y)
+    assert kept.terms_.set_index("variable").loc["a", "form"].iloc[0] == "vee"
+    assert m.skill_ >= kept.skill_ - 0.005

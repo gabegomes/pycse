@@ -417,6 +417,17 @@ def fit_form(form: Form, u, f, w, scale: Scale, *, min_side=3, polish=True):
     return theta, r2
 
 
+def _fitted(form: Form, theta, u, f, w, scale: Scale):
+    """The form's weighted least-squares fit to ``f`` at ``u``, with its shape at ``theta``."""
+    cols = [np.ones_like(u), form.shape(u, theta, scale)]
+    if form.companion_line:
+        cols.append(u)
+    A = np.column_stack(cols)
+    sw = np.sqrt(np.asarray(w, float))
+    coef = np.linalg.lstsq(A * sw[:, None], f * sw, rcond=None)[0]
+    return A @ coef
+
+
 @dataclass
 class Piece:
     """A unit shape of one variable: what the equation is a sum (and product) of.
@@ -501,9 +512,11 @@ def match_curve(name, x, f, *, weights=None, se=None, forms=None, min_r2=0.97, m
     Forms are tried in the order given (default :data:`DEFAULT_ORDER`, simplest first). A form
     is accepted when its admissible fit explains ``min_r2`` of the curve's variance, or, when
     the curve's standard error ``se`` is given, when the fit stays within ``band`` standard
-    errors of the curve on average: a weak, noisy curve does not earn a complicated form. When no form is
-    accepted, the best admissible fit is taken. A variable with two values is a flag. A form with shape
-    parameters needs more distinct values than it has parameters, plus two.
+    errors of the curve, point by point, on average (root mean square): a weak, noisy curve does
+    not earn a complicated form, and a curve that is sure of itself somewhere must be followed
+    there. When no form is accepted, the best admissible fit is taken. A variable with two
+    values is a flag. A form with shape parameters needs more distinct values than it has
+    parameters, plus two.
 
     Args:
         name: the variable's name.
@@ -511,8 +524,10 @@ def match_curve(name, x, f, *, weights=None, se=None, forms=None, min_r2=0.97, m
         weights: optional observation weights.
         se: optional standard error of the curve at each observation.
         band: how many standard errors a form may sit from the curve, on average, and still be
-            accepted. In simulation a true form sits within about 1.3 and a wrong simpler form
-            beyond 1.9, hence 1.5.
+            accepted. Only used when ``se`` is given. :class:`~transferledger.model.PieceModel`
+            does not use it: it lets held-out rows decide between a form and a simpler one
+            (``simplify``), because a curve's standard error says how noisy the curve is and
+            not whether its shape predicts.
         forms: names of the forms to try, in order.
         min_r2: fraction of the curve's variance a form must reproduce to be accepted.
         min_side: distinct values required on each side of an edge.
@@ -529,10 +544,11 @@ def match_curve(name, x, f, *, weights=None, se=None, forms=None, min_r2=0.97, m
         var_band = None
     else:
         xu, fu, cnt, su = _collapse(x, f, weights, max_points, se)
-        # the average squared standard error, as a share of the curve's variance
-        fm = np.average(fu, weights=cnt)
-        spread = float(np.average((fu - fm) ** 2, weights=cnt))
-        var_band = float(np.average(su**2, weights=cnt)) / spread if spread > 0 else None
+        # a floor on the standard error: where the curve is pinned (near its centring point)
+        # no form could be held to it
+        var_band = np.maximum(su, 0.25 * np.sqrt(np.average(su**2, weights=cnt))) ** 2
+        if not np.all(var_band > 0):
+            var_band = None
     if len(xu) < 2:
         return []
     if len(xu) == 2:
@@ -550,7 +566,12 @@ def match_curve(name, x, f, *, weights=None, se=None, forms=None, min_r2=0.97, m
             continue
         if best is None or r2 > best[2] + 1e-9:
             best = (form, theta, r2)
-        if r2 >= min_r2 or (var_band is not None and 1.0 - r2 <= band**2 * var_band):
+        within = False
+        if var_band is not None and r2 < min_r2:
+            # the form against the curve, point by point, in units of the curve's standard error
+            miss = fu - _fitted(form, theta, u, fu, cnt, scale)
+            within = float(np.average(miss**2 / var_band, weights=cnt)) <= band**2
+        if r2 >= min_r2 or within:
             best = (form, theta, r2)
             break
     if best is None:  # nothing admissible among the requested forms: a line always is

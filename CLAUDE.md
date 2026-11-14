@@ -164,8 +164,9 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   error. `select_on=<Shift>` chooses variables under that shift; shapes are refit inside each
   selection fold and a variable needs `min_evidence` standard errors over the shift's units.
   A product may bring in its second variable; with a product in, its two variables' forms are
-  chosen again by held-out loss (`rematch`). `products="pysr"` adds a PySR expression of the
-  pieces. `equation()`, `terms_`, `components(X)`, `support(X)`; `save`/`load`, `to_latex`,
+  chosen again by held-out loss (`rematch`); a simpler form replaces a variable's form when it
+  costs less than `min_gain` of held-out skill (`simplify`). `products="pysr"` adds a PySR
+  expression of the pieces. `equation()`, `terms_`, `components(X)`, `support(X)`; `save`/`load`, `to_latex`,
   `to_python` (numpy-only source), `to_sympy`
 - shifts (`shifts.py`): `NewGroups` (leave-one-out when few; `.from_clusters`), `ForwardInTime`,
   `BeyondRange`, `Splitter`, and `Reference` (random folds)
@@ -174,10 +175,12 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   does not transfer, undetermined, ...); memorized share; several shifts at once
   `ledger.report(path)` writes a self-contained HTML page; `to_json` every table
 - `preflight()` - distinct values, group-level variables, variance between groups, duplicates
-- `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve;
-  with the curve's standard error (`SplineAdditive.curve_se`) a form within 1.5 SE is accepted
+- `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve.
+  A rule that accepted a form within 1.5 standard errors of the curve was tried and dropped: on
+  a yes/no target it let a V stand in for a window (the curve's noise says nothing about
+  whether a shape predicts); held-out rows decide instead
 - `cli.py`: `transferledger preflight|fit|ledger|predict|truth` on CSV/TSV/Parquet files
-- `truth.py`: seven known-answer problems; `scorecard(seeds)` gives the share of runs in which
+- `truth.py`: eight known-answer problems; `scorecard(seeds)` gives the share of runs in which
   each fact is recovered, and the slow test holds each above its floor in `FLOORS`. Rerun
   `transferledger truth --seeds 20` after any change to forms, selection or curve sources
 Tests: `packages/transferledger/tests` (in the repo's `testpaths`; also run by

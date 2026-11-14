@@ -252,6 +252,10 @@ class PieceModel(RegressorMixin, BaseEstimator):
             of curves cannot express is left in its residual and blurs exactly those two
             curves (a step can pass for a bend); once the product carries it, the data can tell
             the forms apart. The shape parameters still come from the curve.
+        simplify: for each variable in the equation the simpler forms are tried, simplest
+            first, and the first is taken that costs less than ``min_gain`` of held-out skill.
+            A noisy curve can be reproduced best by a window; if a line predicts as well, the
+            equation says a line.
         pysr_options: overrides for the PySR search (for example ``{"niterations": 100}``).
         max_products: at most this many.
         shrink: shrinkage of the equation's weights toward zero: a number (0 is none; scale-free,
@@ -281,7 +285,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
 
     def __init__(self, source="spline", family="gaussian", forms=None, min_r2=0.97, min_side=3,
                  select_on=None, n_splits=5, max_variables=12, min_gain=0.005, min_evidence=1.645,
-                 products=True, rematch=True,
+                 products=True, rematch=True, simplify=True,
                  max_products=3, pysr_options=None, shrink=0.0, tune_source=True,
                  refit_shapes=True, limit=0.5, feature_names=None, random_state=0):  # fmt: skip
         self.source = source
@@ -297,6 +301,7 @@ class PieceModel(RegressorMixin, BaseEstimator):
         self.products = products
         self.max_products = max_products
         self.rematch = rematch
+        self.simplify = simplify
         self.pysr_options = pysr_options
         self.shrink = shrink
         self.tune_source = tune_source
@@ -324,14 +329,10 @@ class PieceModel(RegressorMixin, BaseEstimator):
             source.fit(Xn[rows], y[rows], sample_weight=w[rows])
         else:
             source.fit(Xn[rows], y[rows], sample_weight=w[rows] if weighted else None)
-        ctx = {
-            "rows": rows,
-            "curves": source.curves(Xn[rows]),
-            "se": source.curve_se(Xn[rows]) if hasattr(source, "curve_se") else None,
-        }
+        ctx = {"rows": rows, "curves": source.curves(Xn[rows])}
         pieces = make_pieces(
             ctx["curves"], Xn[rows], self.design_.names_, self.design_.source_, weights=w[rows],
-            se=ctx["se"], forms=self.forms, min_r2=self.min_r2, min_side=self.min_side,
+            forms=self.forms, min_r2=self.min_r2, min_side=self.min_side,
         )  # fmt: skip
         return pieces, ctx
 
@@ -447,36 +448,57 @@ class PieceModel(RegressorMixin, BaseEstimator):
             self.path_ = self.path_ + path
         self.skill_ = self.path_[-1] if self.path_ else 0.0
 
+        _, unit_idx = np.unique(np.asarray(units), return_inverse=True)
+        sel = chosen + pairs
+
+        def with_form(v, form):
+            """The pieces and folds with ``v`` matched to ``form`` instead, or None."""
+            alt = self._with_form(self.pieces_, ctx_all, Xn, w, v, form)
+            folds = [self._with_form(f["pcs"], f["ctx"], Xn, w, v, form) for f in state["folds"]]
+            if alt is None or any(f is None for f in folds):
+                return None
+            return alt, [
+                fold_of(pcs, f["ctx"], f["tr"], f["te"]) for pcs, f in zip(folds, state["folds"])
+            ]
+
+        def earns(d):
+            """Does a per-row gain ``d`` pass the rule a variable has to pass?"""
+            gain = float(d.sum()) / base if base > 0 else 0.0
+            return gain >= self.min_gain and _evident(d, unit_idx, self.min_evidence)
+
         # with a product in, its two variables' forms are chosen again by the whole equation
         if self.rematch and pairs:
-            sel = chosen + pairs
-            _, unit_idx = np.unique(np.asarray(units), return_inverse=True)
             for v in dict.fromkeys(x for pair in pairs for x in pair):
                 current, best = loss_rows(sel), None
                 now = next(p.form for p in self.pieces_ if p.group == v)
                 for form in _forms_for(self.forms, v, v):
-                    if form == now:
+                    alt = None if form == now else with_form(v, form)
+                    if alt is None:
                         continue
-                    alt = self._with_form(self.pieces_, ctx_all, Xn, w, v, form)
-                    folds = [
-                        self._with_form(f["pcs"], f["ctx"], Xn, w, v, form) for f in state["folds"]
-                    ]
-                    if alt is None or any(f is None for f in folds):
-                        continue
-                    folds = [
-                        fold_of(pcs, f["ctx"], f["tr"], f["te"])
-                        for pcs, f in zip(folds, state["folds"])
-                    ]
-                    d = current - loss_rows(sel, folds=folds)
-                    gain = float(d.sum()) / base if base > 0 else 0.0
-                    if gain < self.min_gain or (best is not None and gain <= best[0]):
-                        continue
-                    if not _evident(d, unit_idx, self.min_evidence):
-                        continue
-                    best = (gain, alt, folds)
+                    d = current - loss_rows(sel, folds=alt[1])
+                    if earns(d) and (best is None or d.sum() > best[0]):
+                        best = (float(d.sum()), *alt)
                 if best is not None:
                     self.pieces_, state["folds"] = best[1], best[2]
-                    self.skill_ += best[0]
+        # a simpler form is taken when it costs less skill than a variable must add
+        if self.simplify:
+            for v in chosen:
+                order = list(_forms_for(self.forms, v, v))
+                now = next(p.form for p in self.pieces_ if p.group == v)
+                if now not in order:
+                    continue
+                current = loss_rows(sel)
+                for form in order[: order.index(now)]:
+                    alt = with_form(v, form)
+                    if alt is None:
+                        continue
+                    cost = float((loss_rows(sel, folds=alt[1]) - current).sum())
+                    if cost >= self.min_gain * base:
+                        continue
+                    self.pieces_, state["folds"] = alt
+                    break
+        if chosen and base > 0:
+            self.skill_ = 1.0 - float(loss_rows(sel).sum()) / base
         P = piece_matrix(self.pieces_, Xn)
 
         if self.products == "pysr" and len(chosen) > 1:
