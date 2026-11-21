@@ -62,6 +62,19 @@ in at least 90 % of draws.
 selection in descriptor space are not better than random ones (better in at most 60 % of
 draws).
 
+### Analysis details for H2 to H6, fixed before the Cernak yields were read
+
+- H2: "high" and "low" activity split the ligands of each metal at the median activity. The
+  cut is searched from 28 to 34 % in steps of 0.1; the direction is the one stated in H2, and
+  the balanced accuracy is that of the best cut in that direction.
+- H3 to H6 use the target of `KAN_Ligand_Reactivity_Cliff`: active (yield at least 10 %) as a
+  yes/no outcome, family binomial. Rows: Ni reactions with a kraken ligand. Variables: the
+  twelve kraken descriptors of that notebook, pruned at |r| > 0.85 with the minimum buried
+  volume kept first, plus indicators for catalyst, base, solvent, aryl halide, amine and
+  temperature. Steric descriptors are the buried volumes and the Sterimol values.
+- If the Ni rows are too many for the planning routines in a few hours on four cores, rows are
+  thinned at random within each ligand, never ligands.
+
 ## A second outside table, added before its yields were read
 
 Wang, J. Y.; Stevens, J. M.; Kariofillis, S. K.; ... Doyle, A. G. *Nature* **2024**, *626*,
