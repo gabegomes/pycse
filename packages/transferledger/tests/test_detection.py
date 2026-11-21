@@ -38,8 +38,11 @@ def test_strong_properties_are_found_and_absent_ones_are_not():
     assert D.unit == "site" and D.n_units == 18
     # the fitted law: more units and a larger share both raise the detection rate
     assert D.rate(36, 0.5) > D.rate(18, 0.5) > D.rate(18, 0.2)
+    # the floor is read off the measured rates: between the shares planted, or the smallest
     floor = D.floor()
-    assert floor is None or 0.02 <= floor <= 0.98
+    assert floor is not None and 0.3 <= floor <= 0.95
+    assert D.floor(units=36) is None or D.floor(units=36) <= D.floor(units=18)
+    assert list(D.table().columns) == ["30 %", "50 %", "70 %"]
     strong, weak = D.needed(0.95), D.needed(0.3)
     assert strong is not None and (weak is None or weak >= strong)
     assert "site" in str(D) and set(D.to_dict()) >= {"power", "law", "false_alarms"}

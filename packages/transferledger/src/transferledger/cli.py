@@ -3,6 +3,7 @@
     transferledger preflight data.csv --target yield --group ligand
     transferledger fit       data.csv --target yield --select-on group:ligand --save equation.json
     transferledger ledger    data.csv --target yield --group ligand --group base --report ledger.html
+    transferledger plan      data.csv --target yield --group ligand --floor
     transferledger predict   equation.json new_rows.csv --out predictions.csv
     transferledger truth
 
@@ -18,6 +19,8 @@ import sys
 import numpy as np
 import pandas as pd
 
+from .detection import detectable
+from .learning import learning_curve
 from .ledger import transfer_ledger
 from .model import PieceModel
 from .preflight import preflight
@@ -156,6 +159,33 @@ def cmd_ledger(args):
     return 0
 
 
+def cmd_plan(args):
+    X, y, shifts, weight = _prepare(args)
+    groups = {k: s for k, s in shifts.items() if isinstance(s, NewGroups)}
+    if not groups:
+        raise SystemExit("a plan needs units to count: --group COL (repeatable)")
+    out = {}
+    for name, shift in groups.items():
+        curve = learning_curve(X, y, shift, family=args.family, sample_weight=weight,
+                               n_jobs=args.jobs, random_state=args.seed)  # fmt: skip
+        print(curve)
+        out[name] = {"curve": curve.to_dict()}
+        if args.floor:
+            found = detectable(X, y, shift, family=args.family, sample_weight=weight,
+                               n_trials=args.trials, n_jobs=args.jobs, random_state=args.seed)  # fmt: skip
+            print()
+            print(found)
+            out[name]["detection"] = found.to_dict()
+        print()
+    if args.json:
+        import json
+
+        with open(args.json, "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=1, default=float)
+        print(f"tables written to {args.json}")
+    return 0
+
+
 def cmd_predict(args):
     model = PieceModel.load(args.equation)
     df = _read(args.data)
@@ -260,6 +290,17 @@ def build_parser():
     p.add_argument("--json", help="write every table as JSON")
     p.add_argument("--title", help="title of the report")
     p.set_defaults(run=cmd_ledger)
+
+    p = sub.add_parser("plan", help="what it would take: skill against the number of units")
+    _common(p)
+    p.add_argument("--family", default="gaussian", choices=["gaussian", "binomial", "poisson"])
+    p.add_argument("--floor", action="store_true",
+                   help="also plant properties of known strength: what the units could have shown")  # fmt: skip
+    p.add_argument("--trials", type=int, default=24, help="plantings per cell for --floor")
+    p.add_argument("--jobs", type=int, default=None, help="parallel workers")
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--json", help="write every table as JSON")
+    p.set_defaults(run=cmd_plan)
 
     p = sub.add_parser("predict", help="apply a saved equation to new rows")
     p.add_argument("equation", help="JSON file written by 'fit --save'")

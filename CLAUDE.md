@@ -175,11 +175,21 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   does not transfer, undetermined, ...); memorized share; several shifts at once
   `ledger.report(path)` writes a self-contained HTML page; `to_json` every table
 - `preflight()` - distinct values, group-level variables, variance between groups, duplicates
+- `learning_curve(X, y, NewGroups(...))` (`learning.py`) - skill on unseen units against the
+  number of units trained on; `state()` is "nothing yet" or "established", `floor()` the skill
+  more units are expected to keep. It forecasts nothing: `backtest()` (measure on part of the
+  units, then reveal the rest) showed that a curve at zero cannot be extended and that no
+  extension is right in both directions; `extend()` exists only to repeat that check. Do not
+  add a forecast without a backtest that supports it
+- `detectable(X, y, NewGroups(...))` (`detection.py`) - plants a unit property that captures a
+  known share of the unit-to-unit variance (trend or peak; the target is never simulated) and
+  counts how often the analysis admits it: `floor(shape)`, `needed(share, shape)`, fitted
+  probit law in log units and logit share
 - `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve.
   A rule that accepted a form within 1.5 standard errors of the curve was tried and dropped: on
   a yes/no target it let a V stand in for a window (the curve's noise says nothing about
   whether a shape predicts); held-out rows decide instead
-- `cli.py`: `transferledger preflight|fit|ledger|predict|truth` on CSV/TSV/Parquet files
+- `cli.py`: `transferledger preflight|fit|ledger|plan|predict|truth` on CSV/TSV/Parquet files
 - `truth.py`: eight known-answer problems; `scorecard(seeds)` gives the share of runs in which
   each fact is recovered, and the slow test holds each above its floor in `FLOORS`. Rerun
   `transferledger truth --seeds 20` after any change to forms, selection or curve sources
@@ -198,6 +208,10 @@ every model a second time on folds that hold out whole molecules. `KAN_Transfer_
 `transferledger` on a calibration set with a known interaction, on the five datasets (each
 loaded as in its own notebook, every component held out in turn) and on a housing table:
 equations, ladder with intervals, verdicts per descriptor block and shift.
+`KAN_Transfer_Planning` asks what would change a "does not transfer": learning curves in
+molecules, the forecast-then-reveal check of what such a curve can say, the detection floor of
+each table and a check of its law on the 90 phosphines (about two hours on four cores;
+`PLAN_FAST=1` runs it with a handful of trials).
 All of them download their data at run time and are not executed in CI.
 
 ### Utilities

@@ -58,3 +58,19 @@ def test_errors_are_plain(csv):
         main(["preflight", str(csv), "--target", "nope"])
     with pytest.raises(SystemExit, match="needs at least one shift"):
         main(["ledger", str(csv), "--target", "response"])
+
+
+def test_plan_needs_units(csv):
+    with pytest.raises(SystemExit, match="units to count"):
+        main(["plan", str(csv), "--target", "response", "--beyond", "dose:high"])
+
+
+@pytest.mark.slow
+def test_plan_with_floor(csv, capsys, tmp_path):
+    out = tmp_path / "plan.json"
+    code = main(["plan", str(csv), "--target", "response", "--group", "site", "--floor", "--trials", "3",
+                 "--json", str(out)])  # fmt: skip
+    text = capsys.readouterr().out
+    assert code == 0 and "Skill on a new site" in text and "planted property" in text
+    saved = pd.read_json(out, typ="series")["new site"]
+    assert set(saved) == {"curve", "detection"} and saved["curve"]["unit"] == "site"

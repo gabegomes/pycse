@@ -3,7 +3,7 @@
 Readable equations from tabular data, and an account of which parts of a model still hold when
 the cases change: a new group, a later time, a value range not seen in training.
 
-It answers three questions about any table with a target column:
+It answers four questions about any table with a target column:
 
 1. **What is the relationship?** An equation made of named one-variable shapes (a line, a step
    at a threshold, a window, an optimum), each in the variable's own units.
@@ -13,6 +13,9 @@ It answers three questions about any table with a target column:
    supports it.
 3. **Is this prediction inside what was fitted?** Each prediction can report which variables lie
    outside the range the equation saw.
+4. **What would it take?** Where nothing about a group carries to a new group: how strong would a
+   property of the group have to be to show up with the groups in hand, and how many groups
+   would a weaker one need?
 
 The core needs only numpy, scipy, pandas and scikit-learn.
 
@@ -189,6 +192,49 @@ are held at the edge value), which ones, whether a text value was never seen, an
 the nearest training row. Predictions are also kept within the range of the training target,
 widened by half on each side (`limit=None` removes this).
 
+## What it would take
+
+"Nothing about a site carries to a new site" leaves two readings open: the description of a site
+holds nothing, or it holds something that this many sites cannot establish.
+
+```python
+from transferledger import learning_curve, detectable, backtest
+
+sites = NewGroups(site, "new site")
+curve = learning_curve(df, y, sites)  # skill on a new site, trained on 4, 6, 9, ... sites
+print(curve)
+curve.state()  # "nothing yet" or "established"
+curve.floor()  # the skill more sites are expected to keep, or None
+
+found = detectable(df, y, sites)  # plant properties of known strength, count how often found
+print(found)
+found.floor("trend")  # smallest share of the site-to-site variance that shows up
+found.needed(0.3, "peak")  # sites needed for a property that captures 30 %
+```
+
+**The learning curve** trains on a part of the groups and scores on groups held out, size by
+size. What it may say about *more* groups was settled by `backtest`, which measures a curve on a
+part of the groups and then reveals the rest. On 90 phosphines, 37 alcohols, 160 housing regions
+and made-up populations with known structure:
+
+- a curve that sits at zero does not say where it will leave zero (curves measured on 13
+  phosphines and extended to 39 said about -0.1; 0.35 was then measured);
+- no way of extending a curve was right in both directions;
+- skill, once established, was kept when groups were added.
+
+So the curve reports a state and a floor, and forecasts nothing. `curve.extend()` gives the
+textbook extension for anyone repeating the check.
+
+**The detection floor** answers the case the curve cannot. `detectable` adds to the table a made-up
+property that captures a chosen share of what distinguishes one group from another (the group's
+own mean of the target, blurred), runs the whole analysis as on the real table, and counts how
+often the property is admitted. The target is never simulated. Two shapes are planted: a trend,
+and a peak (high in the middle, low on both sides), which needs both sides populated. The floor
+is the smallest share found in 80 % of plantings: "nothing transfers" then reads "no variable in
+this table captures that much". Groups needed for a weaker property come from a law fitted to
+the counts, up to three times the groups in hand. That law is checked in the same
+forecast-then-reveal way in the notebook `KAN_Transfer_Planning`.
+
 ## Taking the result elsewhere
 
 ```python
@@ -210,6 +256,7 @@ ladder with intervals, each variable under each shift with its verdict, and the 
 transferledger preflight data.csv --target yield --group site
 transferledger fit       data.csv --target yield --select-on group:site --save equation.json
 transferledger ledger    data.csv --target yield --group site --time date --report ledger.html
+transferledger plan      data.csv --target yield --group site --floor
 transferledger predict   equation.json new_rows.csv --out predictions.csv
 transferledger truth
 ```
@@ -245,6 +292,9 @@ hold each above a stated floor, so a change that makes the method quietly worse 
 | `PieceModel(source, family, forms, select_on, products, ...)` | the equation; scikit-learn estimator with `fit`, `predict`, `equation()`, `terms_`, `components(X)`, `support(X)` |
 | `transfer_ledger(X, y, shifts, model, models, blocks, ...)` | the ledger: `.ladder`, `.skill`, `.contributions`, `.verdicts`, `.blocks`, `.memorized`, `.selection`, `.distance`, `.models`, `.predictions` |
 | `preflight(X, y, shifts)` | what the data can support |
+| `learning_curve(X, y, shift)` | skill on unseen groups against the number of groups trained on: `.curve`, `.state()`, `.floor()`, `.advice()` |
+| `backtest(X, y, shift, have=...)` | measure a curve on part of the groups, then reveal the rest |
+| `detectable(X, y, shift)` | planted properties of known strength: `.power`, `.floor(shape)`, `.needed(share, shape)`, `.rate(units, share, shape)` |
 | `ledger.report(path)`, `ledger.to_json(path)` | the HTML report; every table as JSON |
 | `model.save`, `PieceModel.load`, `to_latex`, `to_python`, `to_sympy` | the equation as a file, LaTeX, numpy source, SymPy |
 | `scorecard(seeds)` | the known-answer problems |

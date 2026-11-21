@@ -107,28 +107,57 @@ class Detection:
         return norm.cdf(z)
 
     def floor(self, shape="trend", units=None):
-        """The smallest share a property must capture to be established with ``units`` units
-        (default: the units in hand). None when even a near-perfect property would not be."""
-        units = self.n_units if units is None else units
+        """The smallest share a property must capture to be established.
+
+        For the units in hand this is read off the measured rates (interpolated between the
+        shares that were planted); it equals the smallest share planted when even that one was
+        established. For another number of ``units`` the fitted law is used. None when no
+        share is enough.
+        """
+        if units is None or units == self.n_units:
+            c = self.power[
+                (self.power["shape"] == shape) & (self.power.units == self.power.units.max())
+            ]
+            c = c.sort_values("share")
+            q = c["share"].to_numpy(float)
+            r = np.maximum.accumulate(c["detected"].to_numpy(float))  # more is not found less often
+            hit = np.flatnonzero(r >= self.level)
+            if not len(hit):
+                return None
+            k = int(hit[0])
+            if k == 0:
+                return float(q[0])
+            return float(q[k - 1] + (self.level - r[k - 1]) * (q[k] - q[k - 1]) / (r[k] - r[k - 1]))
         grid = np.linspace(0.02, 0.98, 97)
         ok = np.flatnonzero(self.rate(units, grid, shape) >= self.level)
         return float(grid[ok[0]]) if len(ok) else None
 
     def needed(self, share, shape="trend"):
-        """Units needed to establish a property that captures ``share``. None beyond the
-        horizon (a multiple of the units in hand): the law is not trusted that far."""
+        """Units needed to establish a property that captures ``share``, from the fitted law.
+
+        None beyond the horizon (a multiple of the units in hand), and None when the planted
+        rates did not rise with the number of units, so that there is no law to extend.
+        """
+        k = self._law(shape)
+        if not (k["per log unit"] > 0 and k["per logit share"] > 0):
+            return None
         last = int(np.floor(self.horizon * self.n_units))
-        grid = np.arange(3, last + 1)
+        grid = np.arange(4, last + 1)
         ok = np.flatnonzero(self.rate(grid, share, shape) >= self.level)
         return int(grid[ok[0]]) if len(ok) else None
 
     def table(self, shares=(0.3, 0.5, 0.7), shapes=None):
-        """Units needed, per shape and share; a dash where the horizon is passed."""
+        """Units needed, per shape and share; "more than" the horizon where it is passed."""
         shapes = shapes or list(self.law["shape"])
         last = int(np.floor(self.horizon * self.n_units))
-        rows = {s: {f"{int(100 * q)} %": self.needed(q, s) for q in shares} for s in shapes}
-        out = pd.DataFrame(rows).T
-        out = out.astype(object).where(out.notna(), f"more than {last}")
+        rows = {}
+        for s in shapes:
+            need = {q: self.needed(q, s) for q in shares}
+            rows[s] = {
+                f"{int(100 * q)} %": f"more than {last}" if v is None else v
+                for q, v in need.items()
+            }
+        out = pd.DataFrame(rows, dtype=object).T
         out.index.name = "shape"
         return out
 
@@ -148,12 +177,18 @@ class Detection:
             ),  # fmt: skip
             "",
         ]
+        smallest = float(self.power["share"].min())
         for s in self.law["shape"]:
             f = self.floor(s)
+            if f is None:
+                say = "more than any share planted"
+            elif f <= smallest:
+                say = f"{f:.0%} or less (the smallest share planted was established)"
+            else:
+                say = f"at least {f:.0%}"
             lines.append(
-                f"{s}: with {self.n_units} {self.unit}s a property must capture "
-                + (f"at least {f:.0%}" if f is not None else "more than any tested share")
-                + f" of the differences between {self.unit}s to be established"
+                f"{s}: with {self.n_units} {self.unit}s a property must capture {say} of the "
+                f"differences between {self.unit}s to be established"
             )
         lines += ["", f"{self.unit.capitalize()}s needed for a weaker property:",
                   self.table().to_string()]  # fmt: skip
@@ -164,6 +199,7 @@ class Detection:
             "unit": self.unit, "n_units": self.n_units, "level": self.level, "horizon": self.horizon,
             "power": self.power.to_dict("records"), "false_alarms": self.false_alarms.to_dict("records"),
             "law": self.law.to_dict("records"), "meta": self.meta,
+            "floor": {s: self.floor(s) for s in self.law["shape"]},
         }  # fmt: skip
 
 
