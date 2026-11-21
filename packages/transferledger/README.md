@@ -246,6 +246,15 @@ One more thing was tried and is not offered: choosing the next groups to cover t
 space (farthest-point selection). On the phosphines it was worse than choosing at random, and
 on the alcohols no different.
 
+**Checked on outside tables.** Predictions written before the yields were read were scored on
+tables from other laboratories (notebook `KAN_Prospective_Test`). Fitted on 20 of 52 ligands of a
+Ni C-N coupling table, the law's rates were again too low (by 0.03 to 0.05 for a trend, 0.08 to
+0.38 for a peak), but the ligands it asked for were enough in only 8 of 15 comparisons. On 22
+ligands of a C-H arylation table the floor was 49 % (trend) and 67 % (peak), as the phosphines
+had implied for 24. Where the ligand descriptors carried nothing (that Ni table, whose activity
+is the metal-free background), the ligand block was given 0.000 and the chosen equation kept no
+ligand descriptor.
+
 ## Taking the result elsewhere
 
 ```python

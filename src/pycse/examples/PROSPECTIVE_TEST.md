@@ -128,3 +128,17 @@ higher activity (share of reactions with at least 10 % yield) than ligands outsi
 
 Each hypothesis is reported as held, failed or not testable, with the reason. None is dropped
 or redefined after the analysis.
+
+## Outcome (added after the analysis; the predictions above are unchanged)
+
+Scored in `KAN_Prospective_Test.ipynb`: H4, H5, H6, H7 and H9 held; H1, H2, H3 and H8 failed.
+Two points the notebook's reading spells out:
+
+- H4 does not say in how many comparisons the law must ask for enough ligands. The notebook
+  used at least half; that rule was set before the run but was not committed here. Under
+  "every comparison" H4 fails.
+- H5 rests on one check: the curve was established at half the ligands in 1 of 16 draws.
+
+Post hoc, the Ni activity of the Cernak table is the metal-free background (0 of 3577 Ni
+reactions with a kraken phosphine active where the metal-free controls give no product), so
+H1 to H3 could not have found a ligand effect on Ni there.

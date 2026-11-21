@@ -217,6 +217,10 @@ equations, ladder with intervals, verdicts per descriptor block and shift.
 molecules, the forecast-then-reveal check of what such a curve can say, the detection floor of
 each table and a check of its law on the 90 phosphines (about two hours on four cores;
 `PLAN_FAST=1` runs it with a handful of trials).
+`KAN_Prospective_Test` scores nine predictions written beforehand in `PROSPECTIVE_TEST.md`
+(same folder; do not edit its predictions) on outside tables: the Cernak C-N couplings
+(Open Reaction Database, needs `ord-schema`), a 24-ligand C-H arylation, 8 new alcohols and a
+Ni borylation (about three and a half hours on four cores; 5 held, 4 failed).
 All of them download their data at run time and are not executed in CI.
 
 ### Utilities
