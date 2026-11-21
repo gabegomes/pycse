@@ -6,11 +6,19 @@ do, or is the description of a ligand the limit? :func:`learning_curve` answers 
 part. It trains on 4, 6, 9, ... of the units in hand (whole molecules, sites, patients), scores
 each model on units it has not seen, and reports the skill at each size with an interval.
 
-The curve can then be extended a stated distance beyond the units in hand
-(:meth:`LearningCurve.forecast`, :meth:`LearningCurve.needed`). An extrapolated learning curve
-is a forecast, and forecasts of this kind are easy to make and often wrong, so the extension
-is limited to a horizon, and the package's tests check, on populations where the answer is
-known, that the stated intervals hold.
+What the curve is allowed to say was settled by experiment, not by taste. :func:`backtest`
+measures a curve on a part of the units and then reveals the rest. On a set of 90 phosphines,
+on alcohols, on housing regions and on made-up populations with known answers, it showed that:
+
+- a curve that sits at zero does not say where it will leave zero. Curves fitted to 13
+  phosphines put the skill with 39 at about -0.1; it was 0.35. So in the state "nothing yet"
+  nothing is said about more units, and :func:`~transferledger.detection.detectable` takes
+  over;
+- no way of extending a curve was right in both directions. Holding the last value is too low
+  where skill keeps growing, and extending the rise overshoots where a threshold has just
+  been found. So no number is forecast for more units;
+- one statement held: once skill on a new unit is established, adding units did not lose it.
+  :meth:`LearningCurve.floor` reports that lower bound.
 """
 
 from __future__ import annotations
@@ -29,37 +37,33 @@ from .ledger import BASELINE, CURVES, EQUATION, _loss, _predict
 from .model import PieceModel
 from .shifts import NewGroups, Reference, Shift
 
-__all__ = ["learning_curve", "LearningCurve", "power_law"]
+__all__ = ["learning_curve", "LearningCurve", "backtest", "power_law"]
 
-#: Exponents tried for the approach to the ceiling. 1 is what a fitted model with a fixed number
-#: of parameters gives (its excess loss falls as parameters / units); slower and faster
-#: approaches are allowed for.
+#: Exponents tried when a curve is extended. 1 is what a fitted model with a fixed number of
+#: parameters gives (its excess loss falls as parameters / units).
 EXPONENTS = (0.5, 0.75, 1.0, 1.5, 2.0)
 
 
-def power_law(units, skill, weights=None, exponents=EXPONENTS):
+def power_law(units, skill, exponents=EXPONENTS):
     """Fit ``skill = ceiling - gap * units**(-rate)`` to a measured curve.
 
-    The gap is not allowed to be negative (a curve that falls with more units is read as flat)
-    and the ceiling not above 1.
+    This is the textbook way to extend a learning curve, kept so that its failure can be
+    reproduced: :func:`backtest` reports what it would have said next to what happened. The gap
+    is not allowed to be negative and the ceiling not above 1.
 
     Returns:
         ``(ceiling, gap, rate)``.
     """
     m, s = np.asarray(units, float), np.asarray(skill, float)
-    w = np.ones_like(s) if weights is None else np.asarray(weights, float)
     best = None
     for c in exponents:
         x = m ** (-c)
-        xm, sm = np.average(x, weights=w), np.average(s, weights=w)
-        vx = np.average((x - xm) ** 2, weights=w)
-        b = -np.average((x - xm) * (s - sm), weights=w) / vx if vx > 0 else 0.0
-        b = max(b, 0.0)
-        a = sm + b * xm
+        vx = np.mean((x - x.mean()) ** 2)
+        b = max(-np.mean((x - x.mean()) * (s - s.mean())) / vx if vx > 0 else 0.0, 0.0)
+        a = s.mean() + b * x.mean()
         if a > 1.0:  # the ceiling cannot pass 1: refit the gap with it held there
-            a = 1.0
-            b = max(np.average(x * (1.0 - s), weights=w) / np.average(x * x, weights=w), 0.0)
-        sse = float(np.average((s - (a - b * x)) ** 2, weights=w))
+            a, b = 1.0, max(np.mean(x * (1.0 - s)) / np.mean(x * x), 0.0)
+        sse = float(np.mean((s - (a - b * x)) ** 2))
         if best is None or sse < best[0] - 1e-15:
             best = (sse, a, b, c)
     return best[1], best[2], best[3]
@@ -99,25 +103,20 @@ class LearningCurve:
 
     Attributes:
         curve: one row per rung and size: ``units``, ``skill``, ``lo``, ``hi`` (interval over the
-            test units), ``spread`` (standard deviation of the skill across draws).
-        fits: per rung, the fitted ``ceiling``, ``gap`` and ``rate`` of
-            ``skill = ceiling - gap * units**(-rate)``, with an interval for the ceiling.
+            test units), ``spread`` (standard deviation of the skill across draws), ``draws``.
         unit: what a unit is called ("ligand").
         n_units: how many units the data have.
-        horizon: how far beyond ``n_units`` a forecast is given, as a multiple of it.
+        level: confidence level of the intervals.
     """
 
     curve: pd.DataFrame
-    fits: pd.DataFrame
     unit: str
     n_units: int
-    horizon: float
     level: float
     family: str
     meta: dict = field(default_factory=dict)
-    _loo: dict = field(
-        default_factory=dict, repr=False
-    )  # rung -> (sizes, leave-one-unit-out skills)
+    # rung -> (sizes, skill, skill with each unit left out)
+    _loo: dict = field(default_factory=dict, repr=False)
 
     @property
     def rungs(self):
@@ -129,16 +128,10 @@ class LearningCurve:
         top = self.curve[self.curve.units == self.curve.units.max()]
         return str(top.sort_values("skill", ascending=False)["rung"].iloc[0])
 
-    def _replicates(self, rung, units):
-        """The fitted curve at ``units`` from all units, and with each unit left out in turn."""
-        sizes, point, loo = self._loo[rung]
-        units = np.atleast_1d(np.asarray(units, float))
-
-        def at(s):
-            a, b, c = power_law(sizes, s)
-            return a - b * units ** (-c)
-
-        return at(point), np.array([at(row) for row in loo])
+    def top(self, rung=None):
+        """The row of the curve at the largest size measured."""
+        rung = rung or self.best
+        return self.curve[self.curve.rung == rung].sort_values("units").iloc[-1]
 
     def state(self, rung=None):
         """Where the curve stands: ``"nothing yet"``, ``"rising"`` or ``"level"``.
@@ -149,8 +142,7 @@ class LearningCurve:
         difference on the same test units. *Level*: established, and not rising.
         """
         rung = rung or self.best
-        c = self.curve[self.curve.rung == rung].sort_values("units")
-        if c["lo"].iloc[-1] <= 0:
+        if self.top(rung)["lo"] <= 0:
             return "nothing yet"
         sizes, point, loo = self._loo[rung]
         half = int(np.argmin(np.abs(sizes[:-1] - sizes[-1] / 2.0)))
@@ -160,50 +152,50 @@ class LearningCurve:
         rise = point[-1] - point[half]
         return "rising" if rise - student_t.ppf(0.5 + self.level / 2, g - 1) * se > 0 else "level"
 
-    def forecast(self, units, rung=None):
-        """The fitted curve at ``units``, with an interval, for sizes up to the horizon.
+    def floor(self, rung=None):
+        """The skill that more units are expected to keep: the lower end of the interval at
+        the largest size measured, or None while nothing is established.
 
-        Nothing is forecast while the state is "nothing yet": a curve that sits at zero does
-        not say where it would leave zero (on 90 phosphines, forecasts made from 13 of them
-        missed the skill later measured with 39 by 0.4). Sizes beyond ``horizon * n_units``
-        are missing too.
-
-        Returns:
-            DataFrame with ``units``, ``skill``, ``lo``, ``hi``.
+        This is the one statement about more units that held when checked (see
+        :func:`backtest`): skill, once established, was not lost by adding units.
         """
-        rung = rung or self.best
-        units = np.atleast_1d(np.asarray(units, float))
-        if self.state(rung) == "nothing yet":
-            nan = np.full(len(units), np.nan)
-            return pd.DataFrame({"units": units, "skill": nan, "lo": nan, "hi": nan})
-        point, reps = self._replicates(rung, units)
-        g = len(reps)
-        se = np.sqrt((g - 1) / g * np.sum((reps - reps.mean(axis=0)) ** 2, axis=0))
-        half = student_t.ppf(0.5 + self.level / 2, g - 1) * se
-        out = pd.DataFrame({"units": units, "skill": point, "lo": point - half,
-                            "hi": np.minimum(point + half, 1.0)})  # fmt: skip
-        out.loc[out.units > self.horizon * self.n_units, ["skill", "lo", "hi"]] = np.nan
-        return out
+        row = self.top(rung)
+        return float(row["lo"]) if row["lo"] > 0 else None
 
-    def needed(self, skill, rung=None):
-        """How many units the fitted curve needs to reach ``skill``.
+    def extend(self, units, rung=None):
+        """What extending the fitted curve gives at ``units``. Not a forecast.
 
-        Returns:
-            dict with ``units`` (from the fitted curve), ``optimistic`` and ``pessimistic`` (from
-            the two ends of its interval); a value is None when that curve does not reach the
-            target within the horizon.
+        The value of :func:`power_law` fitted to the measured sizes. Checked against units
+        added later it was off by 0.2 to 0.5 of skill, low where a threshold had not yet been
+        found and high or low elsewhere; it is here so that the check can be repeated.
         """
+        sizes, point, _ = self._loo[rung or self.best]
+        a, b, c = power_law(sizes, point)
+        return a - b * np.atleast_1d(np.asarray(units, float)) ** (-c)
+
+    def advice(self, rung=None):
+        """One sentence on what the curve supports."""
         rung = rung or self.best
-        last = int(np.floor(self.horizon * self.n_units))
-        grid = np.arange(self.curve.units.min(), last + 1)
-        f = self.forecast(grid, rung)
-
-        def first(col):
-            hit = np.flatnonzero(f[col].to_numpy() >= skill)
-            return int(grid[hit[0]]) if len(hit) else None
-
-        return {"rung": rung, "target": skill, "units": first("skill"),
-                "optimistic": first("hi"), "pessimistic": first("lo"), "searched to": last}  # fmt: skip
+        state, u, n = self.state(rung), self.unit, self.n_units
+        if state == "nothing yet":
+            return (
+                f"Nothing yet: no skill on a new {u} is established with {n} {u}s. A curve at "
+                f"zero does not say where it would leave zero; detectable() says what these "
+                f"{u}s could have shown and how many a weaker property needs."
+            )
+        t = self.top(rung)
+        kept = f"at least {self.floor(rung):.2f} is expected to be kept with more {u}s"
+        if state == "rising":
+            return (
+                f"Rising: skill on a new {u} is established ({t.skill:.2f} with {int(t.units)} "
+                f"{u}s) and still growing; {kept}, and more {u}s are likely to add to it, by "
+                f"an amount the curve cannot give."
+            )
+        return (
+            f"Level: skill on a new {u} is established ({t.skill:.2f} with {int(t.units)} {u}s) "
+            f"and no longer growing; {kept}, and a better description of a {u} is the more "
+            f"likely way to raise it."
+        )
 
     def __str__(self):
         with pd.option_context("display.width", 200, "display.max_columns", 30):
@@ -215,39 +207,20 @@ class LearningCurve:
                 f"({self.n_units} in hand; {int(100 * self.level)} % intervals over test {self.unit}s)\n"
                 + c.loc[self.rungs].to_string()
             )
-            last = int(np.floor(self.horizon * self.n_units))
-            state = self.state()
-            if state == "nothing yet":
-                text += (
-                    f"\n\n{self.best!r}: nothing yet. No skill on a new {self.unit} is established "
-                    f"with {self.n_units} {self.unit}s, and a curve at zero does not say where it "
-                    f"would leave zero, so nothing is forecast. detectable() says what these "
-                    f"{self.unit}s could have shown."
-                )
-            else:
-                steps = sorted(
-                    {int(round(k * self.n_units)) for k in (1.0, 1.5, 2.0, self.horizon)}
-                )
-                f = self.forecast([q for q in steps if q <= last], self.best)
-                note = ("skill is established and still rising" if state == "rising" else
-                        "skill is established and no longer rising with more units")  # fmt: skip
-                text += (
-                    f"\n\n{self.best!r}: {state} ({note}). Forecast from the fitted curve, not "
-                    f"given beyond {last} {self.unit}s:\n" + f.round(3).to_string(index=False)
-                )
-        return text
+        return text + f"\n\n{self.best!r}. {self.advice()}"
 
     def to_dict(self):
         return {
-            "unit": self.unit, "n_units": self.n_units, "horizon": self.horizon, "level": self.level,
-            "family": self.family, "meta": self.meta,
-            "curve": self.curve.to_dict("records"), "fits": self.fits.to_dict("records"),
+            "unit": self.unit, "n_units": self.n_units, "level": self.level, "family": self.family,
+            "meta": self.meta, "curve": self.curve.to_dict("records"), "best": self.best,
+            "state": {r: self.state(r) for r in self.rungs},
+            "floor": {r: self.floor(r) for r in self.rungs}, "advice": self.advice(),
         }  # fmt: skip
 
 
 def learning_curve(X, y, shift=None, *, model=None, models=None, family="gaussian",
                    sample_weight=None, sizes=None, n_sizes=6, smallest=4, test_fraction=0.2,
-                   n_repeats=None, horizon=2.0, level=0.95, random_state=0, n_jobs=None):  # fmt: skip
+                   n_repeats=None, level=0.95, random_state=0, n_jobs=None):  # fmt: skip
     """Measure the skill on unseen units as a function of the number of units trained on.
 
     The units of ``shift`` are dealt into test folds; for each fold the remaining units are put
@@ -266,7 +239,6 @@ def learning_curve(X, y, shift=None, *, model=None, models=None, family="gaussia
         test_fraction: share of the units held out in each draw.
         n_repeats: how many times the units are dealt into test folds (default: enough for
             about twenty draws).
-        horizon: forecasts are given up to this multiple of the units in hand.
         level: confidence level of the intervals.
 
     Returns:
@@ -329,11 +301,10 @@ def learning_curve(X, y, shift=None, *, model=None, models=None, family="gaussia
             EQUATION: f"{EQUATION}, chosen for {inner}",
             CURVES: f"{CURVES}, tuned for {inner}",
         }
-    rungs = [EQUATION, CURVES, *extra]
     _, unit_idx = np.unique(units, return_inverse=True)
-    rows, loo, fit_rows = [], {}, []
+    rows, loo = [], {}
     tq = student_t.ppf(0.5 + level / 2, G - 1)
-    for rung in rungs:
+    for rung in [EQUATION, CURVES, *extra]:
         point, reps = [], []
         for s in sizes:
             mine = [r for (size, _, _), r in zip(tasks, results) if size == s]
@@ -352,17 +323,80 @@ def learning_curve(X, y, shift=None, *, model=None, models=None, family="gaussia
                          "spread": float(np.std(per_draw)), "draws": len(mine)})  # fmt: skip
             point.append(skill)
             reps.append(left)
-        point, reps = np.array(point), np.array(reps).T  # reps: (units, sizes)
-        loo[names.get(rung, rung)] = (np.array(sizes, float), point, reps)
-        a, b, c = power_law(sizes, point)
-        ceilings = np.array([power_law(sizes, r)[0] for r in reps])
-        se = np.sqrt((G - 1) / G * np.sum((ceilings - ceilings.mean()) ** 2))
-        fit_rows.append({"rung": names.get(rung, rung), "ceiling": a, "lo": a - tq * se,
-                         "hi": min(1.0, a + tq * se), "gap": b, "rate": c})  # fmt: skip
+        loo[names.get(rung, rung)] = (np.array(sizes, float), np.array(point), np.array(reps).T)
     return LearningCurve(
-        curve=pd.DataFrame(rows), fits=pd.DataFrame(fit_rows), unit=unit_name, n_units=G,
-        horizon=float(horizon), level=level, family=fam.name,
-        meta={"rows": n, "test units per draw": int(np.ceil(G / K)), "draws": len(tasks) // len(sizes),
-              "sizes": sizes},
+        curve=pd.DataFrame(rows), unit=unit_name, n_units=G, level=level, family=fam.name,
+        meta={"rows": n, "test units per draw": int(np.ceil(G / K)),
+              "draws": len(tasks) // len(sizes), "sizes": sizes},
         _loo=loo,
     )  # fmt: skip
+
+
+def backtest(X, y, shift, *, have, factors=(1.5, 2.0, 3.0), n_trials=6, n_acquisitions=6,
+             model=None, family="gaussian", sample_weight=None, min_test=5, max_test=40,
+             level=0.95, random_state=0, n_jobs=None, **curve_options):  # fmt: skip
+    """Check what a learning curve says about more units, on a table with units to spare.
+
+    In each trial ``have`` units are drawn and treated as all there is, and a learning curve is
+    measured on them. Then ``factor * have`` units are really used (the ones in hand plus units
+    drawn from the rest), and the skill is measured on units left over, which the curve has
+    not seen.
+
+    Args:
+        have: the number of units pretended to be in hand.
+        factors: multiples of ``have`` at which the skill is then measured.
+        n_trials: independent draws of the units in hand.
+        n_acquisitions: draws of the added units per trial and factor; their test rows are
+            pooled.
+        min_test, max_test: a factor is skipped when fewer than ``min_test`` units would be
+            left to test on; at most ``max_test`` are used.
+        **curve_options: passed to :func:`learning_curve` (``n_sizes``, ``n_repeats``, ...).
+
+    Returns:
+        DataFrame, one row per trial, factor and rung: ``units``; from the curve on the units
+        in hand its ``state``, the skill at its largest size (``held``, ``lo``, ``hi``) and
+        what the fitted curve extends to (``extended``); and the skill then ``realized``.
+    """
+    if not isinstance(shift, NewGroups):
+        raise TypeError("backtest needs a NewGroups shift: its groups are the units")
+    fam = get_family(family)
+    frame = Design()._frame(X)
+    y = np.asarray(y, float).ravel()
+    w = np.ones(len(y)) if sample_weight is None else np.asarray(sample_weight, float)
+    units = np.asarray(shift.groups)
+    labels = np.unique(units)
+    proto = clone(model) if model is not None else PieceModel(family=family)
+    rng = np.random.default_rng(random_state)
+    rows = []
+    for trial in range(n_trials):
+        mine = rng.choice(labels, have, replace=False)
+        sub = np.flatnonzero(np.isin(units, mine))
+        L = learning_curve(
+            frame.iloc[sub].reset_index(drop=True), y[sub], NewGroups(units[sub], shift.name),
+            model=proto, family=family, sample_weight=w[sub], level=level,
+            random_state=random_state + trial, n_jobs=n_jobs, **curve_options,
+        )  # fmt: skip
+        rest = np.setdiff1d(labels, mine)
+        for factor in factors:
+            m = int(round(factor * have))
+            if m < have or len(rest) - (m - have) < min_test:
+                continue
+            jobs = []
+            for _ in range(n_acquisitions):
+                new = rng.choice(rest, m - have, replace=False)
+                test = np.setdiff1d(rest, new)
+                if len(test) > max_test:
+                    test = rng.choice(test, max_test, replace=False)
+                jobs.append((np.r_[mine, new], test))
+            res = Parallel(n_jobs=n_jobs)(
+                delayed(_one)(frame, y, w, units, tr, te, proto, {}, fam, shift.name)
+                for tr, te in jobs
+            )
+            for key, rung in zip((EQUATION, CURVES), L.rungs):
+                real = 1.0 - sum(r[key].sum() for r in res) / sum(r[BASELINE].sum() for r in res)
+                t = L.top(rung)
+                rows.append({"trial": trial, "have": have, "factor": factor, "units": m,
+                             "rung": rung, "state": L.state(rung), "held": t["skill"],
+                             "lo": t["lo"], "hi": t["hi"],
+                             "extended": float(L.extend([m], rung)[0]), "realized": real})  # fmt: skip
+    return pd.DataFrame(rows)

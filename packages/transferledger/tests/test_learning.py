@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from transferledger import NewGroups, learning_curve
+from transferledger import NewGroups, backtest, learning_curve
 from transferledger.learning import power_law
 
 
@@ -48,22 +48,22 @@ def test_curve_stays_at_zero_when_nothing_carries():
     )
     top = L.curve[L.curve.units == 24]
     assert (top.skill < 0.1).all()
-    # nothing is established, so nothing is forecast: a curve at zero does not say where it
-    # would leave zero
-    assert L.state() == "nothing yet"
-    assert L.forecast([30, 45]).skill.isna().all() and L.needed(0.2)["units"] is None
-    assert "nothing yet" in str(L)
+    # nothing is established, so there is no floor to hold: a curve at zero does not say where
+    # it would leave zero
+    assert L.state() == "nothing yet" and L.floor() is None
+    assert "Nothing yet" in str(L) and "detectable" in L.advice()
 
 
-def test_forecast_stops_at_the_horizon():
+def test_floor_is_the_lower_end_of_the_established_skill():
     X, y, g = population(30, signal=1.5)
-    L = learning_curve(X, y, NewGroups(g, "new site"), sizes=[4, 10, 24], n_repeats=1, horizon=2.0)
-    f = L.forecast([30, 60, 61, 300])
-    assert f.skill.iloc[:2].notna().all() and f.skill.iloc[2:].isna().all()
-    assert (f.lo.iloc[:2] <= f.skill.iloc[:2]).all() and (f.hi.iloc[:2] <= 1.0).all()
-    need = L.needed(0.2)
-    assert need["units"] is not None and need["units"] <= 60 and need["searched to"] == 60
-    assert L.needed(0.999)["units"] is None
+    L = learning_curve(X, y, NewGroups(g, "new site"), sizes=[4, 10, 24], n_repeats=1)
+    top = L.top()
+    assert L.floor() == pytest.approx(top["lo"]) and 0 < L.floor() < top["skill"]
+    assert L.advice().startswith(("Rising", "Level")) and f"{L.floor():.2f}" in L.advice()
+    d = L.to_dict()
+    assert d["state"][L.best] == L.state() and d["floor"][L.best] == L.floor()
+    # extending the fitted curve is available, and is not what the curve is said to support
+    assert L.extend([30, 60]).shape == (2,) and "Not a forecast" in L.extend.__doc__
 
 
 def test_rows_as_units_and_bad_input():
@@ -85,3 +85,14 @@ def test_yes_no_target_with_one_class_in_a_small_training_set():
     X = pd.DataFrame({"z": z[g], "noise": rng.normal(size=100)})
     L = learning_curve(X, y, NewGroups(g), family="binomial", sizes=[2, 6, 14], n_repeats=1)
     assert np.isfinite(L.curve.skill).all()
+
+
+def test_backtest_forecasts_first_and_then_reveals():
+    X, y, g = population(40, signal=1.5, seed=3)
+    b = backtest(X, y, NewGroups(g, "new site"), have=12, factors=(2.0, 5.0), n_trials=2,
+                 n_acquisitions=2, sizes=[4, 9], n_repeats=1)  # fmt: skip
+    # twelve units doubled leave sixteen to test on; five times twelve is more than there are
+    assert set(b.units) == {24} and len(b) == 2 * 2
+    assert set(b.columns) >= {"state", "held", "lo", "hi", "extended", "realized"}
+    assert np.isfinite(b[["held", "lo", "hi", "extended", "realized"]].to_numpy()).all()
+    assert set(b.state) <= {"nothing yet", "rising", "level"}
