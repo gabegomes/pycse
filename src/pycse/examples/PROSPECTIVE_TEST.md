@@ -77,5 +77,27 @@ capturing a third of the differences between ligands (found in 16 to 25 % of dra
 phosphines), and that 45 to 60 were. On this table, held out by ligand, the detection floor
 for a trend is above 33 %.
 
+## A third outside table: new alcohols
+
+Żurański, Gandhi, Doyle, *J. Am. Chem. Soc.* **2023**, *145*, 7898 (DOI 10.1021/jacs.2c13093)
+ran a validation set after the 37-alcohol table: 8 alcohols that table never had (mostly
+primary benzylic), with PyFluor and PBSF and the same four bases, 116 reactions. Data and
+M06-2X descriptors for all 45 alcohols: `data/` of github.com/doyle-lab-ucla/deoxyfluorination_modeling.
+Disclosure: while checking the file layout, the first 7 rows (alcohol 1al with PyFluor and
+PBSF) were printed before this prediction was written. No other yield of this set was read.
+
+Fixed procedure: train on the 740 reactions of the 37 alcohols, with that paper's alcohol
+descriptors plus the substructure flags of the validation file, and score on the new alcohols
+against the training mean. Rungs: conditions only (base and sulfonyl fluoride), the equation
+chosen on random folds, the equation chosen for a new alcohol, the curves tuned for a new
+alcohol, gradient boosting with everything.
+
+**H8. Alcohol descriptors do not carry to the new alcohols.** The ledger's verdict for the
+alcohol block, "does not transfer", holds outside the table: no rung that uses alcohol
+descriptors beats the conditions-only rung by more than 0.10 of skill on the new alcohols, and
+the equation chosen on random folds scores below the conditions-only rung. (The 2023 paper's
+own model, with interaction terms, reached a mean absolute error of 13 % against 18 % for a
+random forest, so this can fail.)
+
 Each hypothesis is reported as held, failed or not testable, with the reason. None is dropped
 or redefined after the analysis.
