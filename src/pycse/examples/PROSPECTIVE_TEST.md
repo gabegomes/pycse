@@ -99,5 +99,19 @@ the equation chosen on random folds scores below the conditions-only rung. (The 
 own model, with interaction terms, reached a mean absolute error of 13 % against 18 % for a
 random forest, so this can fail.)
 
+## A fourth outside table: Ni-catalysed borylation
+
+Stevens, Li, Simmons, ... Jackson, *Organometallics* **2022**, *41*, 1847 (DOI
+10.1021/acs.organomet.2c00089): Ni-catalysed borylation of 33 aryl (pseudo)halides with 24
+ligands in ethanol and methanol, plus an external set of 12 further ligands with 2 substrates.
+Files `NiB/rxns/inchi.csv` and `NiB/rxns/inchi_val.csv` of the Doyle lab data repository; 19 of
+the 24 ligands and all 12 external ones are in kraken. Not one yield of this table was read
+before this was written.
+
+**H9. The window marks the active ligands in Ni-catalysed borylation too.** Over the kraken
+ligands of both files, ligands with a minimum buried volume between 25.1 and 31.4 % have a
+higher activity (share of reactions with at least 10 % yield) than ligands outside it
+(one-sided Mann-Whitney over ligands, p < 0.05).
+
 Each hypothesis is reported as held, failed or not testable, with the reason. None is dropped
 or redefined after the analysis.
