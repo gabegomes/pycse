@@ -108,6 +108,15 @@ def get_family(family):
 # -----------------------------------------------------------------------------
 # penalized additive splines
 # -----------------------------------------------------------------------------
+def _solve(M, rhs):
+    """Solve ``M x = rhs``; a handful of rows can leave ``M`` singular, and then the smallest
+    solution is taken."""
+    try:
+        return np.linalg.solve(M, rhs)
+    except np.linalg.LinAlgError:
+        return np.linalg.lstsq(M, rhs, rcond=None)[0]
+
+
 class _Block:
     """One variable's columns in the design: an indicator, level indicators, or a spline."""
 
@@ -257,9 +266,11 @@ class SplineAdditive(BaseEstimator):
                 Bc = Br - mu_B
                 A = Bc.T @ (Bc * ww[:, None])
                 M = A + lam0 * P[0] + lam1 * P[1] + scale * ww.sum() * (rho0 * Id[0] + rho1 * Id[1])
-                beta = np.linalg.solve(M, Bc.T @ (ww * (z - sw @ z)))
+                beta = _solve(M, Bc.T @ (ww * (z - sw @ z)))
                 b0 = float(sw @ z - mu_B @ beta)
                 new = b0 + Br @ beta
+                if fam.name != "gaussian":  # a separated outcome sends the score to infinity
+                    new = np.clip(new, -30.0, 30.0)
                 done = np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new)))
                 eta = new
                 if done:
@@ -267,7 +278,7 @@ class SplineAdditive(BaseEstimator):
             if key is not None and fam.name != "gaussian":
                 warm[key] = eta
             # the effective degrees of freedom cost a full solve, so only on request
-            edf = float(np.trace(np.linalg.solve(M, A))) + 1.0 if want_edf else np.nan
+            edf = float(np.trace(_solve(M, A))) + 1.0 if want_edf else np.nan
             last["M"] = M
             return beta, b0, edf, eta
 
@@ -325,7 +336,7 @@ class SplineAdditive(BaseEstimator):
             scale2 = (
                 float(np.sum(w * (y - eta) ** 2)) / max(n_eff - self.edf_, 1.0) * n_eff / w.sum()
             )
-        self.cov_ = scale2 * np.linalg.inv(last["M"])
+        self.cov_ = scale2 * np.linalg.pinv(last["M"])
         self.basis_means_ = np.average(B, axis=0, weights=w)
         # centre each variable's curve on the training rows; the intercept absorbs the shift
         self.centers_ = np.array([
