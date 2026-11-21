@@ -11,15 +11,18 @@ measures a curve on a part of the units and then reveals the rest. On a set of 9
 on alcohols, on housing regions and on made-up populations with known answers, it showed that:
 
 - a curve that sits at zero does not say where it will leave zero. Curves fitted to 13
-  phosphines put the skill with 39 at about -0.1; it was 0.35. So in the state "nothing yet"
+  phosphines put the skill with 39 at -0.17; it was 0.33. So in the state "nothing yet"
   nothing is said about more units, and :func:`~transferledger.detection.detectable` takes
   over;
 - no way of extending a curve was right in both directions. Holding the last value is too low
   where skill keeps growing, and extending the rise overshoots where a threshold has just
   been found. So no number is forecast for more units;
 - one statement held: once skill on a new unit is established, adding units did not lose it
-  (the skill later measured stayed at or above the lower end of the interval in 95 % of 168
+  (the skill later measured stayed at or above the lower end of the interval in 98 of 102
   checks). :meth:`LearningCurve.floor` reports that lower bound.
+
+The numbers are those of the example notebook ``KAN_Transfer_Planning``, which repeats the
+check.
 """
 
 from __future__ import annotations
@@ -142,7 +145,7 @@ class LearningCurve:
 
         A finer reading was tried and dropped. Whether an established curve was still rising
         or had levelled off said nothing about what more units then added (0.10 of skill on
-        average in both cases, over 168 checks).
+        average in both cases, over the 168 checks of an earlier run).
         """
         return "nothing yet" if self.top(rung)["lo"] <= 0 else "established"
 
@@ -152,7 +155,8 @@ class LearningCurve:
 
         This is the one statement about more units that held when checked (see
         :func:`backtest`): with two or three times the units, the skill measured stayed at or
-        above this value in 95 % of 168 checks on six populations.
+        above this value in 98 of 102 checks (the example notebook ``KAN_Transfer_Planning``)
+        and in 95 % of the 168 checks of an earlier run on six populations.
         """
         row = self.top(rung)
         return float(row["lo"]) if row["lo"] > 0 else None
@@ -161,8 +165,9 @@ class LearningCurve:
         """What extending the fitted curve gives at ``units``. Not a forecast.
 
         The value of :func:`power_law` fitted to the measured sizes. Checked against units
-        added later it was off by 0.2 to 0.5 of skill, low where a threshold had not yet been
-        found and high or low elsewhere; it is here so that the check can be repeated.
+        added later it was too low by 0.26 of skill on average where nothing was established
+        yet, and off by 0.15 either way where something was; it is here so that the check can
+        be repeated.
         """
         sizes, point, _ = self._loo[rung or self.best]
         a, b, c = power_law(sizes, point)
@@ -182,8 +187,7 @@ class LearningCurve:
         return (
             f"Established: skill on a new {u} is {t.skill:.2f} with {int(t.units)} {u}s, and at "
             f"least {self.floor(rung):.2f} is expected to be kept with more. Whether more {u}s "
-            f"add to it the curve cannot say: when checked, they added more than 0.05 about "
-            f"half the time."
+            f"add to it the curve does not say."
         )
 
     def __str__(self):

@@ -21,6 +21,15 @@ gives
   larger share is seen to do.
 
 The target is never simulated: its noise, its rows and its other variables are the real ones.
+
+The law is an extension beyond the units in hand, so it was put to the same test as the
+learning curve: fitted on a part of 90 phosphines, then compared with rates measured on more of
+them (the example notebook ``KAN_Transfer_Planning``). Fitted on 20 ligands, its rates for 26
+to 60 ligands were low by 0.03 to 0.06 for a trend and by 0.07 to 0.16 for a peak; fitted on
+13 they were low by 0.2 to 0.5. The law erred toward needing more units throughout, and a
+real descriptor was found sooner than a planted one of the same share. So
+:meth:`Detection.needed` is an upper estimate of the units needed, and is not to be used with
+fewer than about 20 units in hand.
 """
 
 from __future__ import annotations
@@ -137,8 +146,11 @@ class Detection:
     def needed(self, share, shape="trend"):
         """Units needed to establish a property that captures ``share``, from the fitted law.
 
-        None beyond the horizon (a multiple of the units in hand), and None when the planted
-        rates did not rise with the evidence, so that there is no law to extend.
+        An upper estimate: when checked against rates measured on more units, the law fitted
+        on 20 units asked for 0.8 to 1.4 times the units that were then enough for a trend and
+        1 to 3 times for a peak (see the module text). None beyond
+        the horizon (a multiple of the units in hand), and None when the planted rates did not
+        rise with the evidence, so that there is no law to extend.
         """
         if not self._law(shape)["slope"] > 0:
             return None

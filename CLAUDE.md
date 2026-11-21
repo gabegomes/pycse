@@ -186,7 +186,10 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   counts how often the analysis admits it: `floor(shape)` (read off the measured rates) and
   `needed(share, shape)` (from a probit law in `sqrt((units - 2) share / (1 - share))`, the
   evidence for a correlation of that strength; a three-parameter law in log units was
-  unstable and extrapolated worse)
+  unstable and extrapolated worse). `needed` is an upper estimate: checked on the phosphines
+  it erred toward more units, and fitted on 13 ligands it was of no use. Choosing the next
+  units by farthest-point selection was tried and was no better than chance, so no such
+  helper is offered
 - `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve.
   A rule that accepted a form within 1.5 standard errors of the curve was tried and dropped: on
   a yes/no target it let a V stand in for a window (the curve's noise says nothing about

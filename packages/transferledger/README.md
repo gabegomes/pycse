@@ -218,9 +218,9 @@ part of the groups and then reveals the rest. On 90 phosphines, 37 alcohols, 160
 and made-up populations with known structure:
 
 - a curve that sits at zero does not say where it will leave zero (curves measured on 13
-  phosphines and extended to 39 said about -0.1; 0.35 was then measured);
+  phosphines and extended to 39 said -0.17; 0.33 was then measured);
 - no way of extending a curve was right in both directions;
-- skill, once established, was kept when groups were added.
+- skill, once established, was kept when groups were added (in 98 of 102 checks).
 
 So the curve reports a state and a floor, and forecasts nothing. `curve.extend()` gives the
 textbook extension for anyone repeating the check.
@@ -232,8 +232,19 @@ often the property is admitted. The target is never simulated. Two shapes are pl
 and a peak (high in the middle, low on both sides), which needs both sides populated. The floor
 is the smallest share found in 80 % of plantings: "nothing transfers" then reads "no variable in
 this table captures that much". Groups needed for a weaker property come from a law fitted to
-the counts, up to three times the groups in hand. That law is checked in the same
-forecast-then-reveal way in the notebook `KAN_Transfer_Planning`.
+the counts, up to three times the groups in hand.
+
+That law was checked in the same forecast-then-reveal way (notebook `KAN_Transfer_Planning`).
+Fitted on 20 of the phosphines, its detection rates for 26 to 60 were low by 0.03 to 0.16; it
+asked for 0.8 to 1.4 times the ligands that were then enough for a trend, and 1 to 3 times for
+a peak. Fitted on 13 it was of no use. It erred toward needing more throughout, so `needed()`
+is an upper estimate, and it wants about 20 groups in hand. The real descriptor behind the ligand set's threshold captures a third of the
+differences between ligands; it was admitted from 3 % of draws of 13 ligands, 25 % of draws of
+30 and 91 % of draws of 60.
+
+One more thing was tried and is not offered: choosing the next groups to cover the descriptor
+space (farthest-point selection). On the phosphines it was worse than choosing at random, and
+on the alcohols no different.
 
 ## Taking the result elsewhere
 
