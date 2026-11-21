@@ -62,5 +62,20 @@ in at least 90 % of draws.
 selection in descriptor space are not better than random ones (better in at most 60 % of
 draws).
 
+## A second outside table, added before its yields were read
+
+Wang, J. Y.; Stevens, J. M.; Kariofillis, S. K.; ... Doyle, A. G. *Nature* **2024**, *626*,
+1025 ("Identifying general reaction conditions by bandit optimization"): Pd-catalysed C-H
+arylation of imidazoles, 24 ligands with 8 aryl bromides and 8 imidazoles (1536 reactions), the
+reaction family of the 12-ligand direct arylation table (Shields et al. 2021). File
+`deebo/aryl-scope-ligand.csv` of the Doyle lab data repository; 22 of the 24 ligands are in
+kraken.
+
+**H7. Twenty-four ligands are not enough for a property of the window's strength.** The plan
+said that for the direct arylation ligands 24 would not be enough to establish a property
+capturing a third of the differences between ligands (found in 16 to 25 % of draws on the
+phosphines), and that 45 to 60 were. On this table, held out by ligand, the detection floor
+for a trend is above 33 %.
+
 Each hypothesis is reported as held, failed or not testable, with the reason. None is dropped
 or redefined after the analysis.
