@@ -17,8 +17,9 @@ on alcohols, on housing regions and on made-up populations with known answers, i
 - no way of extending a curve was right in both directions. Holding the last value is too low
   where skill keeps growing, and extending the rise overshoots where a threshold has just
   been found. So no number is forecast for more units;
-- one statement held: once skill on a new unit is established, adding units did not lose it.
-  :meth:`LearningCurve.floor` reports that lower bound.
+- one statement held: once skill on a new unit is established, adding units did not lose it
+  (the skill later measured stayed at or above the lower end of the interval in 95 % of 168
+  checks). :meth:`LearningCurve.floor` reports that lower bound.
 """
 
 from __future__ import annotations
@@ -134,30 +135,24 @@ class LearningCurve:
         return self.curve[self.curve.rung == rung].sort_values("units").iloc[-1]
 
     def state(self, rung=None):
-        """Where the curve stands: ``"nothing yet"``, ``"rising"`` or ``"level"``.
+        """Where the curve stands: ``"nothing yet"`` or ``"established"``.
 
         *Nothing yet*: at the largest size measured the interval of the skill reaches zero, so
-        no skill on a new unit is established. *Rising*: skill is established and is higher
-        at the largest size than at about half of it, by more than the uncertainty of that
-        difference on the same test units. *Level*: established, and not rising.
+        no skill on a new unit is established. *Established*: it lies above zero.
+
+        A finer reading was tried and dropped. Whether an established curve was still rising
+        or had levelled off said nothing about what more units then added (0.10 of skill on
+        average in both cases, over 168 checks).
         """
-        rung = rung or self.best
-        if self.top(rung)["lo"] <= 0:
-            return "nothing yet"
-        sizes, point, loo = self._loo[rung]
-        half = int(np.argmin(np.abs(sizes[:-1] - sizes[-1] / 2.0)))
-        d = loo[:, -1] - loo[:, half]
-        g = len(d)
-        se = np.sqrt((g - 1) / g * np.sum((d - d.mean()) ** 2))
-        rise = point[-1] - point[half]
-        return "rising" if rise - student_t.ppf(0.5 + self.level / 2, g - 1) * se > 0 else "level"
+        return "nothing yet" if self.top(rung)["lo"] <= 0 else "established"
 
     def floor(self, rung=None):
         """The skill that more units are expected to keep: the lower end of the interval at
         the largest size measured, or None while nothing is established.
 
         This is the one statement about more units that held when checked (see
-        :func:`backtest`): skill, once established, was not lost by adding units.
+        :func:`backtest`): with two or three times the units, the skill measured stayed at or
+        above this value in 95 % of 168 checks on six populations.
         """
         row = self.top(rung)
         return float(row["lo"]) if row["lo"] > 0 else None
@@ -184,17 +179,11 @@ class LearningCurve:
                 f"{u}s could have shown and how many a weaker property needs."
             )
         t = self.top(rung)
-        kept = f"at least {self.floor(rung):.2f} is expected to be kept with more {u}s"
-        if state == "rising":
-            return (
-                f"Rising: skill on a new {u} is established ({t.skill:.2f} with {int(t.units)} "
-                f"{u}s) and still growing; {kept}, and more {u}s are likely to add to it, by "
-                f"an amount the curve cannot give."
-            )
         return (
-            f"Level: skill on a new {u} is established ({t.skill:.2f} with {int(t.units)} {u}s) "
-            f"and no longer growing; {kept}, and a better description of a {u} is the more "
-            f"likely way to raise it."
+            f"Established: skill on a new {u} is {t.skill:.2f} with {int(t.units)} {u}s, and at "
+            f"least {self.floor(rung):.2f} is expected to be kept with more. Whether more {u}s "
+            f"add to it the curve cannot say: when checked, they added more than 0.05 about "
+            f"half the time."
         )
 
     def __str__(self):

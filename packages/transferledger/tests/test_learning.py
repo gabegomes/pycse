@@ -37,7 +37,7 @@ def test_curve_rises_when_a_group_property_carries():
     assert c.loc[24, "skill"] > 0.5 and c.loc[24, "lo"] > 0
     assert c.loc[24, "skill"] > c.loc[4, "skill"]
     assert set(L.curve.columns) >= {"rung", "units", "skill", "lo", "hi", "spread", "draws"}
-    assert "new site" in str(L) and L.state() in ("rising", "level")
+    assert "new site" in str(L) and L.state() == "established"
 
 
 def test_curve_stays_at_zero_when_nothing_carries():
@@ -59,7 +59,7 @@ def test_floor_is_the_lower_end_of_the_established_skill():
     L = learning_curve(X, y, NewGroups(g, "new site"), sizes=[4, 10, 24], n_repeats=1)
     top = L.top()
     assert L.floor() == pytest.approx(top["lo"]) and 0 < L.floor() < top["skill"]
-    assert L.advice().startswith(("Rising", "Level")) and f"{L.floor():.2f}" in L.advice()
+    assert L.advice().startswith("Established") and f"{L.floor():.2f}" in L.advice()
     d = L.to_dict()
     assert d["state"][L.best] == L.state() and d["floor"][L.best] == L.floor()
     # extending the fitted curve is available, and is not what the curve is said to support
@@ -95,4 +95,4 @@ def test_backtest_forecasts_first_and_then_reveals():
     assert set(b.units) == {24} and len(b) == 2 * 2
     assert set(b.columns) >= {"state", "held", "lo", "hi", "extended", "realized"}
     assert np.isfinite(b[["held", "lo", "hi", "extended", "realized"]].to_numpy()).all()
-    assert set(b.state) <= {"nothing yet", "rising", "level"}
+    assert set(b.state) <= {"nothing yet", "established"}
