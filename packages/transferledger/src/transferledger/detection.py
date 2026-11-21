@@ -14,7 +14,11 @@ gives
 
 - the *floor*: the smallest share a property must capture to be established with the units in
   hand, so that "nothing transfers" can be read as "nothing stronger than this exists here";
-- the units needed for a weaker property, from how detection grows with the number of units.
+- the units needed for a weaker property. A property that captures a share ``q`` of the
+  unit-to-unit variance is a correlation of ``sqrt(q)`` over the units, and the evidence for a
+  correlation over ``m`` units grows as ``sqrt((m - 2) q / (1 - q))``. The detection rate is
+  fitted as a probit curve in that one quantity, which ties what more units would do to what a
+  larger share is seen to do.
 
 The target is never simulated: its noise, its rows and its other variables are the real ones.
 """
@@ -26,6 +30,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
+from scipy.optimize import minimize
 from scipy.stats import norm
 from sklearn.base import clone
 
@@ -80,8 +85,8 @@ class Detection:
             which the planted property entered the equation) and ``trials``.
         false_alarms: per shape and number of units, how often a property that captures
             nothing was admitted.
-        law: per shape, the fitted ``intercept``, ``per log unit`` and ``per logit share`` of
-            ``probit(detected) = intercept + a * log(units) + b * logit(share)``.
+        law: per shape, the fitted ``intercept`` and ``slope`` of
+            ``probit(detected) = intercept + slope * sqrt((units - 2) * share / (1 - share))``.
         unit, n_units, level: what a unit is called, how many the table has, the detection
             rate that counts as "established".
     """
@@ -101,10 +106,7 @@ class Detection:
     def rate(self, units, share, shape="trend"):
         """Detection rate the fitted law gives for ``units`` units and a property of ``share``."""
         k = self._law(shape)
-        share = np.clip(np.asarray(share, float), 1e-6, 1 - 1e-6)
-        z = (k["intercept"] + k["per log unit"] * np.log(np.asarray(units, float))
-             + k["per logit share"] * np.log(share / (1 - share)))  # fmt: skip
-        return norm.cdf(z)
+        return norm.cdf(k["intercept"] + k["slope"] * _evidence(units, share))
 
     def floor(self, shape="trend", units=None):
         """The smallest share a property must capture to be established.
@@ -136,10 +138,9 @@ class Detection:
         """Units needed to establish a property that captures ``share``, from the fitted law.
 
         None beyond the horizon (a multiple of the units in hand), and None when the planted
-        rates did not rise with the number of units, so that there is no law to extend.
+        rates did not rise with the evidence, so that there is no law to extend.
         """
-        k = self._law(shape)
-        if not (k["per log unit"] > 0 and k["per logit share"] > 0):
+        if not self._law(shape)["slope"] > 0:
             return None
         last = int(np.floor(self.horizon * self.n_units))
         grid = np.arange(4, last + 1)
@@ -203,26 +204,28 @@ class Detection:
         }  # fmt: skip
 
 
+def _evidence(units, share):
+    """The strength of the evidence for a correlation of ``sqrt(share)`` over ``units`` units
+    (its t statistic): ``sqrt((units - 2) * share / (1 - share))``."""
+    m = np.maximum(np.asarray(units, float) - 2.0, 1.0)
+    q = np.clip(np.asarray(share, float), 1e-6, 1 - 1e-6)
+    return np.sqrt(m * q / (1.0 - q))
+
+
 def _fit_law(cells):
-    """Probit regression of the detection rate on log(units) and logit(share), by maximum
-    likelihood on the counts (Newton steps; three parameters)."""
-    m = np.log(cells["units"].to_numpy(float))
-    q = cells["share"].to_numpy(float)
-    X = np.column_stack([np.ones(len(m)), m, np.log(q / (1 - q))])
+    """``probit(rate) = intercept + slope * evidence``, by maximum likelihood on the counts."""
+    x = _evidence(cells["units"].to_numpy(float), cells["share"].to_numpy(float))
     k = (cells["detected"] * cells["trials"]).to_numpy(float)
     n = cells["trials"].to_numpy(float)
-    beta = np.zeros(3)
-    for _ in range(60):
-        z = X @ beta
-        p = np.clip(norm.cdf(z), 1e-6, 1 - 1e-6)
-        d = norm.pdf(z)
-        score = X.T @ (d * (k - n * p) / (p * (1 - p)))
-        info = X.T @ (X * (n * d**2 / (p * (1 - p)))[:, None]) + 1e-6 * np.eye(3)
-        step = np.linalg.solve(info, score)
-        beta = beta + np.clip(step, -2.0, 2.0)
-        if np.max(np.abs(step)) < 1e-8:
-            break
-    return beta
+
+    def nll(b):
+        p = np.clip(norm.cdf(b[0] + b[1] * x), 1e-9, 1 - 1e-9)
+        return -(k * np.log(p) + (n - k) * np.log(1 - p)).sum() + 1e-6 * float(b @ b)
+
+    opts = {"xatol": 1e-7, "fatol": 1e-10, "maxiter": 4000}
+    fits = [minimize(nll, np.array(x0), method="Nelder-Mead", options=opts)
+            for x0 in ((0.0, 0.0), (-2.0, 0.5), (-4.0, 1.0))]  # fmt: skip
+    return min(fits, key=lambda r: r.fun).x
 
 
 def detectable(X, y, shift, *, model=None, family="gaussian", sample_weight=None,
@@ -293,9 +296,7 @@ def detectable(X, y, shift, *, model=None, family="gaussian", sample_weight=None
     law = []
     for shape in shapes:
         b = _fit_law(power[power["shape"] == shape])
-        law.append(
-            {"shape": shape, "intercept": b[0], "per log unit": b[1], "per logit share": b[2]}
-        )
+        law.append({"shape": shape, "intercept": float(b[0]), "slope": float(b[1])})
     return Detection(
         power=power, false_alarms=null.reset_index(drop=True), law=pd.DataFrame(law),
         unit=unit_name, n_units=G, level=float(level), horizon=float(horizon),

@@ -41,7 +41,9 @@ def test_strong_properties_are_found_and_absent_ones_are_not():
     # the floor is read off the measured rates: between the shares planted, or the smallest
     floor = D.floor()
     assert floor is not None and 0.3 <= floor <= 0.95
-    assert D.floor(units=36) is None or D.floor(units=36) <= D.floor(units=18)
+    # for other numbers of units the law is used: more units, a lower floor
+    lower, higher = D.floor(units=54), D.floor(units=27)
+    assert lower is not None and (higher is None or lower <= higher)
     assert list(D.table().columns) == ["30 %", "50 %", "70 %"]
     strong, weak = D.needed(0.95), D.needed(0.3)
     assert strong is not None and (weak is None or weak >= strong)

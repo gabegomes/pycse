@@ -183,8 +183,10 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   add a forecast without a backtest that supports it
 - `detectable(X, y, NewGroups(...))` (`detection.py`) - plants a unit property that captures a
   known share of the unit-to-unit variance (trend or peak; the target is never simulated) and
-  counts how often the analysis admits it: `floor(shape)`, `needed(share, shape)`, fitted
-  probit law in log units and logit share
+  counts how often the analysis admits it: `floor(shape)` (read off the measured rates) and
+  `needed(share, shape)` (from a probit law in `sqrt((units - 2) share / (1 - share))`, the
+  evidence for a correlation of that strength; a three-parameter law in log units was
+  unstable and extrapolated worse)
 - `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve.
   A rule that accepted a form within 1.5 standard errors of the curve was tried and dropped: on
   a yes/no target it let a V stand in for a window (the curve's noise says nothing about
