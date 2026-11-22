@@ -129,20 +129,6 @@ higher activity (share of reactions with at least 10 % yield) than ligands outsi
 Each hypothesis is reported as held, failed or not testable, with the reason. None is dropped
 or redefined after the analysis.
 
-## Outcome (added after the analysis; the predictions above are unchanged)
-
-Scored in `KAN_Prospective_Test.ipynb`: H4, H5, H6, H7 and H9 held; H1, H2, H3 and H8 failed.
-Two points the notebook's reading spells out:
-
-- H4 does not say in how many comparisons the law must ask for enough ligands. The notebook
-  used at least half; that rule was set before the run but was not committed here. Under
-  "every comparison" H4 fails.
-- H5 rests on one check: the curve was established at half the ligands in 1 of 16 draws.
-
-Post hoc, the Ni activity of the Cernak table is the metal-free background (0 of 3577 Ni
-reactions with a kraken phosphine active where the metal-free controls give no product), so
-H1 to H3 could not have found a ligand effect on Ni there.
-
 ## A fifth outside table, added 2026-11-22 before its yields were read
 
 LeSueur, Tao, Doyle, Sigman, *Eur. J. Org. Chem.* **2024**, e202400428 (DOI
@@ -183,3 +169,33 @@ least 5 active and 5 inactive kraken ligands, a single cut of minimum buried vol
 and 34 % (steps of 0.1), with the active ligands above it, has a balanced accuracy over
 ligands above 0.65. Active is a yield of at least 10 %. Reactions with fewer than 5 ligands on
 either side are reported as not testable.
+
+## Outcome (added after the analysis; the predictions above are unchanged)
+
+Scored in `KAN_Prospective_Test.ipynb`: H4, H5, H6, H7 and H9 held; H1, H2, H3 and H8 failed.
+Two points the notebook's reading spells out:
+
+- H4 does not say in how many comparisons the law must ask for enough ligands. The notebook
+  used at least half; that rule was set before the run but was not committed here. Under
+  "every comparison" H4 fails.
+- H5 rests on one check: the curve was established at half the ligands in 1 of 16 draws.
+
+Post hoc, the Ni activity of the Cernak table is the metal-free background (0 of 3577 Ni
+reactions with a kraken phosphine active where the metal-free controls give no product), so
+H1 to H3 could not have found a ligand effect on Ni there.
+
+H10 and H11, scored in `KAN_Prospective_Followup.ipynb`, both held:
+
+- H10: of the 28 ligands, 23 are not among the 90 phosphines. Their activity is 0.74 inside
+  the window and 0.17 outside (p = 0.005); balanced accuracy over the 46 ligand-reaction pairs
+  0.73. With the buried volumes as printed in the tables instead of the kraken file (they
+  differ for one ligand): p = 0.016, balanced accuracy 0.67.
+- H11: six of the eight Pd reactions are testable; "active above the cut" has a balanced
+  accuracy over 0.65 in four of them (VII, VIII, IX, XI; 0.85, 0.88, 0.92, 0.66), not in VI
+  (0.63) and XIII (0.57).
+
+A defect found afterwards. H3 to H6 were scored with `transferledger` 0.1.0, whose yes/no fit
+overshot on nearly separated outcomes (the curves rung on the Ni table stood at -2.8 on random
+folds). Version 0.2.0 repairs it. `KAN_Prospective_Followup.ipynb` repeats H3 to H6 as
+registered with the repaired fit and shows both results; the verdicts above are the registered
+ones.
