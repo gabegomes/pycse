@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "transferledger"
-version = "0.1.0"
+version = "0.2.0"
 description = "Readable equations from tabular data, and an account of which parts of a model still hold under a named shift"
 readme = "README.md"
 requires-python = ">=3.10"

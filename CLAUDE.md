@@ -175,6 +175,16 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   does not transfer, undetermined, ...); memorized share; several shifts at once
   `ledger.report(path)` writes a self-contained HTML page; `to_json` every table
 - `preflight()` - distinct values, group-level variables, variance between groups, duplicates
+- `unit_ceiling(X, y, NewGroups(...))` (`ceiling.py`) - on random folds (every unit seen), what
+  the unit's identity adds over the variables that change within a unit (additive curves, and
+  gradient boosting where a unit may change how the others act), and how much of that the
+  unit's description reaches. `state()` is "units differ" or "nothing to explain"; the second
+  means no description of the unit can be tested on the table (the Ni C-N couplings of the
+  outside test: +0.001). Run it before reading a "does not transfer"
+- The iterated fit (binomial, poisson) in `curves.py` and `model.fit_weights` shortens a step
+  that would raise the penalized deviance. Full steps alternated between two bad fits on
+  nearly separated yes/no targets (found on the outside test); do not remove the step control.
+  `tests/test_curves.py::test_separated_yes_no_fit_does_not_overshoot` holds it
 - `learning_curve(X, y, NewGroups(...))` (`learning.py`) - skill on unseen units against the
   number of units trained on; `state()` is "nothing yet" or "established", `floor()` the skill
   more units are expected to keep. It forecasts nothing: `backtest()` (measure on part of the

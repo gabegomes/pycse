@@ -79,3 +79,38 @@ def test_curves_from_any_model():
     c = ModelCurves(Model()).fit(X).curves(X)
     assert np.corrcoef(c[0], X[:, 0])[0, 1] == pytest.approx(1.0)
     assert np.corrcoef(c[1], np.sin(X[:, 1]))[0, 1] == pytest.approx(1.0)
+
+
+def test_separated_yes_no_fit_does_not_overshoot():
+    """Sixteen units, an outcome that a window of one unit property decides almost exactly: full
+    steps of the iterated fit overshoot and alternate between two bad fits (the fit was worse
+    than the training mean by a factor of seven). Shortened steps must end in a fit that beats
+    the mean on its own training rows."""
+    from transferledger.curves import FAMILIES
+
+    rng = np.random.default_rng(0)
+    units, per = 16, 5
+    x, z, q = rng.uniform(20, 40, units), rng.normal(size=units), rng.normal(size=units)
+    u, r = np.repeat(np.arange(units), per), np.tile(np.arange(per), units)
+    inside = (x > 25) & (x < 31.5)
+    y = (inside[u] & (rng.random(len(u)) < 0.9)).astype(float)
+    X = np.column_stack([x[u], z[u], q[u]] + [(r == k) for k in range(1, per)]).astype(float)
+    m = SplineAdditive(family="binomial").fit(X, y)
+    fam = FAMILIES["binomial"]
+    mu = np.clip(m.predict(X), 1e-3, 1 - 1e-3)
+    assert fam.loss(y, mu).sum() < fam.loss(y, np.full(len(y), y.mean())).sum()
+    assert m.damped_
+
+
+def test_weights_of_a_separating_piece_stay_finite():
+    from transferledger.curves import FAMILIES
+    from transferledger.model import fit_weights, linear_score
+
+    rng = np.random.default_rng(1)
+    P = np.column_stack([np.repeat([0.0, 1.0], 40), rng.normal(size=80)])
+    y = P[:, 0].copy()  # the first piece separates the classes
+    fam = FAMILIES["binomial"]
+    coef = fit_weights(P, y, np.ones(80), fam)
+    mu = fam.mean(linear_score(P, coef))
+    assert np.all(np.isfinite(coef))
+    assert ((mu > 0.5) == (y == 1)).all()

@@ -72,5 +72,6 @@ def test_plan_with_floor(csv, capsys, tmp_path):
                  "--json", str(out)])  # fmt: skip
     text = capsys.readouterr().out
     assert code == 0 and "Skill on a new site" in text and "planted property" in text
+    assert "Knowing which site it is adds" in text
     saved = pd.read_json(out, typ="series")["new site"]
-    assert set(saved) == {"curve", "detection"} and saved["curve"]["unit"] == "site"
+    assert set(saved) == {"ceiling", "curve", "detection"} and saved["curve"]["unit"] == "site"

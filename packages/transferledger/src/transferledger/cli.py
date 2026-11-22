@@ -19,6 +19,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+from .ceiling import unit_ceiling
 from .detection import detectable
 from .learning import learning_curve
 from .ledger import transfer_ledger
@@ -166,10 +167,14 @@ def cmd_plan(args):
         raise SystemExit("a plan needs units to count: --group COL (repeatable)")
     out = {}
     for name, shift in groups.items():
+        top = unit_ceiling(X, y, shift, family=args.family, sample_weight=weight,
+                           n_jobs=args.jobs, random_state=args.seed)  # fmt: skip
+        print(top)
+        print()
         curve = learning_curve(X, y, shift, family=args.family, sample_weight=weight,
                                n_jobs=args.jobs, random_state=args.seed)  # fmt: skip
         print(curve)
-        out[name] = {"curve": curve.to_dict()}
+        out[name] = {"ceiling": top.to_dict(), "curve": curve.to_dict()}
         if args.floor:
             found = detectable(X, y, shift, family=args.family, sample_weight=weight,
                                n_trials=args.trials, n_jobs=args.jobs, random_state=args.seed)  # fmt: skip

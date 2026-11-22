@@ -62,18 +62,34 @@ def fit_weights(P, y, w, fam, ridge=0.0):
         )
     eta = fam.start(y, w)
     coef = np.zeros(k)
-    for _ in range(30):
+    coef[0] = eta[0]
+    it, limit = 0, 30
+    while it < limit:
+        it += 1
         z, v = fam.working(y, eta)
         ww = w * v
         M = A.T @ (A * ww[:, None])
         # a trace of ridge keeps the weights finite when a piece separates the classes
-        pen = max(ridge, 1e-6) * ww.sum() * np.diag(var)
-        coef = np.linalg.solve(M + pen + 1e-12 * np.eye(k), A.T @ (ww * z))
-        new = np.clip(A @ coef, -30, 30)
-        if np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new))):
-            eta = new
+        pen = max(ridge, 1e-6) * ww.sum() * var
+        full = np.linalg.solve(M + np.diag(pen) + 1e-12 * np.eye(k), A.T @ (ww * z))
+        new = np.clip(A @ full, -30, 30)
+
+        # a full step can overshoot on a nearly separated target and then alternate between two
+        # bad fits: take the largest fraction of it that does not raise the penalized deviance
+        def objective(e, c):
+            return 0.5 * float(np.sum(w * fam.loss(y, fam.mean(e)))) + 0.5 * float(pen @ c**2)
+
+        before, t, step = objective(eta, coef), 1.0, full
+        while objective(new, step) > before * (1 + 1e-10) + 1e-10 and t > 1e-4:
+            t *= 0.5
+            step = coef + t * (full - coef)
+            new = np.clip(A @ step, -30, 30)
+        if t < 1.0:
+            limit = 200
+        done = np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new)))
+        coef, eta = step, new
+        if done:
             break
-        eta = new
     return coef
 
 

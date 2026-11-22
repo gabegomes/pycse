@@ -186,7 +186,8 @@ class SplineAdditive(BaseEstimator):
     Attributes:
         intercept_, edf_ (effective degrees of freedom of the chosen fit), lambda_ and
         shrinkage_ (the strengths of the variables tuned on rows), strengths_ (all four
-        strengths and which variables were tuned on held-out units).
+        strengths and which variables were tuned on held-out units), damped_ (whether any
+        iterated fit had to shorten a step; True on nearly separable 0/1 targets).
     """
 
     def __init__(
@@ -228,6 +229,7 @@ class SplineAdditive(BaseEstimator):
             _Block(X[:, j], self.n_knots, self.degree, self.max_levels) for j in range(d)
         ]
         B = self._design(X)
+        self.damped_ = False
         self.slices_, i = [], 0
         for b in self.blocks_:
             self.slices_.append(slice(i, i + b.width))
@@ -257,26 +259,53 @@ class SplineAdditive(BaseEstimator):
             ``key`` names the row set, so an iterated fit starts from the last one on it."""
             lam0, rho0, lam1, rho1 = pen
             Br, yr, wr = B[rows], y[rows], w[rows]
-            eta = warm.get(key) if key in warm else fam.start(yr, wr)
-            for _ in range(1 if fam.name == "gaussian" else 25):
+            if key in warm:
+                beta, b0 = warm[key]
+                eta = np.clip(b0 + Br @ beta, -30.0, 30.0)
+            else:
+                eta = fam.start(yr, wr)
+                beta, b0 = np.zeros(p_all), float(eta[0])
+            iterated = fam.name != "gaussian"
+            it, limit = 0, 25
+            while it < (limit if iterated else 1):
+                it += 1
                 z, v = fam.working(yr, eta)
                 ww = wr * v
                 sw = ww / ww.sum()
                 mu_B = sw @ Br
                 Bc = Br - mu_B
                 A = Bc.T @ (Bc * ww[:, None])
-                M = A + lam0 * P[0] + lam1 * P[1] + scale * ww.sum() * (rho0 * Id[0] + rho1 * Id[1])
-                beta = _solve(M, Bc.T @ (ww * (z - sw @ z)))
-                b0 = float(sw @ z - mu_B @ beta)
-                new = b0 + Br @ beta
-                if fam.name != "gaussian":  # a separated outcome sends the score to infinity
+                R = lam0 * P[0] + lam1 * P[1] + scale * ww.sum() * (rho0 * Id[0] + rho1 * Id[1])
+                M = A + R
+                step = _solve(M, Bc.T @ (ww * (z - sw @ z)))
+                step0 = float(sw @ z - mu_B @ step)
+                new = step0 + Br @ step
+                if iterated:
+                    # a separated outcome sends the score to infinity, and a full step can
+                    # overshoot and then alternate between two bad fits: take the largest
+                    # fraction of the step that does not raise the penalized deviance
                     new = np.clip(new, -30.0, 30.0)
+
+                    def objective(e, b):
+                        return 0.5 * float(np.sum(wr * fam.loss(yr, fam.mean(e)))) + 0.5 * float(
+                            b @ R @ b
+                        )
+
+                    full, full0 = step, step0
+                    before, t = objective(eta, beta), 1.0
+                    while objective(new, step) > before * (1 + 1e-10) + 1e-10 and t > 1e-4:
+                        t *= 0.5
+                        step, step0 = beta + t * (full - beta), b0 + t * (full0 - b0)
+                        new = np.clip(step0 + Br @ step, -30.0, 30.0)
+                    if t < 1.0:
+                        limit = 200  # a damped fit takes more, smaller steps
+                        self.damped_ = True
                 done = np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new)))
-                eta = new
+                beta, b0, eta = step, step0, new
                 if done:
                     break
-            if key is not None and fam.name != "gaussian":
-                warm[key] = eta
+            if key is not None and iterated:
+                warm[key] = (beta, b0)
             # the effective degrees of freedom cost a full solve, so only on request
             edf = float(np.trace(_solve(M, A))) + 1.0 if want_edf else np.nan
             last["M"] = M

@@ -198,9 +198,14 @@ widened by half on each side (`limit=None` removes this).
 holds nothing, or it holds something that this many sites cannot establish.
 
 ```python
-from transferledger import learning_curve, detectable, backtest
+from transferledger import unit_ceiling, learning_curve, detectable, backtest
 
 sites = NewGroups(site, "new site")
+top = unit_ceiling(df, y, sites)  # what knowing the site adds, on sites already seen
+print(top)
+top.state()  # "units differ" or "nothing to explain"
+top.captured()  # share of that which the site's description reaches
+
 curve = learning_curve(df, y, sites)  # skill on a new site, trained on 4, 6, 9, ... sites
 print(curve)
 curve.state()  # "nothing yet" or "established"
@@ -211,6 +216,18 @@ print(found)
 found.floor("trend")  # smallest share of the site-to-site variance that shows up
 found.needed(0.3, "peak")  # sites needed for a property that captures 30 %
 ```
+
+**The ceiling** comes first. On random folds, where every group is seen in training,
+`unit_ceiling` scores three models: the variables that change within a group, the same plus the
+group's description, and the same plus the group's identity (one shrunken level per group, and
+a gradient-boosting model in which a group may also change how the other variables act). What
+identity adds is the most any description of the group could add. If that cannot be told from
+zero the state is "nothing to explain": the table cannot test a description of the group,
+however many groups it has, and "does not transfer" says nothing about the description. This
+is what happened on an outside table of Ni-catalysed C-N couplings, where every active
+reaction also ran without the metal: knowing the ligand added +0.001 [-0.006, +0.008].
+Otherwise `captured()` is the share of the ceiling that the description reaches on groups
+already seen; whether it carries to a new group is the ledger's verdict.
 
 **The learning curve** trains on a part of the groups and scores on groups held out, size by
 size. What it may say about *more* groups was settled by `backtest`, which measures a curve on a
@@ -312,6 +329,7 @@ hold each above a stated floor, so a change that makes the method quietly worse 
 | `PieceModel(source, family, forms, select_on, products, ...)` | the equation; scikit-learn estimator with `fit`, `predict`, `equation()`, `terms_`, `components(X)`, `support(X)` |
 | `transfer_ledger(X, y, shifts, model, models, blocks, ...)` | the ledger: `.ladder`, `.skill`, `.contributions`, `.verdicts`, `.blocks`, `.memorized`, `.selection`, `.distance`, `.models`, `.predictions` |
 | `preflight(X, y, shifts)` | what the data can support |
+| `unit_ceiling(X, y, shift)` | what knowing the group adds on groups already seen, and how much of it the group's description reaches: `.state()`, `.ceiling()`, `.captured()`, `.skill`, `.adds` |
 | `learning_curve(X, y, shift)` | skill on unseen groups against the number of groups trained on: `.curve`, `.state()`, `.floor()`, `.advice()` |
 | `backtest(X, y, shift, have=...)` | measure a curve on part of the groups, then reveal the rest |
 | `detectable(X, y, shift)` | planted properties of known strength: `.power`, `.floor(shape)`, `.needed(share, shape)`, `.rate(units, share, shape)` |
@@ -324,6 +342,16 @@ hold each above a stated floor, so a change that makes the method quietly worse 
 
 ## Status
 
-Version 0.1. The equation's shape parameters (where a step sits, how wide it is) come from the
+Version 0.2. The equation's shape parameters (where a step sits, how wide it is) come from the
 curve and are not refined against the data afterwards. Missing values are an error, not
 handled. Families beyond gaussian, binomial and poisson are not built.
+
+Changes in 0.2:
+
+- Fixed: the iterated fit for yes/no and count targets took full steps, which on a nearly
+  separated outcome overshoot and then alternate between two bad fits. The curves rung could
+  then score far below the training mean (on a table of 6560 yes/no reactions: -2.8 on random
+  folds, 0.56 after the fix), and curves fitted on few groups were affected most. Steps are now
+  shortened until the penalized deviance does not rise (`SplineAdditive.damped_` says whether
+  that was needed). Fits that had converged are unchanged; Gaussian targets are untouched.
+- Added `unit_ceiling`, and `transferledger plan` prints it first.
