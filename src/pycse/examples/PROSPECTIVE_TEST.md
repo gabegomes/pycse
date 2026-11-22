@@ -168,3 +168,18 @@ reported for all 28 as well.
 Ligands inside the window (25.1 to 31.4 %) have a higher activity than ligands outside it
 (one-sided Mann-Whitney over ligands, p < 0.05), and the rule "inside the window is active"
 has a balanced accuracy of at least 0.65 over the ligand-reaction pairs.
+
+## A sixth set of tables, added 2026-11-22 before their yields were read
+
+The same supporting information reprints yields for Pd-catalysed reactions VI to XIII
+(Tables S3 to S7: four cross-couplings, a Suzuki-Miyaura coupling, two Heck reactions and a
+C(sp3)-H arylation, from several laboratories), each with kraken monophosphines. Only the
+table captions were read before this was written.
+
+**H11. For Pd the active side is above the cut.** H2 guessed this from the ligation state and
+the Cernak table agreed with it on a thin base (Pd active above 29.5 %, balanced accuracy
+0.75, on 2 % of reactions). Here: in more than half of the reactions VI to XIII that have at
+least 5 active and 5 inactive kraken ligands, a single cut of minimum buried volume between 28
+and 34 % (steps of 0.1), with the active ligands above it, has a balanced accuracy over
+ligands above 0.65. Active is a yield of at least 10 %. Reactions with fewer than 5 ligands on
+either side are reported as not testable.
