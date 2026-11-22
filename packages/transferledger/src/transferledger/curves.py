@@ -275,8 +275,11 @@ class SplineAdditive(BaseEstimator):
                 mu_B = sw @ Br
                 Bc = Br - mu_B
                 A = Bc.T @ (Bc * ww[:, None])
-                R = lam0 * P[0] + lam1 * P[1] + scale * ww.sum() * (rho0 * Id[0] + rho1 * Id[1])
-                M = A + R
+                shrink_k = scale * ww.sum() * (rho0 * Id[0] + rho1 * Id[1])
+                # summed in this order since 0.1; another order changes the last digits, and
+                # with them the choice between two near-equal strengths
+                M = A + lam0 * P[0] + lam1 * P[1] + shrink_k
+                R = lam0 * P[0] + lam1 * P[1] + shrink_k
                 step = _solve(M, Bc.T @ (ww * (z - sw @ z)))
                 step0 = float(sw @ z - mu_B @ step)
                 new = step0 + Br @ step
