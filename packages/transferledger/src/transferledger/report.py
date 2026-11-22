@@ -166,7 +166,14 @@ def render(ledger, title="Transfer ledger", preflight=None):
     parts.append(
         '<p class="small">"equation" is chosen on the reference; "equation, chosen for X" admits a variable only if '
         'it helps cases that are new in the sense of X. "curves" is the additive model the pieces were read from, '
-        "before any form is imposed.</p>"
+        "before any form is imposed."
+        + (
+            ' "one rule" is the best statement about a single variable, a cut or a window, chosen and '
+            "scored the same way."
+            if any(r.startswith("one rule") for r in rungs)
+            else ""
+        )
+        + "</p>"
     )
 
     # ---- memorized

@@ -46,11 +46,12 @@ def test_ledger_with_report(csv, capsys, tmp_path):
     report, tables = tmp_path / "ledger.html", tmp_path / "ledger.json"
     code = main(["ledger", str(csv), "--target", "response", "--group", "site", "--beyond", "dose:high",
                  "--repeats", "1", "--block", "site properties=altitude", "--report", str(report),
-                 "--json", str(tables)])  # fmt: skip
+                 "--json", str(tables), "--rule"])  # fmt: skip
     assert code == 0
     out = capsys.readouterr().out
-    assert "Verdicts" in out and "higher dose" in out
-    assert report.read_text(encoding="utf-8").startswith("<!doctype html>") and tables.exists()
+    assert "Verdicts" in out and "higher dose" in out and "one rule, chosen for" in out
+    page = report.read_text(encoding="utf-8")
+    assert page.startswith("<!doctype html>") and "a cut or a window" in page and tables.exists()
 
 
 def test_errors_are_plain(csv):
