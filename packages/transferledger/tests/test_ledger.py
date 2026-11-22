@@ -145,3 +145,35 @@ def test_extra_models_can_use_fewer_repeats():
                         n_repeats=2, model_repeats=1)  # fmt: skip
     row = L.skill.set_index(["rung", "scheme"]).loc[("linear", "new group")]
     assert np.isfinite(row.skill) and row.lo <= row.skill <= row.hi
+
+
+def test_one_rule_rung_names_the_window_and_keeps_it_on_new_groups():
+    """A window in a group property and a line in a row variable. The rule rung is the window
+    alone: below the equation, and still there when whole groups are held out."""
+    rng = np.random.default_rng(0)
+    n_groups, per = 40, 10
+    g = np.repeat(np.arange(n_groups), per)
+    size = rng.uniform(20, 40, n_groups)
+    x = rng.normal(size=len(g))
+    y = 2.0 * ((size[g] > 25) & (size[g] < 31)) + 0.5 * x + 0.2 * rng.normal(size=len(g))
+    X = pd.DataFrame({"size": size[g], "x": x, "noise": rng.normal(size=n_groups)[g]})
+    L = transfer_ledger(X, y, NewGroups(g, "new group"), rule=True, n_repeats=1)
+    lad = L.ladder
+    assert list(lad.index[1:3]) == ["one rule", "one rule, chosen for new group"]
+    assert lad.loc["one rule, chosen for new group", "new group"] > 0.3
+    assert lad.loc["one rule", "reference"] < lad.loc["equation", "reference"]
+    one = L.models["one rule, chosen for new group"]
+    assert list(one.variables_) == ["size"] and one.pieces_[one.chosen_[0]].form == "window"
+    assert "size" in L.rule("new group") and "W(size" in L.rule()
+    assert L.selection.loc["size", "one rule, chosen for new group"] > 0.7
+    assert "one rule" in L.report()
+
+
+def test_no_rule_rung_unless_asked():
+    X, y, g = grouped_data(n_groups=10, per=8, seed=4)
+    L = transfer_ledger(X, y, NewGroups(g, "new group"), n_repeats=1)
+    assert not any(k.startswith("one rule") for k in L.ladder.index)
+    with pytest.raises(KeyError):
+        L.rule()
+    with pytest.raises(TypeError):
+        transfer_ledger(X, y, NewGroups(g, "new group"), rule="window", n_repeats=1)

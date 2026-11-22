@@ -174,6 +174,9 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   removed; delete-one-unit jackknife intervals; per-variable and per-block verdicts (transfers,
   does not transfer, undetermined, ...); memorized share; several shifts at once
   `ledger.report(path)` writes a self-contained HTML page; `to_json` every table
+  `rule=True` adds a "one rule" rung below the equation (the best cut or window in one
+  variable, chosen and scored like the equation; `ledger.rule(shift)`). Opt-in: it changes no
+  existing table
 - `preflight()` - distinct values, group-level variables, variance between groups, duplicates
 - `unit_ceiling(X, y, NewGroups(...))` (`ceiling.py`) - on random folds (every unit seen), what
   the unit's identity adds over the variables that change within a unit (additive curves, and

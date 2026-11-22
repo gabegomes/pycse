@@ -169,6 +169,12 @@ real, and from 53 % to 3 % when one is, while the real one is still found 92 % o
 **Memorized share.** The reference skill an equation gives up when its variables must earn their
 place under the shift: what it knew only by having seen the cases.
 
+**One rule.** `transfer_ledger(..., rule=True)` adds a rung below the equation: the best
+statement about one variable, a cut or a window ("active between 25 and 31"), chosen and scored
+like the equation. `ledger.rule("new site")` prints it. An equation can keep a variable's
+threshold and still lose skill on new groups through its other terms; when the rule rung keeps
+under a shift what the equation loses, the rule is the thing to carry to a new case.
+
 ## Before fitting
 
 ```python
@@ -301,7 +307,8 @@ transferledger truth
 `--group`, `--time` and `--beyond COL[:high|low|both]` each add a shift and may be repeated;
 `--clusters K` holds out regions of the numeric columns when there are no labels. A column that
 defines a shift is not used as a predictor unless named with `--keep`. `predict` adds, per row,
-which variables lie outside the fitted range. CSV, TSV and Parquet files are read.
+which variables lie outside the fitted range. `ledger --rule` also scores the best one-variable
+rule. CSV, TSV and Parquet files are read.
 
 ## Known answers
 
@@ -327,7 +334,7 @@ hold each above a stated floor, so a change that makes the method quietly worse 
 | Object | Purpose |
 |---|---|
 | `PieceModel(source, family, forms, select_on, products, ...)` | the equation; scikit-learn estimator with `fit`, `predict`, `equation()`, `terms_`, `components(X)`, `support(X)` |
-| `transfer_ledger(X, y, shifts, model, models, blocks, ...)` | the ledger: `.ladder`, `.skill`, `.contributions`, `.verdicts`, `.blocks`, `.memorized`, `.selection`, `.distance`, `.models`, `.predictions` |
+| `transfer_ledger(X, y, shifts, model, models, blocks, rule, ...)` | the ledger: `.ladder`, `.skill`, `.contributions`, `.verdicts`, `.blocks`, `.memorized`, `.selection`, `.distance`, `.models`, `.predictions`, `.rule(shift)` |
 | `preflight(X, y, shifts)` | what the data can support |
 | `unit_ceiling(X, y, shift)` | what knowing the group adds on groups already seen, and how much of it the group's description reaches: `.state()`, `.ceiling()`, `.captured()`, `.skill`, `.adds` |
 | `learning_curve(X, y, shift)` | skill on unseen groups against the number of groups trained on: `.curve`, `.state()`, `.floor()`, `.advice()` |
@@ -355,3 +362,5 @@ Changes in 0.2:
   shortened until the penalized deviance does not rise (`SplineAdditive.damped_` says whether
   that was needed). Fits that had converged are unchanged; Gaussian targets are untouched.
 - Added `unit_ceiling`, and `transferledger plan` prints it first.
+- Added the one-rule rung: `transfer_ledger(..., rule=True)`, `ledger.rule(shift)`, and
+  `transferledger ledger --rule`.

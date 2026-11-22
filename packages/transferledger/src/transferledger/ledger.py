@@ -35,6 +35,8 @@ __all__ = ["transfer_ledger", "Ledger"]
 BASELINE = "baseline (training mean)"
 EQUATION = "equation"
 CURVES = "curves"
+RULE = "one rule"
+RULE_FORMS = ("step", "window")
 
 
 def _loss(fam, y, mu, w):
@@ -49,9 +51,10 @@ def _predict(model, Xn, fam):
     return np.asarray(model.predict(Xn), float).ravel()
 
 
-def _fold(X, y, w, tr, te, proto, variants, extra, fam, blocks):
+def _fold(X, y, w, tr, te, proto, variants, extra, fam, blocks, rule=None):
     """Everything one train/test split contributes. ``variants`` maps a name to the shift the
-    equation is chosen under, already restricted to the training rows (None: random folds)."""
+    equation is chosen under, already restricted to the training rows (None: random folds).
+    ``rule`` is the one-variable model scored beside the equation, or None."""
     Xtr, Xte = X.iloc[tr], X.iloc[te]
     ytr, yte, wtr, wte = y[tr], y[te], w[tr], w[te]
     out = {"rows": te, "loss": {}, "drop": {}, "selected": {}, "pred": {}}
@@ -71,6 +74,12 @@ def _fold(X, y, w, tr, te, proto, variants, extra, fam, blocks):
         out["loss"][rung], out["pred"][rung] = _loss(fam, yte, mu, wte), mu
         if name is None:
             reference_model = m
+        if rule is not None:
+            one = clone(rule).set_params(select_on=shift).fit(Xtr, ytr, sample_weight=wtr)
+            rung = RULE if name is None else f"{RULE}, chosen for {name}"
+            mu = one.predict(Xte)
+            out["loss"][rung], out["pred"][rung] = _loss(fam, yte, mu, wte), mu
+            out["selected"][rung] = list(one.variables_)
     m = reference_model
     Xn_tr, Xn_te = m.design_.transform(Xtr), m.design_.transform(Xte)
     # what each variable of the reference equation adds: refit the weights without it
@@ -227,6 +236,14 @@ class Ledger:
             EQUATION if shift is None else f"{EQUATION}, chosen for {shift}"
         ].equation()
 
+    def rule(self, shift=None):
+        """The one-variable rule fitted to all rows (``rule=True``), chosen on the reference
+        (None) or for a shift."""
+        key = RULE if shift is None else f"{RULE}, chosen for {shift}"
+        if key not in self.models:
+            raise KeyError(f"no {key!r}: run transfer_ledger(..., rule=True)")
+        return self.models[key].equation()
+
     def summary(self):
         pct = f"{100 * self.level:.0f} %"
         with pd.option_context(
@@ -304,8 +321,9 @@ class Ledger:
 
 
 def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian", sample_weight=None,
-                    blocks=None, reference=None, n_splits=5, n_repeats=5, model_repeats=None,
-                    level=0.95, tol=0.005, random_state=0, n_jobs=None, verbose=False):  # fmt: skip
+                    blocks=None, reference=None, rule=False, n_splits=5, n_repeats=5,
+                    model_repeats=None, level=0.95, tol=0.005, random_state=0, n_jobs=None,
+                    verbose=False):  # fmt: skip
     """Account for what an equation, and each variable in it, is worth under each shift.
 
     Args:
@@ -325,6 +343,15 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
             reference asks about new rows from the *same* groups, so its intervals are
             conditional on the groups at hand; pass ``Reference(n, units=groups)`` to ask about
             a new sample of groups instead.
+        rule: True adds a rung below the equation: the best statement about one variable, a
+            cut or a window ("active between 25 and 31"), chosen and scored like the equation
+            ("one rule" on the reference, "one rule, chosen for X" under each shift). It is
+            the model's settings with ``forms=("step", "window")``, one variable and no
+            products; a variable with two values enters as a flag, one with too few distinct
+            values for an edge as a line. Pass a :class:`~transferledger.model.PieceModel` to
+            use other settings. When this rung keeps under a shift what the equation loses,
+            the rule is the thing to carry to a new case, and the rest of the equation is
+            detail of the cases seen.
         n_splits: folds per scheme. A group shift with fewer groups leaves one out at a time.
         n_repeats: repeats of schemes whose splits depend on a seed.
         model_repeats: score the extra ``models`` on this many repeats only (default: all).
@@ -356,6 +383,16 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
     if proto.family != fam.name:
         raise ValueError(f"the model's family is {proto.family!r} but the ledger's is {fam.name!r}")
     extra = dict(models or {})
+    if rule is True:
+        rule = clone(proto).set_params(forms=list(RULE_FORMS), max_variables=1, products=False)
+    elif rule is False or rule is None:
+        rule = None
+    elif not isinstance(rule, PieceModel):
+        raise TypeError("rule must be True, False or a PieceModel")
+    elif rule.family != fam.name:
+        raise ValueError(f"the rule's family is {rule.family!r} but the ledger's is {fam.name!r}")
+    else:
+        rule = clone(rule)
     blocks = {b: list(v) for b, v in (blocks or {}).items()}
     schemes = {"reference": reference, **shifts}
 
@@ -377,7 +414,17 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
     run = Parallel(n_jobs=n_jobs, verbose=10 if verbose else 0)
     results = run(
         delayed(_fold)(
-            frame, y, w, tr, te, proto, variants_for(tr), extra if r < slow else {}, fam, blocks
+            frame,
+            y,
+            w,
+            tr,
+            te,
+            proto,
+            variants_for(tr),
+            extra if r < slow else {},
+            fam,
+            blocks,
+            rule,
         )
         for _, tr, te, r in tasks
     )
@@ -385,6 +432,7 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
     found = list(dict.fromkeys(k for r in results for k in r["loss"]))
     rungs = (
         [BASELINE]
+        + [k for k in found if k.startswith(RULE)]
         + [k for k in found if k.startswith(EQUATION)]
         + [k for k in found if k.startswith(CURVES)]
         + [k for k in found if k in extra]
@@ -543,6 +591,13 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
         final[f"{EQUATION}, chosen for {name}"] = (
             clone(proto).set_params(select_on=s).fit(frame, y, sample_weight=w)
         )
+    if rule is not None:
+        final[RULE] = clone(rule).set_params(select_on=None).fit(frame, y, sample_weight=w)
+        for name, s in shifts.items():
+            if f"{EQUATION}, chosen for {name}" in final:
+                final[f"{RULE}, chosen for {name}"] = (
+                    clone(rule).set_params(select_on=s).fit(frame, y, sample_weight=w)
+                )
     return Ledger(
         skill=skill, contributions=contributions, verdicts=verdicts, blocks=block_table,
         block_verdicts=block_verdicts, memorized=memorized,

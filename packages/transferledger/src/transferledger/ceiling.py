@@ -16,11 +16,13 @@ Whether that part carries to a new unit is the ledger's question.
 
 from __future__ import annotations
 
+import inspect
 from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
+from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import TargetEncoder
 
 from ._data import Design
@@ -28,6 +30,21 @@ from .curves import SplineAdditive, get_family
 from .shifts import NewGroups
 
 __all__ = ["unit_ceiling", "Ceiling"]
+
+# scikit-learn 1.9 moved the encoder's shuffling into the ``cv`` argument
+_CV_OBJECT = "shuffle" in inspect.signature(TargetEncoder.__init__).parameters and (
+    inspect.signature(TargetEncoder.__init__).parameters["shuffle"].default == "deprecated"
+)
+
+
+def _level_encoder(binary, seed):
+    """The cross-fitted mean outcome per unit; the same folds on every scikit-learn version."""
+    kind = "binary" if binary else "continuous"
+    if not _CV_OBJECT:
+        return TargetEncoder(target_type=kind, random_state=seed)
+    folds = (StratifiedKFold if binary else KFold)(5, shuffle=True, random_state=seed)
+    return TargetEncoder(target_type=kind, cv=folds)
+
 
 WITHOUT, DESCRIPTION, IDENTITY = "without the unit", "with its description", "with its identity"
 
@@ -163,9 +180,7 @@ def _fold(XA, XD, code, y, w, tr, te, fam, seed):
     # cross-fitted so that a row does not see itself) and as a category. The level is what lets
     # a unit with a handful of rows count; a category that thin is ignored by the trees
     yb = ytr.astype(int) if fam.name == "binomial" else ytr
-    enc = TargetEncoder(
-        target_type="binary" if fam.name == "binomial" else "continuous", random_state=seed
-    )
+    enc = _level_encoder(fam.name == "binomial", seed)
     constant = fam.name == "binomial" and len(np.unique(yb)) < 2
     level = np.zeros((len(y), 1))
     if not constant:
