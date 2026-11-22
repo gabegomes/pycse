@@ -191,6 +191,9 @@ class Ledger:
         models: the equations fitted to all rows, per way of choosing.
         predictions: per scheme, the held-out prediction of every row by every rung.
         preflight: the pre-check of the data (see :func:`~transferledger.preflight.preflight`).
+        ceilings: with ``ceiling=True``, per shift that holds out groups, the
+            :class:`~transferledger.ceiling.Ceiling`: whether the units differ at all once the
+            other variables are known. Read it before a "does not transfer".
         family, level, n_splits, n_repeats, schemes, meta (rows, columns, units per scheme).
     """
 
@@ -212,6 +215,7 @@ class Ledger:
     schemes: list = field(default_factory=list)
     preflight: object = None
     meta: dict = field(default_factory=dict)
+    ceilings: dict = field(default_factory=dict)
 
     @property
     def ladder(self):
@@ -279,6 +283,8 @@ class Ledger:
                 ]
                 parts += ["\nBlocks of variables removed together", wide.to_string(),
                           self.block_verdicts.to_string()]  # fmt: skip
+        for name, top in self.ceilings.items():
+            parts += [f"\nDo the units differ? ({name})", top.verdict()]
         return "\n".join(parts)
 
     def __str__(self):
@@ -291,7 +297,7 @@ class Ledger:
         """
         from .report import render
 
-        page = render(self, title=title, preflight=self.preflight)
+        page = render(self, title=title, preflight=self.preflight, ceilings=self.ceilings)
         if path is not None:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(page)
@@ -313,6 +319,8 @@ class Ledger:
             "distance_trend": records(self.distance_trend),
             "equations": {name: m.to_dict() for name, m in self.models.items()},
             "notes": list(self.preflight.warnings) if self.preflight is not None else [],
+            **({"ceilings": {k: c.to_dict() for k, c in self.ceilings.items()}}
+               if self.ceilings else {}),
         }  # fmt: skip
 
     def to_json(self, path):
@@ -321,7 +329,8 @@ class Ledger:
 
 
 def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian", sample_weight=None,
-                    blocks=None, reference=None, rule=False, n_splits=5, n_repeats=5,
+                    blocks=None, reference=None, rule=False, ceiling=False, n_splits=5,
+                    n_repeats=5,
                     model_repeats=None, level=0.95, tol=0.005, random_state=0, n_jobs=None,
                     verbose=False):  # fmt: skip
     """Account for what an equation, and each variable in it, is worth under each shift.
@@ -598,7 +607,25 @@ def transfer_ledger(X, y, shifts, *, model=None, models=None, family="gaussian",
                 final[f"{RULE}, chosen for {name}"] = (
                     clone(rule).set_params(select_on=s).fit(frame, y, sample_weight=w)
                 )
+    ceilings = {}
+    if ceiling:
+        from .ceiling import unit_ceiling
+        from .shifts import NewGroups
+
+        for name, s in shifts.items():
+            if isinstance(s, NewGroups):
+                ceilings[name] = unit_ceiling(
+                    frame,
+                    y,
+                    s,
+                    family=fam.name,
+                    sample_weight=w,
+                    level=level,
+                    random_state=random_state,
+                    n_jobs=n_jobs,
+                )
     return Ledger(
+        ceilings=ceilings,
         skill=skill, contributions=contributions, verdicts=verdicts, blocks=block_table,
         block_verdicts=block_verdicts, memorized=memorized,
         selection=selection, distance=distance,

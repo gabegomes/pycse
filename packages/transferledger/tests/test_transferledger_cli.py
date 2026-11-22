@@ -1,5 +1,7 @@
 """The command line, on a small CSV."""
 
+import json
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -46,12 +48,15 @@ def test_ledger_with_report(csv, capsys, tmp_path):
     report, tables = tmp_path / "ledger.html", tmp_path / "ledger.json"
     code = main(["ledger", str(csv), "--target", "response", "--group", "site", "--beyond", "dose:high",
                  "--repeats", "1", "--block", "site properties=altitude", "--report", str(report),
-                 "--json", str(tables), "--rule"])  # fmt: skip
+                 "--json", str(tables), "--rule", "--ceiling"])  # fmt: skip
     assert code == 0
     out = capsys.readouterr().out
     assert "Verdicts" in out and "higher dose" in out and "one rule, chosen for" in out
+    assert "Do the units differ? (new site)" in out
     page = report.read_text(encoding="utf-8")
     assert page.startswith("<!doctype html>") and "a cut or a window" in page and tables.exists()
+    assert "Do the sites differ at all?" in page
+    assert "new site" in json.loads(tables.read_text(encoding="utf-8"))["ceilings"]
 
 
 def test_errors_are_plain(csv):

@@ -144,7 +144,8 @@ def cmd_ledger(args):
         blocks[name] = [c.strip() for c in cols.split(",") if c.strip()]
     ledger = transfer_ledger(
         X, y, shifts, model=_model(args), family=args.family, sample_weight=weight, blocks=blocks,
-        rule=args.rule, n_repeats=args.repeats, n_jobs=args.jobs, random_state=args.seed,
+        rule=args.rule, ceiling=args.ceiling, n_repeats=args.repeats, n_jobs=args.jobs,
+        random_state=args.seed,
     )  # fmt: skip
     print(ledger.preflight)
     print()
@@ -291,6 +292,8 @@ def build_parser():
     p.add_argument("--repeats", type=int, default=5)
     p.add_argument("--rule", action="store_true",
                    help="also score the best one-variable rule (a cut or a window)")  # fmt: skip
+    p.add_argument("--ceiling", action="store_true",
+                   help="also ask whether the units of each --group differ at all")  # fmt: skip
     p.add_argument("--jobs", type=int, default=None, help="parallel workers")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--report", help="write a self-contained HTML report")

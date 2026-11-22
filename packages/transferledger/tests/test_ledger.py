@@ -177,3 +177,26 @@ def test_no_rule_rung_unless_asked():
         L.rule()
     with pytest.raises(TypeError):
         transfer_ledger(X, y, NewGroups(g, "new group"), rule="window", n_repeats=1)
+
+
+def test_ceiling_in_the_ledger_says_when_units_do_not_differ(tmp_path):
+    # the site's property is in the table but the target does not depend on the site
+    rng = np.random.default_rng(3)
+    n_sites, per = 12, 20
+    site = np.repeat(np.arange(n_sites), per)
+    altitude = rng.uniform(0, 1, n_sites)[site]
+    dose = rng.uniform(-1, 1, n_sites * per)
+    X = pd.DataFrame({"dose": dose, "altitude": altitude})
+    y = 2 * dose + 0.3 * rng.normal(size=len(dose))
+    shifts = {"new site": NewGroups(site, "new site")}
+    plain = transfer_ledger(X, y, shifts, n_repeats=1)
+    assert plain.ceilings == {} and "ceilings" not in plain.to_dict()
+    assert "Do the units differ" not in str(plain)
+    ledger = transfer_ledger(X, y, shifts, n_repeats=1, ceiling=True)
+    top = ledger.ceilings["new site"]
+    assert top.state() == "nothing to explain" and top.described_by == ["altitude"]
+    assert "Do the units differ? (new site)" in str(ledger) and "Nothing to explain" in str(ledger)
+    assert ledger.to_dict()["ceilings"]["new site"]["state"] == "nothing to explain"
+    page = ledger.report(tmp_path / "ledger.html")
+    assert "Do the sites differ at all?" in page and "nothing to explain" in page
+    pd.testing.assert_frame_equal(plain.skill, ledger.skill)

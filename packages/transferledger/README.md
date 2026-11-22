@@ -234,6 +234,9 @@ is what happened on an outside table of Ni-catalysed C-N couplings, where every 
 reaction also ran without the metal: knowing the ligand added +0.001 [-0.006, +0.008].
 Otherwise `captured()` is the share of the ceiling that the description reaches on groups
 already seen; whether it carries to a new group is the ledger's verdict.
+`transfer_ledger(..., ceiling=True)` runs it for every shift that holds out groups and puts the
+answer in the ledger's summary, its report ("Do the units differ at all?") and its JSON, next
+to the verdicts it qualifies.
 
 **The learning curve** trains on a part of the groups and scores on groups held out, size by
 size. What it may say about *more* groups was settled by `backtest`, which measures a curve on a
@@ -317,7 +320,7 @@ transferledger truth
 `--clusters K` holds out regions of the numeric columns when there are no labels. A column that
 defines a shift is not used as a predictor unless named with `--keep`. `predict` adds, per row,
 which variables lie outside the fitted range. `ledger --rule` also scores the best one-variable
-rule. CSV, TSV and Parquet files are read.
+rule; `ledger --ceiling` also asks whether the units of each `--group` differ at all. CSV, TSV and Parquet files are read.
 
 ## Known answers
 
@@ -343,7 +346,7 @@ hold each above a stated floor, so a change that makes the method quietly worse 
 | Object | Purpose |
 |---|---|
 | `PieceModel(source, family, forms, select_on, products, ...)` | the equation; scikit-learn estimator with `fit`, `predict`, `equation()`, `terms_`, `components(X)`, `support(X)` |
-| `transfer_ledger(X, y, shifts, model, models, blocks, rule, ...)` | the ledger: `.ladder`, `.skill`, `.contributions`, `.verdicts`, `.blocks`, `.memorized`, `.selection`, `.distance`, `.models`, `.predictions`, `.rule(shift)` |
+| `transfer_ledger(X, y, shifts, model, models, blocks, rule, ceiling, ...)` | the ledger: `.ladder`, `.skill`, `.contributions`, `.verdicts`, `.blocks`, `.memorized`, `.selection`, `.distance`, `.models`, `.predictions`, `.rule(shift)`, `.ceilings` |
 | `preflight(X, y, shifts)` | what the data can support |
 | `unit_ceiling(X, y, shift)` | what knowing the group adds on groups already seen, and how much of it the group's description reaches: `.state()`, `.ceiling()`, `.captured()`, `.skill`, `.adds` |
 | `learning_curve(X, y, shift)` | skill on unseen groups against the number of groups trained on: `.curve`, `.state()`, `.floor()`, `.advice()` |
@@ -373,3 +376,5 @@ Changes in 0.2:
 - Added `unit_ceiling`, and `transferledger plan` prints it first.
 - Added the one-rule rung: `transfer_ledger(..., rule=True)`, `ledger.rule(shift)`, and
   `transferledger ledger --rule`.
+- Added `transfer_ledger(..., ceiling=True)` and `transferledger ledger --ceiling`: the ceiling
+  in the ledger's summary, report and JSON (`ledger.ceilings`). Opt-in; no other table changes.

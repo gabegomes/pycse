@@ -177,6 +177,8 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   `rule=True` adds a "one rule" rung below the equation (the best cut or window in one
   variable, chosen and scored like the equation; `ledger.rule(shift)`). Opt-in: it changes no
   existing table
+  `ceiling=True` runs `unit_ceiling` for each `NewGroups` shift and puts it in the summary,
+  the report ("Do the units differ at all?") and the JSON (`ledger.ceilings`). Opt-in too
 - `preflight()` - distinct values, group-level variables, variance between groups, duplicates
 - `unit_ceiling(X, y, NewGroups(...))` (`ceiling.py`) - on random folds (every unit seen), what
   the unit's identity adds over the variables that change within a unit (additive curves, and

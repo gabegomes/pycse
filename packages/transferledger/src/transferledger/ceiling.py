@@ -121,11 +121,17 @@ class Ceiling:
                 t.to_string(),
                 "",
             ]
+        lines.append(self.verdict())
+        return "\n".join(lines)
+
+    def verdict(self):
+        """The reading in words: what identity adds, and either that there is nothing to explain
+        or how much of it the description reaches."""
         top = self.ceiling()
-        lines.append(
+        lines = [
             f"Knowing which {self.unit} it is adds {top.contribution:+.3f} "
             f"[{top.lo:+.3f}, {top.hi:+.3f}] ({top.kind} model)."
-        )
+        ]
         if self.state() == "nothing to explain":
             lines.append(
                 f"Nothing to explain: once the other variables are known, {self.unit}s do not "

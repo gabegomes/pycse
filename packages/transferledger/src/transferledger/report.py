@@ -124,7 +124,7 @@ def _whiskers(labels, series, lo_clip, hi_clip, xlabel, zero=True, label_width=2
     return "".join(out)
 
 
-def render(ledger, title="Transfer ledger", preflight=None):
+def render(ledger, title="Transfer ledger", preflight=None, ceilings=None):
     """The ledger as one HTML page (a string)."""
     schemes = ledger.schemes
     shifts = schemes[1:]
@@ -175,6 +175,27 @@ def render(ledger, title="Transfer ledger", preflight=None):
         )
         + "</p>"
     )
+
+    # ---- do the units differ at all
+    for name, top in (ceilings or {}).items():
+        parts.append(f"<h2>Do the {_e(top.unit)}s differ at all?</h2>")
+        parts.append(
+            f"<p>Before reading a verdict for a description of the {_e(top.unit)}: on random folds, "
+            f"where every {_e(top.unit)} is seen in training, what does knowing which {_e(top.unit)} "
+            "a row belongs to add over the variables that change within one? If it adds nothing, no "
+            f"description of a {_e(top.unit)} can be tested on this table, however many there are.</p>"
+        )
+        rows = [[_e(r.adds), _e(r.kind), _num(r.contribution), f"[{_num(r.lo)}, {_num(r.hi)}]"]
+                for _, r in top.adds.iterrows()]  # fmt: skip
+        parts.append(_table(["added by", "kind of model", "skill added", f"{pct} interval"], rows,
+                            numeric=(2, 3)))  # fmt: skip
+        state = top.state()
+        chip = "good" if state == "units differ" else "warn"
+        parts.append(
+            f'<p><span class="chip {chip}">{_e(state)}</span> '
+            + " ".join(_e(s) for s in top.verdict().split("\n"))
+            + "</p>"
+        )
 
     # ---- memorized
     if len(ledger.memorized):
