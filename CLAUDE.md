@@ -199,8 +199,10 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   counts how often the analysis admits it: `floor(shape)` (read off the measured rates) and
   `needed(share, shape)` (from a probit law in `sqrt((units - 2) share / (1 - share))`, the
   evidence for a correlation of that strength; a three-parameter law in log units was
-  unstable and extrapolated worse). `needed` is an upper estimate: checked on the phosphines
-  it erred toward more units, and fitted on 13 ligands it was of no use. Choosing the next
+  unstable and extrapolated worse). `needed` is an estimate, not a bound: checked on the
+  phosphines it asked for 0.7 to 1.2 times the ligands that were enough for a trend and 1.5
+  to 2.3 times for a peak; on an outside table it was enough in 8 of 15 comparisons; fitted
+  on 13 ligands it was of no use. Choosing the next
   units by farthest-point selection was tried and was no better than chance, so no such
   helper is offered
 - `forms.py`: `register_form(Form(...))` adds a form; matching is grid plus exact linear solve.
@@ -226,10 +228,12 @@ every model a second time on folds that hold out whole molecules. `KAN_Transfer_
 `transferledger` on a calibration set with a known interaction, on the five datasets (each
 loaded as in its own notebook, every component held out in turn) and on a housing table:
 equations, ladder with intervals, verdicts per descriptor block and shift.
-`KAN_Transfer_Planning` asks what would change a "does not transfer": learning curves in
-molecules, the forecast-then-reveal check of what such a curve can say, the detection floor of
-each table and a check of its law on the 90 phosphines (about two hours on four cores;
-`PLAN_FAST=1` runs it with a handful of trials).
+`KAN_Transfer_Planning` asks what would change a "does not transfer": whether the molecules
+differ at all (`unit_ceiling`), learning curves in molecules, the forecast-then-reveal check of
+what such a curve can say, the detection floor of each table and a check of its law on the 90
+phosphines (about three hours on four cores; `PLAN_FAST=1` runs it with a handful of trials).
+It was rerun with transferledger 0.2; its Reading ends with what the first run said and no
+longer holds (only the phosphine table changed).
 `KAN_Prospective_Test` scores nine predictions written beforehand in `PROSPECTIVE_TEST.md`
 (same folder; do not edit its predictions) on outside tables: the Cernak C-N couplings
 (Open Reaction Database, needs `ord-schema`), a 24-ligand C-H arylation, 8 new alcohols and a

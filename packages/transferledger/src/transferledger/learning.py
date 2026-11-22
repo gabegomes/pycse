@@ -10,19 +10,21 @@ What the curve is allowed to say was settled by experiment, not by taste. :func:
 measures a curve on a part of the units and then reveals the rest. On a set of 90 phosphines,
 on alcohols, on housing regions and on made-up populations with known answers, it showed that:
 
-- a curve that sits at zero does not say where it will leave zero. Curves fitted to 13
-  phosphines put the skill with 39 at -0.17; it was 0.33. So in the state "nothing yet"
+- a curve that sits at zero does not say where it will leave zero. Extended to 1.5, 2 and 3
+  times the units it was too low by 0.11, 0.23 and 0.30 (162 checks); curves fitted to 13
+  phosphines put the skill with 39 at 0.18, and it was 0.38. So in the state "nothing yet"
   nothing is said about more units, and :func:`~transferledger.detection.detectable` takes
   over;
 - no way of extending a curve was right in both directions. Holding the last value is too low
   where skill keeps growing, and extending the rise overshoots where a threshold has just
   been found. So no number is forecast for more units;
 - one statement held: once skill on a new unit is established, adding units did not lose it
-  (the skill later measured stayed at or above the lower end of the interval in 98 of 102
+  (the skill later measured stayed at or above the lower end of the interval in 110 of 114
   checks). :meth:`LearningCurve.floor` reports that lower bound.
 
 The numbers are those of the example notebook ``KAN_Transfer_Planning``, which repeats the
-check.
+check. (They were measured again after version 0.2 repaired the fit for yes/no targets; before
+that the phosphine example read -0.17 against 0.33.)
 """
 
 from __future__ import annotations
@@ -155,7 +157,7 @@ class LearningCurve:
 
         This is the one statement about more units that held when checked (see
         :func:`backtest`): with two or three times the units, the skill measured stayed at or
-        above this value in 98 of 102 checks (the example notebook ``KAN_Transfer_Planning``)
+        above this value in 110 of 114 checks (the example notebook ``KAN_Transfer_Planning``)
         and in 95 % of the 168 checks of an earlier run on six populations.
         """
         row = self.top(rung)

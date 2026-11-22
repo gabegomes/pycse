@@ -240,10 +240,11 @@ size. What it may say about *more* groups was settled by `backtest`, which measu
 part of the groups and then reveals the rest. On 90 phosphines, 37 alcohols, 160 housing regions
 and made-up populations with known structure:
 
-- a curve that sits at zero does not say where it will leave zero (curves measured on 13
-  phosphines and extended to 39 said -0.17; 0.33 was then measured);
+- a curve that sits at zero does not say where it will leave zero (extended to 1.5, 2 and 3
+  times the groups it was too low by 0.11, 0.23 and 0.30; curves measured on 13 phosphines and
+  extended to 39 said 0.18, and 0.38 was then measured);
 - no way of extending a curve was right in both directions;
-- skill, once established, was kept when groups were added (in 98 of 102 checks).
+- skill, once established, was kept when groups were added (in 110 of 114 checks).
 
 So the curve reports a state and a floor, and forecasts nothing. `curve.extend()` gives the
 textbook extension for anyone repeating the check.
@@ -258,12 +259,13 @@ this table captures that much". Groups needed for a weaker property come from a 
 the counts, up to three times the groups in hand.
 
 That law was checked in the same forecast-then-reveal way (notebook `KAN_Transfer_Planning`).
-Fitted on 20 of the phosphines, its detection rates for 26 to 60 were low by 0.03 to 0.16; it
-asked for 0.8 to 1.4 times the ligands that were then enough for a trend, and 1 to 3 times for
-a peak. Fitted on 13 it was of no use. It erred toward needing more throughout, so `needed()`
-is an upper estimate, and it wants about 20 groups in hand. The real descriptor behind the ligand set's threshold captures a third of the
-differences between ligands; it was admitted from 3 % of draws of 13 ligands, 25 % of draws of
-30 and 91 % of draws of 60.
+Fitted on 20 of the phosphines, its detection rates for 26 to 60 were low by 0.00 to 0.15; it
+asked for 0.7 to 1.2 times the ligands that were then enough for a trend, and 1.5 to 2.3 times
+for a peak. Fitted on 13 it was of no use. So `needed()` leans toward more groups, most for a
+peak; it is an estimate, not a bound, and it wants about 20 groups in hand. The real
+descriptor behind the ligand set's threshold captures a third of the differences between
+ligands; it was admitted from none of the draws of 13 ligands, 28 % of draws of 30 and 91 % of
+draws of 60.
 
 One more thing was tried and is not offered: choosing the next groups to cover the descriptor
 space (farthest-point selection). On the phosphines it was worse than choosing at random, and
