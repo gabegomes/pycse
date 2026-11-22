@@ -21,6 +21,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
+from sklearn.preprocessing import TargetEncoder
 
 from ._data import Design
 from .curves import SplineAdditive, get_family
@@ -72,7 +73,9 @@ class Ceiling:
     def captured(self):
         """Share of the ceiling that the description reaches on units already seen (None when
         there is nothing to explain or no description). Above 1 is possible: a description is
-        shared between units, an identity has to be learned unit by unit."""
+        shared between units, an identity has to be learned unit by unit. With few units and
+        several descriptors it is close to 1 almost by construction, because the descriptors
+        then pin down each unit and act as its label; a low share is the informative case."""
         if self.state() != "units differ" or not self.described_by:
             return None
         top = self.ceiling()
@@ -156,12 +159,23 @@ def _fold(XA, XD, code, y, w, tr, te, fam, seed):
         else:
             mu = SplineAdditive(family=fam.name).fit(Z[tr], ytr, wtr).predict(Z[te])
         out["loss"][(name, "additive")] = _loss(fam, y[te], mu, w[te])
+    # gradient boosting: the unit enters as its level (the mean outcome of its training rows,
+    # cross-fitted so that a row does not see itself) and as a category. The level is what lets
+    # a unit with a handful of rows count; a category that thin is ignored by the trees
     yb = ytr.astype(int) if fam.name == "binomial" else ytr
-    boosted = {WITHOUT: XA, IDENTITY: np.column_stack([XA, code])}
+    enc = TargetEncoder(
+        target_type="binary" if fam.name == "binomial" else "continuous", random_state=seed
+    )
+    constant = fam.name == "binomial" and len(np.unique(yb)) < 2
+    level = np.zeros((len(y), 1))
+    if not constant:
+        level[tr] = enc.fit_transform(code[tr].reshape(-1, 1), yb)
+        level[te] = enc.transform(code[te].reshape(-1, 1))
+    boosted = {WITHOUT: XA, IDENTITY: np.column_stack([XA, level, code])}
     if XD.shape[1]:
         boosted[DESCRIPTION] = np.hstack([XA, XD])
     for name, Z in boosted.items():
-        if Z.shape[1] == 0 or (fam.name == "binomial" and len(np.unique(yb)) < 2):
+        if Z.shape[1] == 0 or constant:
             mu = np.full(len(te), np.average(ytr, weights=wtr))
         else:
             est = _boosting(fam)
@@ -183,7 +197,8 @@ def unit_ceiling(X, y, shift, *, family="gaussian", describe=None, sample_weight
 
     Two kinds of model are scored: "additive" (the package's curves, where a unit shifts the
     score by one amount) and "any" (gradient boosting, where a unit may also change how the
-    other variables act). Rows are dealt into folds within each unit, so every unit with at
+    other variables act). The boosted model needs rows to learn a unit: with a handful of rows
+    per unit it shows little, and the additive figure is the one to read. Rows are dealt into folds within each unit, so every unit with at
     least two rows is seen in training.
 
     Args:

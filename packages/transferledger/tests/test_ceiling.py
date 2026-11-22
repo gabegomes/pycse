@@ -56,3 +56,13 @@ def test_needs_groups():
     X, y, unit = _table(effect=1.0, described=True)
     with pytest.raises(TypeError):
         unit_ceiling(X, y, None)
+
+
+def test_thin_units_count_in_the_boosted_model():
+    """Ten rows per unit: a tree ignores a category that thin, so the unit also enters as its
+    cross-fitted level."""
+    X, y, unit = _table(effect=1.5, described=False, n_units=40, per=10)
+    yes = (y > np.median(y)).astype(float)
+    c = unit_ceiling(X[["x"]], yes, NewGroups(unit, "new site"), family="binomial")
+    row = c.adds[(c.adds.adds == "identity") & (c.adds.kind == "any")].iloc[0]
+    assert row.contribution > 0.1
