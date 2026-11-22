@@ -142,3 +142,29 @@ Two points the notebook's reading spells out:
 Post hoc, the Ni activity of the Cernak table is the metal-free background (0 of 3577 Ni
 reactions with a kraken phosphine active where the metal-free controls give no product), so
 H1 to H3 could not have found a ligand effect on Ni there.
+
+## A fifth outside table, added 2026-11-22 before its yields were read
+
+LeSueur, Tao, Doyle, Sigman, *Eur. J. Org. Chem.* **2024**, e202400428 (DOI
+10.1002/ejoc.202400428): 28 further monophosphines screened on the bench in two of the
+Ni-catalysed Suzuki-Miyaura couplings ("reactions 2 and 4") from which the window came.
+Supporting information, Tables S8 and S9, as archived at Zenodo record 15652094. This is the
+closest test of the window there is: the same reaction family, ligands screened later.
+
+Disclosure. Only the article's main text was read: it says its own two-threshold rule (minimum
+buried volume below 57.277 A^3, which is 31.9 %, and a second cut on the electrostatic
+potential) classified these ligands with 83 % accuracy, and that the bench reactions gave
+about 15 % more yield than the plates. So an upper cut near ours is known to do reasonably;
+the lower edge of the window (25.1 %) and its exact upper edge (31.4 %) are what can fail.
+Tables S8 and S9 were not opened before this was written.
+
+Fixed in advance: active is a yield of at least 10 %; a ligand's activity is the share of its
+reactions in these tables that are active; ligands are matched to kraken by identifier if the
+tables give one, otherwise by structure. The test is run on the ligands that are not among
+the 90 phosphines of `KAN_Ligand_Reactivity_Cliff` if there are at least 10 of them, and
+reported for all 28 as well.
+
+**H10. The window marks the active ligands among new ligands in the reactions it came from.**
+Ligands inside the window (25.1 to 31.4 %) have a higher activity than ligands outside it
+(one-sided Mann-Whitney over ligands, p < 0.05), and the rule "inside the window is active"
+has a balanced accuracy of at least 0.65 over the ligand-reaction pairs.
