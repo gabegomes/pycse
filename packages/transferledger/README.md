@@ -280,6 +280,13 @@ had implied for 24. Where the ligand descriptors carried nothing (that Ni table,
 is the metal-free background), the ligand block was given 0.000 and the chosen equation kept no
 ligand descriptor.
 
+Two further predictions concerned the threshold itself (notebook `KAN_Prospective_Followup`).
+The window found on 90 phosphines (minimum buried volume between 25.1 and 31.4 %) was scored on
+23 phosphines it had never seen, screened later in two of the same reactions: active in 74 %
+of their reactions inside the window against 17 % outside (p = 0.0047), balanced accuracy 0.73.
+And in 4 of 6 Pd-catalysed reactions the active ligands lay above a cut, the opposite side, as
+the ligation-state argument says.
+
 ## Taking the result elsewhere
 
 ```python
