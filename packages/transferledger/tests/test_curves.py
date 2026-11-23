@@ -114,3 +114,35 @@ def test_weights_of_a_separating_piece_stay_finite():
     mu = fam.mean(linear_score(P, coef))
     assert np.all(np.isfinite(coef))
     assert ((mu > 0.5) == (y == 1)).all()
+
+
+def test_a_stalled_separated_fit_ends():
+    """Twenty reactions under a condition that never gives product, among 600 of which one in
+    eleven does: the weight of that condition can only creep toward minus infinity. A shortened
+    step that gains nothing must end the fit. It ran on to the limit of 200 steps before, for
+    a change of under 1e-6 in any probability, and an outside table with such conditions took
+    ten times as long."""
+    from transferledger.curves import FAMILIES
+    from transferledger.model import fit_weights, linear_score
+
+    class Counting:
+        def __init__(self, fam):
+            self.fam, self.steps = fam, 0
+
+        def __getattr__(self, name):
+            return getattr(self.fam, name)
+
+        def working(self, y, eta):
+            self.steps += 1
+            return self.fam.working(y, eta)
+
+    rng = np.random.default_rng(0)
+    dead = np.repeat([0.0, 1.0], [580, 20])
+    y = ((dead == 0) & (rng.random(600) < 0.09)).astype(float)
+    P = np.column_stack([dead, rng.normal(size=600)])
+    fam = Counting(FAMILIES["binomial"])
+    coef = fit_weights(P, y, np.ones(600), fam)
+    mu = fam.mean(linear_score(P, coef))
+    assert fam.steps < 40
+    assert mu[dead == 1].max() < 1e-3
+    assert abs(mu[dead == 0].mean() - y[dead == 0].mean()) < 1e-3

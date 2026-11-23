@@ -84,9 +84,13 @@ def fit_weights(P, y, w, fam, ridge=0.0):
             t *= 0.5
             step = coef + t * (full - coef)
             new = np.clip(A @ step, -30, 30)
+        stalled = False
         if t < 1.0:
             limit = 200
-        done = np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new)))
+            # a shortened step that gains nothing ends the fit: on a separated target the
+            # weights would only creep toward infinity from here, at no gain, up to the limit
+            stalled = before - objective(new, step) <= before * 1e-10 + 1e-10
+        done = stalled or np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new)))
         coef, eta = step, new
         if done:
             break

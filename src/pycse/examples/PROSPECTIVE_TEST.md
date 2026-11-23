@@ -196,6 +196,6 @@ H10 and H11, scored in `KAN_Prospective_Followup.ipynb`, both held:
 
 A defect found afterwards. H3 to H6 were scored with `transferledger` 0.1.0, whose yes/no fit
 overshot on nearly separated outcomes (the curves rung on the Ni table stood at -2.8 on random
-folds). Version 0.2.0 repairs it. `KAN_Prospective_Followup.ipynb` repeats H3 to H6 as
+folds). Version 0.2 repairs it. `KAN_Prospective_Followup.ipynb` repeats H3 to H6 as
 registered with the repaired fit and shows both results; the verdicts above are the registered
 ones.

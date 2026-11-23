@@ -365,6 +365,14 @@ Version 0.2. The equation's shape parameters (where a step sits, how wide it is)
 curve and are not refined against the data afterwards. Missing values are an error, not
 handled. Families beyond gaussian, binomial and poisson are not built.
 
+Changes in 0.2.1:
+
+- Faster: a shortened step of the yes/no fit that gains nothing now ends the fit. Where a
+  condition never gives product, its weight can only creep toward minus infinity, and the fit
+  ran on to its limit of 200 steps for a change of under 1e-6 in any probability. A fit on
+  6560 yes/no reactions with several such conditions took about an hour and now takes under
+  two minutes. Fits that never needed a shortened step are unchanged.
+
 Changes in 0.2:
 
 - Fixed: the iterated fit for yes/no and count targets took full steps, which on a nearly

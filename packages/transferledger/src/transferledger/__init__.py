@@ -12,7 +12,7 @@ from .preflight import Preflight, preflight
 from .shifts import BeyondRange, ForwardInTime, NewGroups, Reference, Shift, Splitter
 from .truth import scorecard
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __all__ = [
     "transfer_ledger", "Ledger", "learning_curve", "LearningCurve", "backtest", "detectable", "Detection", "unit_ceiling", "Ceiling", "preflight", "Preflight", "PieceModel", "SplineAdditive", "KANAdditive", "ModelCurves", "Form", "Piece", "FORMS",
     "register_form", "match_curve", "Shift", "Reference", "NewGroups", "ForwardInTime",

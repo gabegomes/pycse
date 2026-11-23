@@ -189,6 +189,8 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
 - The iterated fit (binomial, poisson) in `curves.py` and `model.fit_weights` shortens a step
   that would raise the penalized deviance. Full steps alternated between two bad fits on
   nearly separated yes/no targets (found on the outside test); do not remove the step control.
+  A shortened step that gains nothing ends the fit (0.2.1): without that, a condition that
+  never gives product kept the fit creeping to its limit of 200 steps, ten times slower.
   `tests/test_curves.py::test_separated_yes_no_fit_does_not_overshoot` holds it
 - `learning_curve(X, y, NewGroups(...))` (`learning.py`) - skill on unseen units against the
   number of units trained on; `state()` is "nothing yet" or "established", `floor()` the skill

@@ -283,6 +283,7 @@ class SplineAdditive(BaseEstimator):
                 step = _solve(M, Bc.T @ (ww * (z - sw @ z)))
                 step0 = float(sw @ z - mu_B @ step)
                 new = step0 + Br @ step
+                stalled = False
                 if iterated:
                     # a separated outcome sends the score to infinity, and a full step can
                     # overshoot and then alternate between two bad fits: take the largest
@@ -303,7 +304,9 @@ class SplineAdditive(BaseEstimator):
                     if t < 1.0:
                         limit = 200  # a damped fit takes more, smaller steps
                         self.damped_ = True
-                done = np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new)))
+                        # a shortened step that gains nothing ends the fit (see fit_weights)
+                        stalled = before - objective(new, step) <= before * 1e-10 + 1e-10
+                done = stalled or np.max(np.abs(new - eta)) < 1e-6 * (1 + np.max(np.abs(new)))
                 beta, b0, eta = step, step0, new
                 if done:
                     break
