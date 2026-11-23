@@ -174,6 +174,12 @@ statement about one variable, a cut or a window ("active between 25 and 31"), ch
 like the equation. `ledger.rule("new site")` prints it. An equation can keep a variable's
 threshold and still lose skill on new groups through its other terms; when the rule rung keeps
 under a shift what the equation loses, the rule is the thing to carry to a new case.
+The ledger does not always say which of the two that will be. On 90 phosphines scored in Ni
+couplings, held-out ligands ranked the equation above the rule (skill 0.32 against 0.14). On 23
+ligands published three years later the rule kept +0.26 and the equation fell to -0.20: the
+ligand terms carried, the rate it had learned for one of the two reactions did not (0.25 of the
+ligands in the window active in the table, 0.76 among the new ones). A rule has fewer terms
+that can fail in this way (`KAN_Prospective_Followup`, a post hoc analysis).
 
 ## Before fitting
 
