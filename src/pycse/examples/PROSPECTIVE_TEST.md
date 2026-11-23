@@ -199,3 +199,14 @@ overshot on nearly separated outcomes (the curves rung on the Ni table stood at 
 folds). Version 0.2 repairs it. `KAN_Prospective_Followup.ipynb` repeats H3 to H6 as
 registered with the repaired fit and shows both results; the verdicts above are the registered
 ones.
+
+The repeat changed no verdict:
+
+- H3 failed again: the equation chosen for a new ligand has no ligand descriptor (skill 0.59
+  [0.55, 0.62]; registered 0.29). The curves rung stands at 0.51 where it stood at -5.6.
+- H4 held by the same rule: mean error of the rates -0.02 (registered -0.15), enough ligands
+  asked for in 6 of 12 comparisons. For a trend the rates at 40 and 52 ligands were too high,
+  by 0.07 and 0.11, so "errs toward more ligands" is not what the repeat shows for a trend.
+- H5 held, and no longer on one check: established at half the ligands in 10 of 16 draws,
+  kept with all of them in all 10.
+- H6 held: spread-out ligands better in 50 % of draws (registered 19 %).

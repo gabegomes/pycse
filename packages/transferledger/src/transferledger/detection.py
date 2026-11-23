@@ -28,10 +28,12 @@ them (the example notebook ``KAN_Transfer_Planning``). Fitted on 20 ligands, its
 to 60 ligands were low by 0.00 to 0.04 for a trend and by 0.09 to 0.15 for a peak; fitted on
 13 they were low by 0.2 to 0.4. The units it asked for were 0.7 to 1.2 times those that were
 enough for a trend and 1.5 to 2.3 times for a peak, and a real descriptor was found sooner
-than a planted one of the same share. On an outside table (``KAN_Prospective_Test``) the units
-asked for were enough in 8 of 15 comparisons. So :meth:`Detection.needed` leans toward more
-units, most for a peak, but it is an estimate and not a bound, and it is not to be used with
-fewer than about 20 units in hand.
+than a planted one of the same share. On an outside table (``KAN_Prospective_Followup``) the
+rates fitted on 20 ligands were right on average (mean error -0.02) but too high by 0.07 to
+0.11 for a trend at 40 and 52 ligands, and the units asked for were enough in 6 of 12
+comparisons. So :meth:`Detection.needed` leans toward more units for a peak and not reliably
+for a trend; it is an estimate and not a bound, and it is not to be used with fewer than about
+20 units in hand.
 """
 
 from __future__ import annotations

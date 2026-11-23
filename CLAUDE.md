@@ -205,7 +205,8 @@ replaced `pycse.sklearn.kan_symbolic`. Install with `pip install -e packages/tra
   evidence for a correlation of that strength; a three-parameter law in log units was
   unstable and extrapolated worse). `needed` is an estimate, not a bound: checked on the
   phosphines it asked for 0.7 to 1.2 times the ligands that were enough for a trend and 1.5
-  to 2.3 times for a peak; on an outside table it was enough in 8 of 15 comparisons; fitted
+  to 2.3 times for a peak; on an outside table it was enough in 6 of 12 comparisons and its
+  rates for a trend were too high by 0.07 to 0.11 (repaired fit; 8 of 15 as first scored); fitted
   on 13 ligands it was of no use. Choosing the next
   units by farthest-point selection was tried and was no better than chance, so no such
   helper is offered
@@ -241,7 +242,15 @@ longer holds (only the phosphine table changed).
 `KAN_Prospective_Test` scores nine predictions written beforehand in `PROSPECTIVE_TEST.md`
 (same folder; do not edit its predictions) on outside tables: the Cernak C-N couplings
 (Open Reaction Database, needs `ord-schema`), a 24-ligand C-H arylation, 8 new alcohols and a
-Ni borylation (about three and a half hours on four cores; 5 held, 4 failed).
+Ni borylation (about three and a half hours on four cores; 5 held, 4 failed). It was run with
+transferledger 0.1.0 and is kept as the record; do not rerun it in place.
+`KAN_Prospective_Followup` scores H10 and H11 (23 later phosphines and eight Pd reactions from
+the supporting information of LeSueur 2024, Zenodo record 15652094; needs `pypdf`; both held),
+repeats H3 to H6 with the repaired fit (same verdicts), and runs `unit_ceiling`, the ledger and
+`detectable` on the Pd reactions of the Cernak table (about three and a quarter hours on four
+cores with transferledger 0.2.1; `PROSP_RESUME=<folder>` keeps each long step so that an
+interrupted run continues). The Ledger and Planning notebooks were run with 0.2.0; 0.2.1 gives
+the same ledger on the 90 phosphines to within 1e-6.
 All of them download their data at run time and are not executed in CI.
 
 ### Utilities

@@ -270,8 +270,9 @@ the counts, up to three times the groups in hand.
 That law was checked in the same forecast-then-reveal way (notebook `KAN_Transfer_Planning`).
 Fitted on 20 of the phosphines, its detection rates for 26 to 60 were low by 0.00 to 0.15; it
 asked for 0.7 to 1.2 times the ligands that were then enough for a trend, and 1.5 to 2.3 times
-for a peak. Fitted on 13 it was of no use. So `needed()` leans toward more groups, most for a
-peak; it is an estimate, not a bound, and it wants about 20 groups in hand. The real
+for a peak. Fitted on 13 it was of no use. So on the phosphines `needed()` leaned toward more
+groups, most for a peak (on an outside table, below, it did not for a trend); it is an
+estimate, not a bound, and it wants about 20 groups in hand. The real
 descriptor behind the ligand set's threshold captures a third of the differences between
 ligands; it was admitted from none of the draws of 13 ligands, 28 % of draws of 30 and 91 % of
 draws of 60.
@@ -281,13 +282,22 @@ space (farthest-point selection). On the phosphines it was worse than choosing a
 on the alcohols no different.
 
 **Checked on outside tables.** Predictions written before the yields were read were scored on
-tables from other laboratories (notebook `KAN_Prospective_Test`). Fitted on 20 of 52 ligands of a
-Ni C-N coupling table, the law's rates were again too low (by 0.03 to 0.05 for a trend, 0.08 to
-0.38 for a peak), but the ligands it asked for were enough in only 8 of 15 comparisons. On 22
+tables from other laboratories (notebook `KAN_Prospective_Test`; the yes/no ones again with the
+repaired fit in `KAN_Prospective_Followup`, whose numbers are given here). Fitted on 20 of 52
+ligands of a Ni C-N coupling table, the law's rates were right on average (mean error -0.02)
+and not uniformly low: for a trend too high by 0.07 and 0.11 at 40 and 52 ligands, for a peak
+too low by up to 0.20. The ligands it asked for were enough in 6 of 12 comparisons. On 22
 ligands of a C-H arylation table the floor was 49 % (trend) and 67 % (peak), as the phosphines
 had implied for 24. Where the ligand descriptors carried nothing (that Ni table, whose activity
 is the metal-free background), the ligand block was given 0.000 and the chosen equation kept no
-ligand descriptor.
+ligand descriptor. A learning curve established at 22 of those ligands kept its floor at 44 in
+all 10 checks where it was established, and its extension was wrong in both directions.
+
+The Pd reactions of the same table show the three tools together. The ceiling says the ligands
+differ (identity adds +0.072 [+0.033, +0.112]). The ledger gives the ligand block
+"undetermined", and the equation chosen for a new ligand holds conditions only. The floor says
+why: with 53 ligands a trend must capture 49 % of the ligand-to-ligand differences to be
+established, and the best real descriptor captures 11 %.
 
 Two further predictions concerned the threshold itself (notebook `KAN_Prospective_Followup`).
 The window found on 90 phosphines (minimum buried volume between 25.1 and 31.4 %) was scored on
